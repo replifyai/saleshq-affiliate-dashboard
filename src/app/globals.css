@@ -1,26 +1,342 @@
 @import "tailwindcss";
+/* Ark Premium Theme - Default and Only Theme */
+:root,
+[data-theme="dark-premium"] {
+  /* Core */
+  --bg: #000000;              /* pure black background */
+  --text: #FFFFFF;            /* white text for max contrast */
+  --primary: #edc200;         /* brand yellow */
+  --secondary: #000000;       /* keep secondary black to stick to the two-color rule */
+  --accent: #ffefca;          /* light yellow accent */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Mapped variables used across UI */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --muted: rgba(255,255,255,0.60);        /* subtle muted text */
+  --muted-foreground: rgba(255,255,255,0.72);
+  --popover: #111111;                     /* slightly lighter than black for depth */
+  --popover-foreground: var(--text);
+  --card: #111111;                        /* card background */
+  --card-foreground: var(--text);
+  --border: rgba(255,255,255,0.06);       /* faint border for separation */
+  --input: rgba(255,255,255,0.04);        /* input background */
+  --ring: rgba(252,208,11,0.28);          /* subtle yellow focus ring */
+
+  /* Status colors (kept semantic) */
+  --destructive: #EF4444;
+  --destructive-foreground: #ffffff;
+  --success: #10B981;                     /* green success */
+  --success-foreground: #ffffff;
+  --warning: var(--primary);
+  --warning-foreground: #000000;          /* black text on yellow warning */
+
+  /* Hovers / interactions */
+  --primary-hover: #e6c30a;               /* slightly darker yellow for hover */
+  --secondary-hover: #050505;
+  --accent-hover: #e6c30a;
+
+  /* Gradients */
+  --primary-gradient: linear-gradient(135deg, #fcd00b 0%, #e6c30a 100%);
+  --secondary-gradient: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
+  --accent-gradient: linear-gradient(135deg, #fcd00b 0%, #e6c30a 100%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --font-sans: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom Utility Classes */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-accent { color: var(--accent); }
+.bg-primary { background-color: var(--primary); }
+.bg-secondary { background-color: var(--secondary); }
+.bg-accent { background-color: var(--accent); }
+.border-primary { border-color: var(--primary); }
+.border-secondary { border-color: var(--secondary); }
+.border-accent { border-color: var(--accent); }
+
+/* Interactive States */
+.hover-primary:hover { background-color: var(--primary-hover); }
+.hover-secondary:hover { background-color: var(--secondary-hover); }
+.hover-accent:hover { background-color: var(--accent-hover); }
+
+/* Shiny Gradient Classes */
+.bg-primary-gradient { background: var(--primary-gradient); }
+
+/* Snackbar Styles */
+.snackbar-container {
+  /* Ensure snackbars appear above other content */
+  z-index: 9999;
+}
+
+.snackbar-item {
+  /* Smooth animations */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Glass morphism effect */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Subtle shadow for depth */
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Snackbar animations */
+@keyframes snackbar-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes snackbar-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .snackbar-container {
+    top: 1rem;
+    right: 1rem;
+    left: 1rem;
+  }
+  
+  .snackbar-item {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
+}
+.bg-secondary-gradient { background: var(--secondary-gradient); }
+.bg-accent-gradient { background: var(--accent-gradient); }
+
+/* Shiny Button Styles */
+.btn-shiny {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-shiny:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+}
+
+.btn-shiny-secondary {
+  background: var(--secondary-gradient);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-shiny-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+}
+
+.btn-shiny-accent {
+  background: var(--accent-gradient);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-shiny-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Shiny Card Styles */
+.card-shiny {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.card-shiny:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Shiny Badge Styles */
+.badge-shiny {
+  background: var(--primary-gradient);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-shiny-secondary {
+  background: var(--secondary-gradient);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.badge-shiny-accent {
+  background: var(--accent-gradient);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+/* Horizontal scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+  opacity: 0.3;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+  opacity: 0.6;
 }
