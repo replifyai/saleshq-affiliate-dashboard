@@ -25,7 +25,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
     <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-6">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-black text-2xl font-bold">
             {profile.name.charAt(0)}
           </div>
           <div>
