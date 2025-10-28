@@ -4,6 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { BarChart3, Package, ShoppingBag, User } from 'lucide-react';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface SidebarProps {
   className?: string;
@@ -12,6 +13,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
   const pathname = usePathname();
+  const { state } = useProfile();
   
   const navItems = [
     { label: 'DashBoard', icon: BarChart3, path: '/dashboard' },
@@ -22,6 +24,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
     ...item,
     active: pathname === item.path
   }));
+
+  // Get the creator's name from profile, fallback to "there"
+  const creatorName = state.profile?.name || 'there';
 
   return (
     <aside
@@ -35,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       <div className="p-6 border-b border-border">
         <div className="flex flex-col items-center space-y-3">
           <div className="text-left">
-            <h3 className="font-semibold text-foreground text-base text-xl">Hi Rockey Pandit!</h3>
+            <h3 className="font-semibold text-foreground text-base text-xl">Hi {creatorName}!</h3>
             <p className="text-xs text-muted-foreground">Welcome to your affiliate dashboard</p>
           </div>
         </div>

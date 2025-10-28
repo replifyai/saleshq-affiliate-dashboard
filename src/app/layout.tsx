@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { SnackbarProvider, Snackbar } from "@/components/snackbar";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -42,10 +43,12 @@ export default function RootLayout({
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="dark-premium" storageKey="saleshq-theme">
-          <SnackbarProvider>
-            {children}
-            <Snackbar />
-          </SnackbarProvider>
+          <ProfileProvider>
+            <SnackbarProvider>
+              {children}
+              <Snackbar />
+            </SnackbarProvider>
+          </ProfileProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -5,6 +5,8 @@ import Button from './common/Button';
 import TextField from './common/TextField';
 import { cn } from '@/lib/utils';
 import { getContentConfig, getFeatureConfig, formatContent } from '@/lib/constants';
+import { useProfileOperations } from '@/hooks/useProfileOperations';
+import { useSnackbar } from '@/components/snackbar/use-snackbar';
 
 export interface SignupProps {
   className?: string;
@@ -12,6 +14,7 @@ export interface SignupProps {
 
 const Signup: React.FC<SignupProps> = ({ className }) => {
   const [mobileNumber, setMobileNumber] = useState('');
+  const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
@@ -19,6 +22,10 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   // Get configuration
   const contentConfig = getContentConfig();
   const featureConfig = getFeatureConfig();
+  
+  // Profile operations and snackbar
+  const { createProfile, sendOtp, verifyOtp, isLoading, error, clearError } = useProfileOperations();
+  const { showSnackbar } = useSnackbar();
 
   const startCountdown = () => {
     setCountdown(30);
@@ -44,14 +51,24 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
     setMobileNumber(formatMobileNumber(value));
   };
 
-  const handleSendOtp = () => {
-    // Validate mobile number and send OTP
-    if (mobileNumber.length === 10) {
-      setIsOtpSent(true);
-      startCountdown();
-      console.log('OTP sent to:', mobileNumber);
+  const handleSendOtp = async () => {
+    // Validate mobile number and name, then create profile and send OTP
+    if (mobileNumber.length === 10 && name.trim()) {
+      try {
+        const phoneNumber = `+91${mobileNumber}`;
+        await createProfile(phoneNumber, name.trim());
+        setIsOtpSent(true);
+        startCountdown();
+        showSnackbar('Profile created and OTP sent successfully!', 'success');
+      } catch (error) {
+        showSnackbar(error instanceof Error ? error.message : 'Failed to create profile', 'error');
+      }
     } else {
-      alert('Please enter a valid 10-digit mobile number');
+      if (mobileNumber.length !== 10) {
+        showSnackbar('Please enter a valid 10-digit mobile number', 'error');
+      } else if (!name.trim()) {
+        showSnackbar('Please enter your name', 'error');
+      }
     }
   };
 
@@ -61,19 +78,35 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
     setOtp(digits);
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     if (countdown === 0) {
-      startCountdown();
-      console.log('OTP resent to:', mobileNumber);
+      try {
+        const phoneNumber = `+91${mobileNumber}`;
+        await sendOtp(phoneNumber);
+        startCountdown();
+        showSnackbar('OTP resent successfully!', 'success');
+      } catch (error) {
+        showSnackbar(error instanceof Error ? error.message : 'Failed to resend OTP', 'error');
+      }
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle OTP verification and proceed to onboarding
-    if (otp.length === featureConfig.auth.otpLength) {
-      // Redirect to onboarding flow (now in authenticated pages)
+    
+    if (otp.length !== featureConfig.auth.otpLength) {
+      showSnackbar('Please enter a valid OTP', 'error');
+      return;
+    }
+    
+    try {
+      const phoneNumber = `+91${mobileNumber}`;
+      await verifyOtp(phoneNumber, otp);
+      showSnackbar('Signup successful!', 'success');
+      // Redirect to onboarding flow
       window.location.href = '/onboarding';
+    } catch (error) {
+      showSnackbar(error instanceof Error ? error.message : 'Signup failed', 'error');
     }
   };
 
@@ -123,6 +156,16 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
             {!isOtpSent ? (
               <>
                 <TextField
+                  label="Full Name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(value) => setName(value)}
+                  required
+                  className="w-full"
+                />
+
+                <TextField
                   label="Mobile Number"
                   type="tel"
                   placeholder="Enter your mobile number"
@@ -142,9 +185,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                   onClick={handleSendOtp}
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={mobileNumber.length !== 10}
+                  disabled={mobileNumber.length !== 10 || !name.trim() || isLoading}
                 >
-                  Send OTP
+                  {isLoading ? 'Creating Profile...' : 'Create Profile & Send OTP'}
                 </Button>
               </>
             ) : (
@@ -161,7 +204,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                 <TextField
                   label="Enter OTP"
                   type="text"
-                  placeholder="Enter 6-digit OTP"
+                  placeholder={contentConfig.auth.login.otpPlaceholder}
                   value={otp}
                   onChange={handleOtpChange}
                   required
@@ -183,11 +226,13 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                     variant="secondary"
                     onClick={handleResendOtp}
                     className="flex-1"
-                    disabled={countdown > 0}
+                    disabled={countdown > 0 || isLoading}
                   >
-                    {countdown > 0 
-                      ? `Resend in ${countdown}s`
-                      : 'Resend OTP'
+                    {isLoading 
+                      ? 'Sending...'
+                      : countdown > 0 
+                        ? `Resend in ${countdown}s`
+                        : 'Resend OTP'
                     }
                   </Button>
                 </div>
@@ -196,9 +241,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                   type="submit"
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={otp.length !== featureConfig.auth.otpLength}
+                  disabled={otp.length !== featureConfig.auth.otpLength || isLoading}
                 >
-                  Verify & Continue
+                  {isLoading ? 'Verifying...' : 'Verify & Continue'}
                 </Button>
               </>
             )}

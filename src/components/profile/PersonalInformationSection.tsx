@@ -2,18 +2,30 @@
 
 import React from 'react';
 import { AffiliateProfile } from './types';
+import { useSnackbar } from '@/components/snackbar';
 
 interface PersonalInformationSectionProps {
   profile: AffiliateProfile;
   isEditing: boolean;
   onUpdateProfile: (field: keyof AffiliateProfile, value: string) => void;
+  phoneVerified?: boolean;
+  approved?: boolean;
 }
 
 const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
   profile,
   isEditing,
   onUpdateProfile,
+  phoneVerified = false,
+  approved = false,
 }) => {
+  const { showSuccess } = useSnackbar();
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(profile.affiliateCode);
+    showSuccess('Affiliate code copied to clipboard!');
+  };
+
   return (
     <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -21,111 +33,148 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Full Name */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Full Name <span className="text-destructive">*</span>
+          </label>
           {isEditing ? (
             <input
               type="text"
               value={profile.name}
               onChange={(e) => onUpdateProfile('name', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              placeholder="Enter your full name"
+              required
             />
           ) : (
-            <p className="text-foreground">{profile.name}</p>
+            <p className="text-foreground font-medium">{profile.name}</p>
           )}
         </div>
 
+        {/* Email Address */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Email Address</label>
+          <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+            Email Address
+            {profile.email && (
+              <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">
+                Provided
+              </span>
+            )}
+          </label>
           {isEditing ? (
             <input
               type="email"
               value={profile.email}
               onChange={(e) => onUpdateProfile('email', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              placeholder="your.email@example.com"
             />
           ) : (
-            <p className="text-foreground">{profile.email}</p>
+            <p className="text-foreground">{profile.email || <span className="text-muted-foreground italic">Not provided</span>}</p>
+          )}
+          {isEditing && !profile.email && (
+            <p className="text-xs text-muted-foreground mt-1">💡 Add your email to improve profile completion</p>
           )}
         </div>
 
+        {/* Phone Number - Read Only (verified via OTP) */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Phone Number</label>
-          {isEditing ? (
+          <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+            Phone Number
+            {phoneVerified && (
+              <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Verified
+              </span>
+            )}
+          </label>
+          <div className="relative">
             <input
               type="tel"
               value={profile.phone}
-              onChange={(e) => onUpdateProfile('phone', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              disabled
+              className="w-full px-3 py-2 border border-border rounded-md bg-secondary/20 text-foreground cursor-not-allowed"
             />
-          ) : (
-            <p className="text-foreground">{profile.phone}</p>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+              🔒 Verified
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Phone number is verified and cannot be changed</p>
+        </div>
+
+        {/* Account Status */}
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">Account Status</label>
+          <div className="flex items-center gap-2">
+            {approved ? (
+              <span className="px-4 py-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg font-medium flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Approved
+              </span>
+            ) : (
+              <span className="px-4 py-2 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-lg font-medium flex items-center gap-2">
+                <svg className="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                Pending Approval
+              </span>
+            )}
+          </div>
+          {!approved && (
+            <p className="text-xs text-muted-foreground mt-1">Your account is under review. You'll be notified once approved.</p>
           )}
         </div>
 
+        {/* Joining Date */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Date of Birth</label>
-          {isEditing ? (
-            <input
-              type="date"
-              value={profile.dateOfBirth}
-              onChange={(e) => onUpdateProfile('dateOfBirth', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-            />
-          ) : (
-            <p className="text-foreground">{new Date(profile.dateOfBirth).toLocaleDateString()}</p>
-          )}
+          <label className="block text-sm font-medium text-foreground mb-2">Member Since</label>
+          <p className="text-foreground font-medium">
+            {new Date(profile.joiningDate).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
         </div>
 
+        {/* Affiliate Code */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Country</label>
-          {isEditing ? (
-            <select
-              value={profile.country}
-              onChange={(e) => onUpdateProfile('country', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+          <label className="block text-sm font-medium text-foreground mb-2">Affiliate Code</label>
+          <div className="flex items-center gap-2">
+            <code className="px-3 py-2 bg-secondary/30 rounded-md font-mono text-sm font-bold text-primary">
+              {profile.affiliateCode}
+            </code>
+            <button
+              onClick={handleCopyCode}
+              className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all hover:scale-105 active:scale-95"
+              title="Copy to clipboard"
             >
-              <option value="United States">United States</option>
-              <option value="Canada">Canada</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="India">India</option>
-              <option value="Australia">Australia</option>
-              <option value="Other">Other</option>
-            </select>
-          ) : (
-            <p className="text-foreground">{profile.country}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-2">City</label>
-          {isEditing ? (
-            <input
-              type="text"
-              value={profile.city}
-              onChange={(e) => onUpdateProfile('city', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
-            />
-          ) : (
-            <p className="text-foreground">{profile.city}</p>
-          )}
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-foreground mb-2">Bio</label>
-          {isEditing ? (
-            <textarea
-              value={profile.bio}
-              onChange={(e) => onUpdateProfile('bio', e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground resize-vertical"
-              placeholder="Tell us about yourself..."
-            />
-          ) : (
-            <p className="text-foreground">{profile.bio}</p>
-          )}
+              📋
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">Click to copy your unique affiliate code</p>
         </div>
       </div>
+
+      {/* Additional Information - Coming Soon */}
+      {isEditing && (
+        <div className="mt-8 p-4 bg-secondary/10 border border-border/50 rounded-lg">
+          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Additional Fields Coming Soon
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            More profile fields like bio, location, date of birth, and preferences will be available in future updates.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

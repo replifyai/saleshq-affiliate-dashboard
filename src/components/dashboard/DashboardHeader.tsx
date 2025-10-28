@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -9,6 +10,9 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick, className }) => {
+  const { state } = useProfile();
+  const creatorName = state.profile?.name || 'User';
+
   return (
     <header className={cn('flex items-center justify-between mb-8', className)}>
       <div className="flex items-center space-x-4">
@@ -25,7 +29,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick, classNam
         
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, Robert!</p>
+          <p className="text-muted-foreground mt-1">Welcome back, {creatorName}!</p>
         </div>
       </div>
 

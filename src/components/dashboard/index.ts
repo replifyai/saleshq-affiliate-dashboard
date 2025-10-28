@@ -11,3 +11,4 @@ export { default as ShareLinkSection } from './ShareLinkSection';
 export { default as RecentOrdersSection } from './RecentOrdersSection';
 export { default as FeaturedProductsSection } from './FeaturedProductsSection';
 export { default as AnalyticsOverviewSection } from './AnalyticsOverviewSection';
+export { default as ProfileCompletionSection } from './ProfileCompletionSection';

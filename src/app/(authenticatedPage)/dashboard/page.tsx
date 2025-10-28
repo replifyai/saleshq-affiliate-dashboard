@@ -6,6 +6,7 @@ import {
   AnalyticsOverviewSection,
   FeaturedProductsSection,
   ShareLinkSection,
+  ProfileCompletionSection,
 } from '@/components/dashboard';
 
 interface DashboardPageProps {
@@ -30,9 +31,13 @@ export default function DashboardPage({ onMenuClick }: DashboardPageProps) {
             </button>
           </div>
         )}
+        {/* Profile Completion Section */}
+        <ProfileCompletionSection />
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         <ShareLinkSection />
         </div>
+        
+
         {/* Affiliate Stats Section */}
         <AffiliateStatsSection
           totalEarnings="₹1,24,300"

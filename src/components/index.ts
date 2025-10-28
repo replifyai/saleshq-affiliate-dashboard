@@ -5,3 +5,5 @@ export { default as Signup } from './Signup';
 export { default as OnboardingFlow } from './OnboardingFlow';
 export * from './dashboard';
 export * from './profile';
+export { default as ProfileExample } from './examples/ProfileExample';
+export { default as ApiFlowTest } from './examples/ApiFlowTest';

@@ -6,6 +6,8 @@ import TextField from './common/TextField';
 import Toggle from './common/Toggle';
 import { cn } from '@/lib/utils';
 import { getContentConfig, getFeatureConfig, formatContent } from '@/lib/constants';
+import { useProfileOperations } from '@/hooks/useProfileOperations';
+import { useSnackbar } from '@/components/snackbar/use-snackbar';
 
 export interface LoginProps {
   className?: string;
@@ -21,6 +23,10 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   // Get configuration
   const contentConfig = getContentConfig();
   const featureConfig = getFeatureConfig();
+  
+  // Profile operations and snackbar
+  const { sendOtp, verifyOtp, isLoading, error, clearError } = useProfileOperations();
+  const { showSnackbar } = useSnackbar();
 
   const startCountdown = () => {
     setCountdown(30);
@@ -46,14 +52,20 @@ const Login: React.FC<LoginProps> = ({ className }) => {
     setMobileNumber(formatMobileNumber(value));
   };
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     // Validate mobile number and send OTP
     if (mobileNumber.length === 10) {
-      setIsOtpSent(true);
-      startCountdown();
-      console.log('OTP sent to:', mobileNumber);
+      try {
+        const phoneNumber = `+91${mobileNumber}`;
+        await sendOtp(phoneNumber);
+        setIsOtpSent(true);
+        startCountdown();
+        showSnackbar('OTP sent successfully!', 'success');
+      } catch (error) {
+        showSnackbar(error instanceof Error ? error.message : 'Failed to send OTP', 'error');
+      }
     } else {
-      alert(contentConfig.auth.login.errors.invalidMobile);
+      showSnackbar(contentConfig.auth.login.errors.invalidMobile, 'error');
     }
   };
 
@@ -63,17 +75,36 @@ const Login: React.FC<LoginProps> = ({ className }) => {
     setOtp(digits);
   };
 
-  const handleResendOtp = () => {
+  const handleResendOtp = async () => {
     if (countdown === 0) {
-      startCountdown();
-      console.log('OTP resent to:', mobileNumber);
+      try {
+        const phoneNumber = `+91${mobileNumber}`;
+        await sendOtp(phoneNumber);
+        startCountdown();
+        showSnackbar('OTP resent successfully!', 'success');
+      } catch (error) {
+        showSnackbar(error instanceof Error ? error.message : 'Failed to resend OTP', 'error');
+      }
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle OTP verification and login
-    console.log('Login attempt:', { mobileNumber, otp, rememberMe });
+    
+    if (otp.length !== featureConfig.auth.otpLength) {
+      showSnackbar('Please enter a valid OTP', 'error');
+      return;
+    }
+    
+    try {
+      const phoneNumber = `+91${mobileNumber}`;
+      await verifyOtp(phoneNumber, parseInt(otp));
+      showSnackbar('Login successful!', 'success');
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } catch (error) {
+      showSnackbar(error instanceof Error ? error.message : 'Login failed', 'error');
+    }
   };
 
   return (
@@ -150,9 +181,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   onClick={handleSendOtp}
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={mobileNumber.length !== 10}
+                  disabled={mobileNumber.length !== 10 || isLoading}
                 >
-                  {contentConfig.auth.login.sendOtpText}
+                  {isLoading ? 'Sending...' : contentConfig.auth.login.sendOtpText}
                 </Button>
               </>
             ) : (
@@ -168,7 +199,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
 
                 <TextField
                   label={contentConfig.auth.login.otpLabel}
-                  type="text"
+                  type="number"
                   placeholder={contentConfig.auth.login.otpPlaceholder}
                   value={otp}
                   onChange={handleOtpChange}
@@ -191,11 +222,13 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     variant="secondary"
                     onClick={handleResendOtp}
                     className="flex-1"
-                    disabled={countdown > 0}
+                    disabled={countdown > 0 || isLoading}
                   >
-                    {countdown > 0 
-                      ? formatContent(contentConfig.auth.login.countdownText, { seconds: countdown })
-                      : contentConfig.auth.login.resendOtpText
+                    {isLoading 
+                      ? 'Sending...'
+                      : countdown > 0 
+                        ? formatContent(contentConfig.auth.login.countdownText, { seconds: countdown })
+                        : contentConfig.auth.login.resendOtpText
                     }
                   </Button>
                 </div>
@@ -204,9 +237,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   type="submit"
                   size="lg"
                   className="w-full bg-primary-gradient text-white font-bold text-lg py-4"
-                  disabled={otp.length !== featureConfig.auth.otpLength}
+                  disabled={otp.length !== featureConfig.auth.otpLength || isLoading}
                 >
-                  {contentConfig.auth.login.verifyText}
+                  {isLoading ? 'Verifying...' : contentConfig.auth.login.verifyText}
                 </Button>
               </>
             )}
