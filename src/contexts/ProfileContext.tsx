@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { CreatorProfile, VerifyOtpVerified, CompletionScore, SocialMediaHandle } from '@/types/api';
 import apiClient from '@/services/apiClient';
 import { setTokens, getTokens, clearTokens } from '@/lib/cookies';
@@ -84,12 +84,12 @@ interface ProfileContextType {
   state: ProfileState;
   createProfile: (phoneNumber: string, name: string) => Promise<void>;
   sendOtp: (phoneNumber: string) => Promise<void>;
-  verifyOtp: (phoneNumber: string, otp: string) => Promise<void>;
+  verifyOtp: (phoneNumber: string, otp: string | number) => Promise<void>;
   fetchProfile: () => Promise<void>;
   updateProfile: (data: {
     name?: string;
     email?: string | null;
-    approved?: boolean;
+    approved?: 'approved' | 'rejected' | 'pending';
     socialMediaHandles?: SocialMediaHandle[];
     phoneNumberVerified?: boolean;
     [key: string]: any;
@@ -108,14 +108,17 @@ interface ProfileProviderProps {
 
 export function ProfileProvider({ children }: ProfileProviderProps) {
   const [state, dispatch] = useReducer(profileReducer, initialState);
+  const fetchingProfileRef = useRef(false); // Ref to prevent multiple simultaneous fetch calls
 
   // Load tokens from cookies on mount
   useEffect(() => {
     const loadStoredTokens = () => {
       try {
         const tokens = getTokens();
+        console.log('ProfileContext - Loading stored tokens:', { hasIdToken: !!tokens.idToken, hasRefreshToken: !!tokens.refreshToken });
 
         if (tokens.idToken) {
+          console.log('ProfileContext - Setting authentication with stored tokens');
           dispatch({
             type: 'SET_AUTHENTICATION',
             payload: { 
@@ -124,9 +127,11 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
               completionScore: null as any 
             },
           });
+        } else {
+          console.log('ProfileContext - No stored tokens found');
         }
       } catch (error) {
-        console.error('Error loading stored tokens:', error);
+        console.error('ProfileContext - Error loading stored tokens:', error);
         clearTokens();
       }
     };
@@ -169,12 +174,14 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     }
   };
 
-  const verifyOtp = async (phoneNumber: string, otp: string) => {
+  const verifyOtp = async (phoneNumber: string, otp: string | number) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      const response = await apiClient.verifyOtp({ phoneNumber, otp });
+      // Convert otp to number if it's a string, or keep it as is if it's already a number
+      const otpValue = typeof otp === 'string' ? parseInt(otp) : otp;
+      const response = await apiClient.verifyOtp({ phoneNumber, otp: otpValue });
       const verifiedData = response.verified;
       const { idToken, refreshToken, completionScore, ...profileData } = verifiedData;
 
@@ -197,30 +204,52 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     }
   };
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    // Prevent multiple simultaneous fetch calls
+    if (fetchingProfileRef.current) {
+      console.log('ProfileContext - fetchProfile already in progress, skipping duplicate call');
+      return;
+    }
+
+    // If profile already exists, don't fetch again
+    if (state.profile) {
+      console.log('ProfileContext - Profile already exists, skipping fetch');
+      return;
+    }
+
+    console.log('ProfileContext - fetchProfile called');
+    fetchingProfileRef.current = true;
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
+      console.log('ProfileContext - Calling API getCreatorProfile');
       const response = await apiClient.getCreatorProfile();
+      console.log('ProfileContext - API response:', response);
       const { completionScore, ...profile } = response.creator;
+      console.log('ProfileContext - Extracted profile:', profile);
+      console.log('ProfileContext - Extracted completionScore:', completionScore);
 
       // Update profile and completion score in context only
       dispatch({ type: 'SET_PROFILE', payload: profile });
       if (completionScore) {
         dispatch({ type: 'SET_COMPLETION_SCORE', payload: completionScore });
       }
+      console.log('ProfileContext - Profile and completion score set successfully');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch profile';
+      console.error('ProfileContext - Error in fetchProfile:', errorMessage, error);
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
+    } finally {
+      fetchingProfileRef.current = false;
     }
-  };
+  }, [state.profile]); // Only depend on state.profile to avoid unnecessary re-creation
 
   const updateProfile = async (data: {
     name?: string;
     email?: string | null;
-    approved?: boolean;
+    approved?: 'approved' | 'rejected' | 'pending';
     socialMediaHandles?: SocialMediaHandle[];
     phoneNumberVerified?: boolean;
     [key: string]: any;

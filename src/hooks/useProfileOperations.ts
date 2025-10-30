@@ -22,7 +22,7 @@ export function useProfileOperations() {
     await updateProfile({ phoneNumberVerified: true });
   };
 
-  const updateApprovalStatus = async (approved: boolean) => {
+  const updateApprovalStatus = async (approved: 'approved' | 'rejected' | 'pending') => {
     await updateProfile({ approved });
   };
 

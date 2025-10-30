@@ -18,6 +18,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   
   // Get configuration
   const contentConfig = getContentConfig();
@@ -54,6 +57,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const handleSendOtp = async () => {
     // Validate mobile number and name, then create profile and send OTP
     if (mobileNumber.length === 10 && name.trim()) {
+      if (isCreatingProfile) return; // Prevent double clicks
+      
+      setIsCreatingProfile(true);
       try {
         const phoneNumber = `+91${mobileNumber}`;
         await createProfile(phoneNumber, name.trim());
@@ -62,6 +68,8 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
         showSnackbar('Profile created and OTP sent successfully!', 'success');
       } catch (error) {
         showSnackbar(error instanceof Error ? error.message : 'Failed to create profile', 'error');
+      } finally {
+        setIsCreatingProfile(false);
       }
     } else {
       if (mobileNumber.length !== 10) {
@@ -79,7 +87,8 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   };
 
   const handleResendOtp = async () => {
-    if (countdown === 0) {
+    if (countdown === 0 && !isSendingOtp) {
+      setIsSendingOtp(true);
       try {
         const phoneNumber = `+91${mobileNumber}`;
         await sendOtp(phoneNumber);
@@ -87,6 +96,8 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
         showSnackbar('OTP resent successfully!', 'success');
       } catch (error) {
         showSnackbar(error instanceof Error ? error.message : 'Failed to resend OTP', 'error');
+      } finally {
+        setIsSendingOtp(false);
       }
     }
   };
@@ -99,14 +110,18 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
       return;
     }
     
+    if (isVerifying) return; // Prevent double clicks
+    
+    setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      await verifyOtp(phoneNumber, otp);
+      await verifyOtp(phoneNumber, parseInt(otp)); // Pass OTP as number
       showSnackbar('Signup successful!', 'success');
       // Redirect to onboarding flow
       window.location.href = '/onboarding';
     } catch (error) {
       showSnackbar(error instanceof Error ? error.message : 'Signup failed', 'error');
+      setIsVerifying(false); // Only reset on error; success redirects anyway
     }
   };
 
@@ -185,9 +200,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                   onClick={handleSendOtp}
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={mobileNumber.length !== 10 || !name.trim() || isLoading}
+                  disabled={mobileNumber.length !== 10 || !name.trim() || isCreatingProfile}
                 >
-                  {isLoading ? 'Creating Profile...' : 'Create Profile & Send OTP'}
+                  {isCreatingProfile ? 'Creating Profile...' : 'Create Profile & Send OTP'}
                 </Button>
               </>
             ) : (
@@ -226,9 +241,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                     variant="secondary"
                     onClick={handleResendOtp}
                     className="flex-1"
-                    disabled={countdown > 0 || isLoading}
+                    disabled={countdown > 0 || isSendingOtp}
                   >
-                    {isLoading 
+                    {isSendingOtp 
                       ? 'Sending...'
                       : countdown > 0 
                         ? `Resend in ${countdown}s`
@@ -241,9 +256,9 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                   type="submit"
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={otp.length !== featureConfig.auth.otpLength || isLoading}
+                  disabled={otp.length !== featureConfig.auth.otpLength || isVerifying}
                 >
-                  {isLoading ? 'Verifying...' : 'Verify & Continue'}
+                  {isVerifying ? 'Verifying...' : 'Verify & Continue'}
                 </Button>
               </>
             )}

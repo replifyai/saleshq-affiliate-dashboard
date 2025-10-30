@@ -187,7 +187,7 @@ export function ProfileExample() {
             <p><strong>Name:</strong> {profile.name}</p>
             <p><strong>Phone:</strong> {profile.phoneNumber}</p>
             <p><strong>Email:</strong> {profile.email || 'Not set'}</p>
-            <p><strong>Approved:</strong> {profile.approved ? 'Yes' : 'No'}</p>
+            <p><strong>Approved:</strong> {profile.approved.charAt(0).toUpperCase() + profile.approved.slice(1)}</p>
             <p><strong>Phone Verified:</strong> {profile.phoneNumberVerified ? 'Yes' : 'No'}</p>
             <p><strong>Social Media:</strong> {profile.socialMediaHandles?.length || 0} handles</p>
           </div>

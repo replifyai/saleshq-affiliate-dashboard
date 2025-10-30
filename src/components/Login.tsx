@@ -19,6 +19,8 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   
   // Get configuration
   const contentConfig = getContentConfig();
@@ -55,6 +57,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   const handleSendOtp = async () => {
     // Validate mobile number and send OTP
     if (mobileNumber.length === 10) {
+      if (isSendingOtp) return; // Prevent double clicks
+      
+      setIsSendingOtp(true);
       try {
         const phoneNumber = `+91${mobileNumber}`;
         await sendOtp(phoneNumber);
@@ -63,6 +68,8 @@ const Login: React.FC<LoginProps> = ({ className }) => {
         showSnackbar('OTP sent successfully!', 'success');
       } catch (error) {
         showSnackbar(error instanceof Error ? error.message : 'Failed to send OTP', 'error');
+      } finally {
+        setIsSendingOtp(false);
       }
     } else {
       showSnackbar(contentConfig.auth.login.errors.invalidMobile, 'error');
@@ -76,7 +83,8 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   };
 
   const handleResendOtp = async () => {
-    if (countdown === 0) {
+    if (countdown === 0 && !isSendingOtp) {
+      setIsSendingOtp(true);
       try {
         const phoneNumber = `+91${mobileNumber}`;
         await sendOtp(phoneNumber);
@@ -84,6 +92,8 @@ const Login: React.FC<LoginProps> = ({ className }) => {
         showSnackbar('OTP resent successfully!', 'success');
       } catch (error) {
         showSnackbar(error instanceof Error ? error.message : 'Failed to resend OTP', 'error');
+      } finally {
+        setIsSendingOtp(false);
       }
     }
   };
@@ -96,14 +106,18 @@ const Login: React.FC<LoginProps> = ({ className }) => {
       return;
     }
     
+    if (isVerifying) return; // Prevent double clicks
+    
+    setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      await verifyOtp(phoneNumber, parseInt(otp));
+      await verifyOtp(phoneNumber, parseInt(otp)); // Pass OTP as number
       showSnackbar('Login successful!', 'success');
       // Redirect to dashboard
       window.location.href = '/dashboard';
     } catch (error) {
       showSnackbar(error instanceof Error ? error.message : 'Login failed', 'error');
+      setIsVerifying(false); // Only reset on error; success redirects anyway
     }
   };
 
@@ -181,9 +195,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   onClick={handleSendOtp}
                   size="lg"
                   className="w-full bg-primary-gradient font-bold text-lg py-4"
-                  disabled={mobileNumber.length !== 10 || isLoading}
+                  disabled={mobileNumber.length !== 10 || isSendingOtp}
                 >
-                  {isLoading ? 'Sending...' : contentConfig.auth.login.sendOtpText}
+                  {isSendingOtp ? 'Sending...' : contentConfig.auth.login.sendOtpText}
                 </Button>
               </>
             ) : (
@@ -222,9 +236,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     variant="secondary"
                     onClick={handleResendOtp}
                     className="flex-1"
-                    disabled={countdown > 0 || isLoading}
+                    disabled={countdown > 0 || isSendingOtp}
                   >
-                    {isLoading 
+                    {isSendingOtp 
                       ? 'Sending...'
                       : countdown > 0 
                         ? formatContent(contentConfig.auth.login.countdownText, { seconds: countdown })
@@ -237,9 +251,9 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   type="submit"
                   size="lg"
                   className="w-full bg-primary-gradient text-white font-bold text-lg py-4"
-                  disabled={otp.length !== featureConfig.auth.otpLength || isLoading}
+                  disabled={otp.length !== featureConfig.auth.otpLength || isVerifying}
                 >
-                  {isLoading ? 'Verifying...' : contentConfig.auth.login.verifyText}
+                  {isVerifying ? 'Verifying...' : contentConfig.auth.login.verifyText}
                 </Button>
               </>
             )}

@@ -11,7 +11,7 @@ export interface CreatorProfile {
   phoneNumber: string;
   email?: string | null;
   createdAt: number;
-  approved: boolean | string; // Can be boolean or string "true"/"false"
+  approved: 'approved' | 'rejected' | 'pending';
   socialMediaHandles?: SocialMediaHandle[] | null;
   phoneNumberVerified: boolean;
 }
@@ -53,7 +53,7 @@ export interface SendOtpRequest {
 
 export interface VerifyOtpRequest {
   phoneNumber: string;
-  otp: string;
+  otp: string | number; // Accept both string and number for flexibility
 }
 
 export interface UpdateCreatorProfileRequest {
@@ -61,7 +61,7 @@ export interface UpdateCreatorProfileRequest {
   data: {
     name?: string;
     email?: string | null;
-    approved?: boolean;
+    approved?: 'approved' | 'rejected' | 'pending';
     socialMediaHandles?: SocialMediaHandle[];
     phoneNumberVerified?: boolean;
     [key: string]: any;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import {
   CreateCreatorProfileRequest,
   CreateCreatorProfileResponse,
@@ -136,6 +137,9 @@ export async function PUT(request: NextRequest) {
 
     const result = await callFirebaseFunctionWithAuth('/updateCreatorProfile', token, data);
     
+    // Revalidate the cache after updating the profile
+    revalidateTag('creator-profile');
+    
     // Firebase function already returns { profile: CreatorProfile }, so return it directly
     return NextResponse.json(result as UpdateCreatorProfileResponse);
   } catch (error) {
@@ -169,7 +173,7 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    // Call the external API endpoint
+    // Call the external API endpoint with Next.js caching (10 minutes = 600 seconds)
     const response = await fetch(`${FIREBASE_FUNCTION_URL}/getCreatorProfile`, {
       method: 'POST',
       headers: {
@@ -177,6 +181,10 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: '',
+      next: { 
+        revalidate: 600, // Cache for 10 minutes
+        tags: ['creator-profile'] // Tag for cache invalidation
+      },
     });
 
     if (!response.ok) {

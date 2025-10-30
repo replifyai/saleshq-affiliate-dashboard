@@ -253,7 +253,7 @@ export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
           isEditing={isEditing}
           onUpdateProfile={handleUpdateProfile}
           phoneVerified={state.profile?.phoneNumberVerified || false}
-          approved={typeof state.profile?.approved === 'boolean' ? state.profile.approved : state.profile?.approved === 'true'}
+          approved={state.profile?.approved || 'pending'}
         />
 
         {/* Social Media Handles */}
