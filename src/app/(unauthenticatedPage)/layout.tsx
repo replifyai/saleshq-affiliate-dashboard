@@ -7,7 +7,7 @@ export default function UnauthenticatedLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
-      <Navigation className="fixed top-0 left-0 right-0 z-50" />
+      {/* <Navigation className="fixed top-0 left-0 right-0 z-50" /> */}
       <div>{children}</div>
     </div>
   );

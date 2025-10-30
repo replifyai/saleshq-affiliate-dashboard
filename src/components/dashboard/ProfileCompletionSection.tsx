@@ -177,16 +177,26 @@ export default function ProfileCompletionSection() {
           <div className="px-6 md:px-8 pb-6 md:pb-8">
             {/* Complete Now Button - Only show when expanded and incomplete */}
             {!isFullyCompleted && (
-              <div className="mb-6">
+              <div className="mb-6 flex gap-3">
+                <Link 
+                  href="/onboarding"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Quick Setup
+                </Link>
                 <Link 
                   href="/profile"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-card border border-border text-foreground text-sm font-medium rounded-xl hover:bg-secondary/20 transition-all duration-300"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  Complete Profile Now
+                  Edit Full Profile
                 </Link>
               </div>
             )}

@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BarChart3, Package, ShoppingBag, User } from 'lucide-react';
+import { BarChart3, Package, ShoppingBag, User, LogOut } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
 
 interface SidebarProps {
@@ -13,7 +13,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
   const pathname = usePathname();
-  const { state } = useProfile();
+  const { state, logout } = useProfile();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const navItems = [
     { label: 'DashBoard', icon: BarChart3, path: '/dashboard' },
@@ -27,6 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
 
   // Get the creator's name from profile, fallback to "there"
   const creatorName = state.profile?.name || 'there';
+  const isVerified = !!state.completionScore && state.completionScore.leftCount === 0;
 
   return (
     <aside
@@ -40,7 +42,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       <div className="p-6 border-b border-border">
         <div className="flex flex-col items-center space-y-3">
           <div className="text-left">
-            <h3 className="font-semibold text-foreground text-base text-xl">Hi {creatorName}!</h3>
+            <h3 className="font-semibold text-foreground text-base text-lg flex items-center gap-2">
+              Hi {creatorName}!
+              {isVerified && (
+                <img
+                  src="/verified.png"
+                  alt="Verified"
+                  className="w-4 h-4 inline-block"
+                />
+              )}
+            </h3>
             <p className="text-xs text-muted-foreground">Welcome to your affiliate dashboard</p>
           </div>
         </div>
@@ -68,34 +79,62 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
         </ul>
       </nav>
 
-      {/* Community Section */}
+      {/* Logout Section */}
       <div className="p-6 border-t border-border">
-        <div className="bg-secondary/10 rounded-xl p-4 text-center space-y-3">
-          <div className="flex justify-center -space-x-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent border-2 border-card overflow-hidden">
-              <img
-                src="https://i.pravatar.cc/150?img=1"
-                alt="User 1"
-                className="w-full h-full object-cover"
-              />
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all duration-200 font-medium"
+        >
+          <LogOut className="w-5 h-5" />
+          <span>Logout</span>
+        </button>
+      </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowLogoutConfirm(false)}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          
+          {/* Modal */}
+          <div 
+            className="relative bg-card rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-border"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+                <LogOut className="w-6 h-6 text-destructive" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-foreground">Logout Confirmation</h3>
+                <p className="text-sm text-muted-foreground">Are you sure you want to logout?</p>
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-primary border-2 border-card overflow-hidden">
-              <img
-                src="https://i.pravatar.cc/150?img=2"
-                alt="User 2"
-                className="w-full h-full object-cover"
-              />
+
+            <p className="text-sm text-muted-foreground">
+              You will need to login again to access your dashboard and track your earnings.
+            </p>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-border text-foreground hover:bg-secondary/20 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  logout();
+                }}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors font-medium"
+              >
+                Logout
+              </button>
             </div>
-            <div className="w-8 h-8 rounded-full bg-accent border-2 border-card flex items-center justify-center">
-              <span className="text-white text-xs font-bold">+</span>
-            </div>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-foreground">Join the community</p>
-            <p className="text-xs text-muted-foreground">and find out more</p>
           </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 };

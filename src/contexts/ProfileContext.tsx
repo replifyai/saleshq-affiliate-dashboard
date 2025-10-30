@@ -267,6 +267,18 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
         data,
       });
       dispatch({ type: 'UPDATE_PROFILE', payload: response.profile });
+      
+      // Fetch updated profile with completion score
+      try {
+        const profileResponse = await apiClient.getCreatorProfile();
+        const { completionScore } = profileResponse.creator;
+        if (completionScore) {
+          dispatch({ type: 'SET_COMPLETION_SCORE', payload: completionScore });
+        }
+      } catch (fetchError) {
+        // Don't throw if fetching completion score fails
+        console.warn('Failed to fetch updated completion score:', fetchError);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
@@ -275,8 +287,16 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   };
 
   const logout = () => {
-    clearTokens(); // Clear cookies
+    // Clear all tokens from cookies
+    clearTokens();
+    
+    // Clear all state and user data
     dispatch({ type: 'CLEAR_PROFILE' });
+    
+    // Redirect to login page
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   };
 
   const clearError = () => {

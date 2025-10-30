@@ -19,7 +19,7 @@ interface ProfilePageProps {
 // Helper function to convert API social media to UI format
 const convertApiSocialMediaToUI = (apiHandles?: ApiSocialMediaHandle[] | null): SocialMediaHandle[] => {
   if (!apiHandles || apiHandles.length === 0) return [];
-  
+
   return apiHandles.map(handle => ({
     platform: handle.platform.charAt(0).toUpperCase() + handle.platform.slice(1), // Capitalize
     handle: handle.handle,
@@ -41,7 +41,7 @@ const convertUISocialMediaToAPI = (uiHandles: SocialMediaHandle[]): ApiSocialMed
 export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
   const { showSuccess, showError } = useSnackbar();
   const { state, updateProfile } = useProfile();
-  
+
   const [profile, setProfile] = useState<AffiliateProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +50,7 @@ export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
   useEffect(() => {
     if (state.profile) {
       const creatorProfile = state.profile;
-      
+
       setProfile({
         id: creatorProfile.id,
         name: creatorProfile.name,
@@ -91,7 +91,7 @@ export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
       if (profile.name !== state.profile.name) {
         updateData.name = profile.name;
       }
-      
+
       if (profile.email !== (state.profile.email || '')) {
         updateData.email = profile.email || null;
       }
@@ -102,7 +102,7 @@ export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
 
       // Call the updateProfile API
       await updateProfile(updateData);
-      
+
       setIsEditing(false);
       showSuccess('Profile updated successfully!');
     } catch (error) {

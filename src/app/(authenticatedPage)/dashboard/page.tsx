@@ -16,6 +16,7 @@ interface DashboardPageProps {
 
 export default function DashboardPage({ onMenuClick }: DashboardPageProps) {
   const { state } = useProfile();
+  const showProfileCompletion = !!state.completionScore && state.completionScore.leftCount > 0;
 
   // Show loading state while profile is being fetched or not yet available
   if (!state.profile) {
@@ -70,8 +71,8 @@ export default function DashboardPage({ onMenuClick }: DashboardPageProps) {
             </button>
           </div>
         )}
-        {/* Profile Completion Section */}
-        <ProfileCompletionSection />
+        {/* Profile Completion Section (hidden when all steps completed) */}
+        {showProfileCompletion && <ProfileCompletionSection />}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           <ShareLinkSection />
         </div>

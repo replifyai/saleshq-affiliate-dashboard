@@ -2,34 +2,51 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { useRouter } from 'next/navigation';
 import Button from './common/Button';
 import TextField from './common/TextField';
 import { cn } from '@/lib/utils';
+import { useProfile } from '@/contexts/ProfileContext';
+import { SocialMediaHandle } from '@/types/api';
 
 interface OnboardingData {
   creatorName: string;
+  email: string;
   socialHandles: {
     platform: string;
     handle: string;
-    followers: string;
   }[];
-  background: string;
-  categories: string[];
 }
 
 const OnboardingFlow: React.FC = () => {
+  const router = useRouter();
+  const { state, updateProfile } = useProfile();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [data, setData] = useState<OnboardingData>({
     creatorName: '',
-    socialHandles: [],
-    background: '',
-    categories: []
+    email: '',
+    socialHandles: []
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const totalSteps = 3;
+
+  // Pre-populate data from existing profile
+  useEffect(() => {
+    if (state.profile) {
+      setData({
+        creatorName: state.profile.name || '',
+        email: state.profile.email || '',
+        socialHandles: state.profile.socialMediaHandles?.map(handle => ({
+          platform: handle.platform,
+          handle: handle.handle
+        })) || []
+      });
+    }
+  }, [state.profile]);
 
   useEffect(() => {
     // Animate container entrance
@@ -76,20 +93,53 @@ const OnboardingFlow: React.FC = () => {
     }
   };
 
-  const handleComplete = () => {
-    console.log('Onboarding completed:', data);
-    // Redirect to dashboard or main app
-    window.location.href = '/dashboard';
+  const skipStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleComplete();
+    }
+  };
+
+  const handleComplete = async () => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Convert social handles to API format
+      const socialMediaHandles: SocialMediaHandle[] = data.socialHandles
+        .filter(handle => handle.platform && handle.handle)
+        .map(handle => ({
+          platform: handle.platform.toLowerCase() as SocialMediaHandle['platform'],
+          handle: handle.handle
+        }));
+
+      // Update profile with onboarding data
+      await updateProfile({
+        name: data.creatorName || state.profile?.name,
+        email: data.email || null,
+        socialMediaHandles: socialMediaHandles.length > 0 ? socialMediaHandles : undefined
+      });
+
+      // Redirect to dashboard
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      // Still redirect on error to avoid blocking the user
+      router.push('/dashboard');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <CreatorNameStep data={data} setData={setData} onNext={nextStep} />;
+        return <CreatorNameStep data={data} setData={setData} onNext={nextStep} onSkip={skipStep} />;
       case 2:
-        return <SocialHandlesStep data={data} setData={setData} onNext={nextStep} onPrev={prevStep} />;
+        return <EmailStep data={data} setData={setData} onNext={nextStep} onPrev={prevStep} onSkip={skipStep} />;
       case 3:
-        return <BackgroundStep data={data} setData={setData} onComplete={handleComplete} onPrev={prevStep} />;
+        return <SocialHandlesStep data={data} setData={setData} onComplete={handleComplete} onPrev={prevStep} onSkip={skipStep} isSubmitting={isSubmitting} />;
       default:
         return null;
     }
@@ -132,7 +182,8 @@ const CreatorNameStep: React.FC<{
   data: OnboardingData;
   setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
   onNext: () => void;
-}> = ({ data, setData, onNext }) => {
+  onSkip: () => void;
+}> = ({ data, setData, onNext, onSkip }) => {
   const stepRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -171,28 +222,122 @@ const CreatorNameStep: React.FC<{
           className="w-full text-lg"
         />
 
-        <Button
-          onClick={handleNext}
-          size="lg"
-          className="w-full bg-primary-gradient font-bold text-lg py-4"
-          disabled={!data.creatorName.trim()}
-        >
-          Continue
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            onClick={onSkip}
+            variant="outline"
+            size="lg"
+            className="flex-1"
+          >
+            Skip for now
+          </Button>
+          <Button
+            onClick={handleNext}
+            size="lg"
+            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
+            disabled={!data.creatorName.trim()}
+          >
+            Continue
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
-// Step 2: Social Media Handles
-const SocialHandlesStep: React.FC<{
+// Step 2: Email Address
+const EmailStep: React.FC<{
   data: OnboardingData;
   setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
   onNext: () => void;
   onPrev: () => void;
-}> = ({ data, setData, onNext, onPrev }) => {
+  onSkip: () => void;
+}> = ({ data, setData, onNext, onPrev, onSkip }) => {
   const stepRef = useRef<HTMLDivElement>(null);
-  const [newHandle, setNewHandle] = useState({ platform: '', handle: '', followers: '' });
+
+  useEffect(() => {
+    if (stepRef.current) {
+      gsap.fromTo(stepRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+      );
+    }
+  }, []);
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleNext = () => {
+    if (data.email && isValidEmail(data.email)) {
+      onNext();
+    }
+  };
+
+  return (
+    <div ref={stepRef} className="space-y-8">
+      <div className="text-center space-y-4">
+        <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
+          <span className="text-2xl">📧</span>
+        </div>
+        <h2 className="text-3xl font-bold text-foreground">What's your email address?</h2>
+        <p className="text-lg text-muted-foreground">
+          We'll use this to send you important updates and earnings reports
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <TextField
+          label="Email Address"
+          placeholder="your.email@example.com"
+          value={data.email}
+          onChange={(value) => setData(prev => ({ ...prev, email: value }))}
+          className="w-full text-lg"
+          type="email"
+        />
+
+        <div className="flex gap-4">
+          <Button
+            onClick={onPrev}
+            variant="outline"
+            size="lg"
+            className="flex-1"
+          >
+            Back
+          </Button>
+          <Button
+            onClick={onSkip}
+            variant="outline"
+            size="lg"
+            className="flex-1"
+          >
+            Skip for now
+          </Button>
+          <Button
+            onClick={handleNext}
+            size="lg"
+            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
+            disabled={!data.email || !isValidEmail(data.email)}
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Step 3: Social Media Handles
+const SocialHandlesStep: React.FC<{
+  data: OnboardingData;
+  setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
+  onComplete: () => void;
+  onPrev: () => void;
+  onSkip: () => void;
+  isSubmitting: boolean;
+}> = ({ data, setData, onComplete, onPrev, onSkip, isSubmitting }) => {
+  const stepRef = useRef<HTMLDivElement>(null);
+  const [newHandle, setNewHandle] = useState({ platform: '', handle: '' });
 
   useEffect(() => {
     if (stepRef.current) {
@@ -206,12 +351,12 @@ const SocialHandlesStep: React.FC<{
   const platforms = ['Instagram', 'YouTube', 'TikTok', 'Twitter', 'Facebook', 'LinkedIn'];
 
   const addHandle = () => {
-    if (newHandle.platform && newHandle.handle && newHandle.followers) {
+    if (newHandle.platform && newHandle.handle) {
       setData(prev => ({
         ...prev,
         socialHandles: [...prev.socialHandles, { ...newHandle }]
       }));
-      setNewHandle({ platform: '', handle: '', followers: '' });
+      setNewHandle({ platform: '', handle: '' });
     }
   };
 
@@ -222,10 +367,6 @@ const SocialHandlesStep: React.FC<{
     }));
   };
 
-  const handleNext = () => {
-    onNext();
-  };
-
   return (
     <div ref={stepRef} className="space-y-8">
       <div className="text-center space-y-4">
@@ -234,7 +375,7 @@ const SocialHandlesStep: React.FC<{
         </div>
         <h2 className="text-3xl font-bold text-foreground">Add your social media handles</h2>
         <p className="text-lg text-muted-foreground">
-          Share your social media presence to help us understand your reach
+          Share your social media presence to help us connect with you
         </p>
       </div>
 
@@ -243,7 +384,7 @@ const SocialHandlesStep: React.FC<{
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-semibold text-foreground">Add Social Media Handle</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Platform</label>
               <select
@@ -259,23 +400,12 @@ const SocialHandlesStep: React.FC<{
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Handle</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Handle/Username</label>
               <input
                 type="text"
-                placeholder="@username"
+                placeholder="@username or profile link"
                 value={newHandle.handle}
                 onChange={(e) => setNewHandle(prev => ({ ...prev, handle: e.target.value }))}
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Followers</label>
-              <input
-                type="text"
-                placeholder="e.g., 10K, 1M"
-                value={newHandle.followers}
-                onChange={(e) => setNewHandle(prev => ({ ...prev, followers: e.target.value }))}
                 className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -285,7 +415,7 @@ const SocialHandlesStep: React.FC<{
             onClick={addHandle}
             variant="outline"
             className="w-full"
-            disabled={!newHandle.platform || !newHandle.handle || !newHandle.followers}
+            disabled={!newHandle.platform || !newHandle.handle}
           >
             Add Handle
           </Button>
@@ -299,11 +429,11 @@ const SocialHandlesStep: React.FC<{
               <div key={index} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-primary-gradient rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-white">{handle.platform[0]}ss</span>
+                    <span className="text-sm font-bold text-white">{handle.platform[0]}</span>
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">{handle.platform}</div>
-                    <div className="text-sm text-muted-foreground">{handle.handle} • {handle.followers} followers</div>
+                    <div className="text-sm text-muted-foreground">{handle.handle}</div>
                   </div>
                 </div>
                 <button
@@ -322,121 +452,26 @@ const SocialHandlesStep: React.FC<{
           <Button
             onClick={onPrev}
             variant="outline"
+            size="lg"
             className="flex-1"
           >
             Back
           </Button>
           <Button
-            onClick={handleNext}
-            size="lg"
-            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-          >
-            Continue
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Step 3: Background & Categories
-const BackgroundStep: React.FC<{
-  data: OnboardingData;
-  setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
-  onComplete: () => void;
-  onPrev: () => void;
-}> = ({ data, setData, onComplete, onPrev }) => {
-  const stepRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (stepRef.current) {
-      gsap.fromTo(stepRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-      );
-    }
-  }, []);
-
-  const categories = [
-    'Technology', 'Fashion', 'Beauty', 'Fitness', 'Food', 'Travel',
-    'Gaming', 'Education', 'Business', 'Lifestyle', 'Health', 'Entertainment'
-  ];
-
-  const toggleCategory = (category: string) => {
-    setData(prev => ({
-      ...prev,
-      categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
-    }));
-  };
-
-  const handleComplete = () => {
-    onComplete();
-  };
-
-  return (
-    <div ref={stepRef} className="space-y-8">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
-          <span className="text-2xl">🎯</span>
-        </div>
-        <h2 className="text-3xl font-bold text-foreground">Tell us about your background</h2>
-        <p className="text-lg text-muted-foreground">
-          Help us understand your expertise and interests
-        </p>
-      </div>
-
-      <div className="space-y-6">
-        {/* Background */}
-        <div>
-          <label className="block text-lg font-semibold text-foreground mb-4">Background</label>
-          <textarea
-            placeholder="Tell us about your background, experience, and what makes you unique..."
-            value={data.background}
-            onChange={(e) => setData(prev => ({ ...prev, background: e.target.value }))}
-            rows={4}
-            className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-          />
-        </div>
-
-        {/* Categories */}
-        <div>
-          <label className="block text-lg font-semibold text-foreground mb-4">Categories (Select all that apply)</label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => toggleCategory(category)}
-                className={cn(
-                  "px-4 py-3 rounded-lg border-2 transition-all duration-200 text-sm font-medium",
-                  data.categories.includes(category)
-                    ? "bg-primary-gradient text-black border-primary"
-                    : "bg-card text-foreground border-border hover:border-primary"
-                )}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex gap-4">
-          <Button
-            onClick={onPrev}
+            onClick={onSkip}
             variant="outline"
+            size="lg"
             className="flex-1"
           >
-            Back
+            Skip for now
           </Button>
           <Button
-            onClick={handleComplete}
+            onClick={onComplete}
             size="lg"
             className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-            disabled={!data.background.trim() || data.categories.length === 0}
+            disabled={isSubmitting}
           >
-            Complete Setup
+            {isSubmitting ? 'Saving...' : 'Complete Setup'}
           </Button>
         </div>
       </div>

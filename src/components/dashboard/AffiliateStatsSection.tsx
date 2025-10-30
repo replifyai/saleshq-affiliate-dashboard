@@ -4,6 +4,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useSnackbar } from '@/components/snackbar';
 import { Tooltip } from 'react-tooltip';
+import { useProfile } from '@/contexts/ProfileContext';
+import LockOverlay from '@/components/LockOverlay';
 
 interface StatItemProps {
   label: string;
@@ -72,7 +74,11 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
   nextPayout = '₹0',
   className,
 }) => {
-
+	const { state } = useProfile();
+	const completion = state.completionScore;
+	const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);
+	const completionPercentage = totalSteps > 0 ? Math.round(((completion?.completedCount || 0) / totalSteps) * 100) : 0;
+	const isLocked = completionPercentage < 100;
 
   return (
     <div className={cn('space-y-8', className)}>
@@ -82,6 +88,7 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
         <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/50">
+          <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Your Performance." roundedClassName="rounded-3xl" />
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Your Performance</h2>

@@ -3,6 +3,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Package, DollarSign, MousePointer } from 'lucide-react';
+import LockOverlay from '@/components/LockOverlay';
+import { useProfile } from '@/contexts/ProfileContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -368,6 +370,11 @@ const AnalyticsOverviewSection: React.FC<AnalyticsOverviewSectionProps> = ({
   className,
   data = mockData,
 }) => {
+  const { state } = useProfile();
+  const completion = state.completionScore;
+  const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);
+  const completionPercentage = totalSteps > 0 ? Math.round(((completion?.completedCount || 0) / totalSteps) * 100) : 0;
+  const isLocked = completionPercentage < 100;
   const [selectedPeriod, setSelectedPeriod] = React.useState<TimePeriod>('30d');
   
   // Generate data based on selected period - always show most recent data first
@@ -410,6 +417,7 @@ const AnalyticsOverviewSection: React.FC<AnalyticsOverviewSectionProps> = ({
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
         <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/50">
+          <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Analytics Overview." roundedClassName="rounded-3xl" />
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Analytics Overview</h2>
@@ -482,6 +490,7 @@ const AnalyticsOverviewSection: React.FC<AnalyticsOverviewSectionProps> = ({
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
         <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/50">
+          <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Key Insights." roundedClassName="rounded-3xl" />
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Key Insights</h2>

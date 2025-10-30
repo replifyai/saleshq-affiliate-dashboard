@@ -4,6 +4,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useSnackbar } from '@/components/snackbar';
 import { Facebook, Linkedin, MessageCircle, Copy } from 'lucide-react';
+import { useProfile } from '@/contexts/ProfileContext';
+import LockOverlay from '@/components/LockOverlay';
 
 interface ShareLinkSectionProps {
   shareUrl?: string;
@@ -17,6 +19,12 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
   className,
 }) => {
   const { showSuccess } = useSnackbar();
+  const { state } = useProfile();
+
+  const completion = state.completionScore;
+  const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);
+  const completionPercentage = totalSteps > 0 ? Math.round(((completion?.completedCount || 0) / totalSteps) * 100) : 0;
+  const isLocked = completionPercentage < 100;
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -45,6 +53,7 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
   ];
 
   const handleSocialShare = (url: string) => {
+    if (isLocked) return;
     window.open(url, '_blank', 'width=600,height=400');
   };
 
@@ -52,6 +61,7 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
     <div className={cn('relative overflow-hidden rounded-xl space-y-8', className)}>
       <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 rounded-xl blur-xl"></div>
       <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/50">
+        <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Share & Earn." roundedClassName="rounded-3xl" />
         {/* Header */}
         <div className="flex items-center justify-between space-x-2 mb-4">
           <div>
@@ -69,10 +79,12 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
                     'group bg-gradient-to-br from-yellow-500/20 to-yellow-500/5relative p-3 rounded-lg transition-all duration-300 hover:scale-110 shadow-md hover:shadow-lg',
                     'bg-card/60 backdrop-blur-sm border border-border/50 hover:border-primary/30',
                     'flex items-center justify-center',
-                    social.color
+                    social.color,
+                    isLocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''
                   )}
                   aria-label={`Share on ${social.name}`}
                   style={{ animationDelay: `${index * 50}ms` }}
+                  disabled={isLocked}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="relative w-5 h-5 flex items-center justify-center">
@@ -97,8 +109,12 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => handleCopy(referralCode, 'Referral code copied!')}
-                className="px-2 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90"
+                onClick={() => !isLocked && handleCopy(referralCode, 'Referral code copied!')}
+                className={cn(
+                  'px-2 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90',
+                  isLocked ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : ''
+                )}
+                disabled={isLocked}
               >
                 <Copy className="w-5 h-5" />
               </button>
@@ -116,8 +132,12 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => handleCopy(shareUrl, 'Referral link copied!')}
-                className="px-2 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90"
+                onClick={() => !isLocked && handleCopy(shareUrl, 'Referral link copied!')}
+                className={cn(
+                  'px-2 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90',
+                  isLocked ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : ''
+                )}
+                disabled={isLocked}
               >
                 <Copy className="w-5 h-5" />
               </button>
