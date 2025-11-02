@@ -56,9 +56,29 @@ export function getCookie(name: string): string | null {
 
 /**
  * Delete a cookie by setting it to expire in the past
+ * Must include same attributes that were used to set the cookie
  */
 export function deleteCookie(name: string) {
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  if (typeof document === 'undefined') return;
+  
+  // Delete cookie with all possible attribute combinations to ensure it's removed
+  // Include SameSite and Secure attributes to match how cookies were set
+  const cookieString = [
+    `${name}=`,
+    `expires=Thu, 01 Jan 1970 00:00:00 UTC`,
+    `path=${COOKIE_OPTIONS.path}`,
+    `SameSite=${COOKIE_OPTIONS.sameSite}`,
+    COOKIE_OPTIONS.secure ? 'Secure' : '',
+  ]
+    .filter(Boolean)
+    .join('; ');
+
+  document.cookie = cookieString;
+  
+  // Also try without Secure in case it was set in development
+  if (COOKIE_OPTIONS.secure) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${COOKIE_OPTIONS.path}; SameSite=${COOKIE_OPTIONS.sameSite}`;
+  }
 }
 
 /**

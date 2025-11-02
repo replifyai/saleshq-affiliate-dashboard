@@ -111,6 +111,7 @@ interface ProfileProviderProps {
 export function ProfileProvider({ children }: ProfileProviderProps) {
   const [state, dispatch] = useReducer(profileReducer, initialState);
   const fetchingProfileRef = useRef(false); // Ref to prevent multiple simultaneous fetch calls
+  const isLoggingOutRef = useRef(false); // Ref to prevent useEffect from resetting cookies during logout
 
   // NOTE: We no longer load tokens from cookies on mount
   // Profile data is now fetched server-side and passed to setInitialProfile
@@ -118,6 +119,10 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
 
   // Store tokens in cookies when they change
   useEffect(() => {
+    // Skip setting cookies if we're in the process of logging out
+    if (isLoggingOutRef.current) {
+      return;
+    }
     if (state.tokens.idToken) {
       setTokens(state.tokens.idToken, state.tokens.refreshToken || '');
     }
@@ -264,13 +269,30 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   };
 
   const logout = () => {
-    // Clear all tokens from cookies
+    // Set flag to prevent useEffect from resetting cookies during logout
+    isLoggingOutRef.current = true;
+    
+    // Clear all tokens from cookies first
     clearTokens();
     
-    // Clear all state and user data
+    // Force a synchronous cookie clear by also directly clearing document.cookie
+    // This ensures cookies are deleted before the redirect happens
+    if (typeof document !== 'undefined') {
+      document.cookie = 'idToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict';
+      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict';
+      
+      // Also clear with Secure flag in case in production
+      if (process.env.NODE_ENV === 'production') {
+        document.cookie = 'idToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure';
+        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure';
+      }
+    }
+    
+    // Clear all state and user data after cookies are cleared
     dispatch({ type: 'CLEAR_PROFILE' });
     
-    // Redirect to login page
+    // Redirect to login page using full page reload to ensure clean state
+    // The redirect will reset the ref when the component unmounts
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
