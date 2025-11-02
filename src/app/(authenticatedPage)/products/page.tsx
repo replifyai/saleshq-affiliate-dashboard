@@ -13,8 +13,8 @@ import {
   ProductDetailModal,
   PerformanceChartModal,
   Product,
-  SummaryCard as SummaryCardType
 } from '@/components/products';
+import type { SummaryCard as SummaryCardType } from '@/components/products/types';
 import { mockProducts, mockCategories } from '@/components/products/mockData';
 
 // Main Component

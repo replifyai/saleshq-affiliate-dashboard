@@ -58,7 +58,7 @@ export function SnackbarProvider({
     });
 
     // Auto-remove message after duration
-    if (newMessage.duration > 0) {
+    if (newMessage.duration && newMessage.duration > 0) {
       setTimeout(() => {
         removeMessage(id);
       }, newMessage.duration);

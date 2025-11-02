@@ -125,7 +125,6 @@ const AnalyticsChart: React.FC<{ data: AnalyticsData[] }> = ({ data }) => {
         yAxisID: 'y1',
       },
     ],
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [visibleData]);
 
   const options: ChartOptions<'bar'> = React.useMemo(() => ({

@@ -6,7 +6,7 @@ export interface TextFieldProps {
   placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
-  type?: 'text' | 'email' | 'password' | 'tel';
+  type?: 'text' | 'email' | 'password' | 'tel' | 'number';
   error?: string;
   disabled?: boolean;
   required?: boolean;

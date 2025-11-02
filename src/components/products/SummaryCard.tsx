@@ -1,10 +1,10 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { SummaryCard } from './types';
+import type { SummaryCard } from './types';
 
 type SummaryCardProps = SummaryCard;
 
-const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, subtitle, icon, trend, trendValue }) => (
+const SummaryCardComponent: React.FC<SummaryCardProps> = ({ title, value, subtitle, icon, trend, trendValue }) => (
   <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px]">
     <div className="flex items-center justify-between mb-2">
       <div className="text-2xl">{icon}</div>
@@ -25,4 +25,6 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, subtitle, icon,
   </div>
 );
 
-export default SummaryCard;
+SummaryCardComponent.displayName = 'SummaryCard';
+
+export default SummaryCardComponent;
