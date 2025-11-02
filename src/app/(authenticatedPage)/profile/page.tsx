@@ -12,10 +12,6 @@ import {
 import { AffiliateProfile, SocialMediaHandle } from '@/components/profile/types';
 import { SocialMediaHandle as ApiSocialMediaHandle } from '@/types/api';
 
-interface ProfilePageProps {
-  onMenuClick?: () => void;
-}
-
 // Helper function to convert API social media to UI format
 const convertApiSocialMediaToUI = (apiHandles?: ApiSocialMediaHandle[] | null): SocialMediaHandle[] => {
   if (!apiHandles || apiHandles.length === 0) return [];
@@ -38,7 +34,7 @@ const convertUISocialMediaToAPI = (uiHandles: SocialMediaHandle[]): ApiSocialMed
     }));
 };
 
-export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
+export default function ProfilePage() {
   const { showSuccess, showError } = useSnackbar();
   const { state, updateProfile } = useProfile();
 
@@ -222,21 +218,6 @@ export default function ProfilePage({ onMenuClick }: ProfilePageProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-6 space-y-8">
-        {/* Mobile Menu Button - Only visible on mobile */}
-        {onMenuClick && (
-          <div className="lg:hidden">
-            <button
-              onClick={onMenuClick}
-              className="mb-4 p-3 rounded-lg bg-card border border-border hover:bg-secondary/20 transition-all duration-300 shadow-sm"
-              aria-label="Toggle menu"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        )}
-
         {/* Profile Header */}
         <ProfileHeader
           profile={profile}
