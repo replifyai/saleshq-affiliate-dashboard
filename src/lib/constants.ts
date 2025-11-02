@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * SaaS Product Constants Configuration
  * This file contains all theme, content, and feature configurations

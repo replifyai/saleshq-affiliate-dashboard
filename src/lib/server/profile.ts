@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers';
 import { GetCreatorProfileResponse } from '@/types/api';
-import config from '@/lib/config';
 
 const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://dashboardapi-dkhjjaxofq-el.a.run.app';
 

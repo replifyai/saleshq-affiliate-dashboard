@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // API Types based on OpenAPI specification - Creator endpoints only
 
 export interface SocialMediaHandle {
