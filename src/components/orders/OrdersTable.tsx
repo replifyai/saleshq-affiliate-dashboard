@@ -10,6 +10,8 @@ interface OrdersTableProps {
   orders: Order[];
   currentPage: number;
   itemsPerPage: number;
+  totalPages?: number;
+  totalItems?: number;
   sortField: keyof Order;
   sortDirection: 'asc' | 'desc';
   onSort: (field: keyof Order) => void;
@@ -20,6 +22,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   orders,
   currentPage,
   itemsPerPage,
+  totalPages: propTotalPages,
+  totalItems: propTotalItems,
   sortField,
   sortDirection,
   onSort,
@@ -42,11 +46,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     });
   };
 
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
-  const paginatedOrders = orders.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Use server-side pagination if provided, otherwise fall back to client-side
+  const totalPages = propTotalPages ?? Math.ceil(orders.length / itemsPerPage);
+  const totalItems = propTotalItems ?? orders.length;
+  // Orders are already paginated from server, so use them directly
+  const paginatedOrders = orders;
 
   return (
     <div className="relative overflow-hidden rounded-3xl">
@@ -167,7 +171,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           totalPages={totalPages}
           onPageChange={onPageChange}
           itemsPerPage={itemsPerPage}
-          totalItems={orders.length}
+          totalItems={totalItems}
         />
       </div>
     </div>

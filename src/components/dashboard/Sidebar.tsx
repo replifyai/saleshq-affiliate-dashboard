@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BarChart3, Package, ShoppingBag, User, LogOut } from 'lucide-react';
+import { BarChart3, Package, ShoppingBag, User, LogOut, Tag } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
 
 interface SidebarProps {
@@ -20,6 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
     { label: 'DashBoard', icon: BarChart3, path: '/dashboard' },
     { label: 'Orders', icon: Package, path: '/orders' },
     { label: 'Products', icon: ShoppingBag, path: '/products' },
+    { label: 'Coupons', icon: Tag, path: '/coupons' },
     { label: 'Profile', icon: User, path: '/profile' },
   ].map(item => ({
     ...item,

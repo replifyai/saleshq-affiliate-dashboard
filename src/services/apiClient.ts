@@ -9,6 +9,11 @@ import {
   UpdateCreatorProfileResponse,
   GetCreatorProfileResponse,
   ErrorResponse,
+  GetCreatorCouponsResponse,
+  CreateCouponForCreatorRequest,
+  CreateCouponForCreatorResponse,
+  GetCreatorOrdersRequest,
+  GetCreatorOrdersResponse,
 } from '@/types/api';
 import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
 import config from '@/lib/config';
@@ -188,6 +193,28 @@ class ApiClient {
   async getCreatorProfile(): Promise<GetCreatorProfileResponse> {
     return this.request<GetCreatorProfileResponse>('/creator/profile', {
       method: 'GET',
+    }, true);
+  }
+
+  // Coupon API methods
+  async getCreatorCoupons(): Promise<GetCreatorCouponsResponse> {
+    return this.request<GetCreatorCouponsResponse>('/creator/coupons', {
+      method: 'GET',
+    }, true);
+  }
+
+  async createCouponForCreator(data: CreateCouponForCreatorRequest): Promise<CreateCouponForCreatorResponse> {
+    return this.request<CreateCouponForCreatorResponse>('/creator/coupons', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  // Orders API methods
+  async getCreatorOrders(data: GetCreatorOrdersRequest): Promise<GetCreatorOrdersResponse> {
+    return this.request<GetCreatorOrdersResponse>('/creator/orders', {
+      method: 'POST',
+      body: JSON.stringify(data),
     }, true);
   }
 }

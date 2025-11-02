@@ -1,224 +1,255 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { OrdersHeader, OrderSummaryCards, OrdersTable, Order } from '@/components/orders';
+import React, { useState, useEffect, useMemo } from 'react';
+import { apiClient } from '@/services/apiClient';
+import { CreatorOrder } from '@/types/api';
+import { useSnackbar } from '@/components/snackbar/use-snackbar';
+import { OrdersHeader, OrderSummaryCards, OrdersTable, OrdersFilters, OrdersSort, OrdersEmptyState, Order } from '@/components/orders';
+
+// Helper function to map API order to display order
+const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
+  const orderValue = parseFloat(apiOrder.totalAmount) || 0;
+  const commissionAmount = parseFloat(apiOrder.commissionAmount) || 0;
+  const commissionRateValue = parseFloat(apiOrder.commissionRateValue) || 0;
+  
+  // Extract product name from line items
+  let productName = 'Multiple Items';
+  if (apiOrder.lineItems && apiOrder.lineItems.length > 0) {
+    const firstItem = apiOrder.lineItems[0];
+    productName = firstItem.title || firstItem.name || 'Product';
+    if (apiOrder.lineItems.length > 1) {
+      productName += ` +${apiOrder.lineItems.length - 1} more`;
+    }
+  }
+
+  // Map attribution type to channel
+  const channelMap: Record<string, Order['channel']> = {
+    coupon: 'coupon',
+    facebook: 'facebook',
+    instagram: 'instagram',
+    youtube: 'youtube',
+  };
+  const channel = channelMap[apiOrder.attributionType?.toLowerCase()] || 
+                  channelMap[apiOrder.commissionSource?.toLowerCase()] || 
+                  'coupon';
+
+  // Infer status from payment status and other fields
+  let status: Order['status'] = 'processing';
+  if (apiOrder.paymentStatus === 'paid') {
+    status = 'delivered'; // Default for paid orders
+  } else if (apiOrder.paymentStatus === 'refunded') {
+    status = 'refunded';
+  } else if (apiOrder.paymentStatus === 'failed') {
+    status = 'cancelled';
+  } else {
+    status = 'pending';
+  }
+
+  // Extract customer name from email (fallback)
+  const customerName = apiOrder.customerEmail?.split('@')[0] || 'Customer';
+
+  return {
+    id: apiOrder.id,
+    orderNumber: apiOrder.orderNumber,
+    customerName,
+    productName,
+    orderValue,
+    commission: commissionAmount,
+    commissionRate: commissionRateValue,
+    date: new Date(apiOrder.createdAt).toISOString().split('T')[0],
+    status,
+    paymentStatus: apiOrder.paymentStatus,
+    channel,
+  };
+};
 
 export default function OrdersPage() {
+  const { showError } = useSnackbar();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<keyof Order>('date');
+  const [itemsPerPage] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  
+  // Filter state
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [orderNumberFilter, setOrderNumberFilter] = useState('');
+  const [debouncedOrderNumber, setDebouncedOrderNumber] = useState('');
+  
+  // Sort state
+  const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  // Mock data - In a real app, this would come from an API
-  const mockOrders: Order[] = [
-    {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      customerName: 'John Smith',
-      productName: 'Premium Wireless Headphones',
-      orderValue: 12999,
-      commission: 1299.9,
-      commissionRate: 10,
-      date: '2024-01-15',
-      status: 'delivered',
-      paymentStatus: 'paid',
-      channel: 'facebook',
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      customerName: 'Sarah Johnson',
-      productName: 'Smart Fitness Tracker',
-      orderValue: 8999,
-      commission: 899.9,
-      commissionRate: 10,
-      date: '2024-01-14',
-      status: 'shipped',
-      paymentStatus: 'paid',
-      channel: 'instagram',
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-2024-003',
-      customerName: 'Mike Wilson',
-      productName: 'Bluetooth Speaker',
-      orderValue: 4999,
-      commission: 499.9,
-      commissionRate: 10,
-      date: '2024-01-13',
-      status: 'processing',
-      paymentStatus: 'paid',
-      channel: 'youtube',
-    },
-    {
-      id: '4',
-      orderNumber: 'ORD-2024-004',
-      customerName: 'Emily Davis',
-      productName: 'Gaming Mouse',
-      orderValue: 2999,
-      commission: 299.9,
-      commissionRate: 10,
-      date: '2024-01-12',
-      status: 'pending',
-      paymentStatus: 'pending',
-      channel: 'coupon',
-    },
-    {
-      id: '5',
-      orderNumber: 'ORD-2024-005',
-      customerName: 'David Brown',
-      productName: 'Mechanical Keyboard',
-      orderValue: 7999,
-      commission: 799.9,
-      commissionRate: 10,
-      date: '2024-01-11',
-      status: 'cancelled',
-      paymentStatus: 'refunded',
-      channel: 'facebook',
-    },
-    {
-      id: '6',
-      orderNumber: 'ORD-2024-006',
-      customerName: 'Lisa Anderson',
-      productName: 'Wireless Charger',
-      orderValue: 1999,
-      commission: 199.9,
-      commissionRate: 10,
-      date: '2024-01-10',
-      status: 'delivered',
-      paymentStatus: 'paid',
-      channel: 'instagram',
-    },
-    {
-      id: '7',
-      orderNumber: 'ORD-2024-007',
-      customerName: 'Tom Miller',
-      productName: 'USB-C Hub',
-      orderValue: 3999,
-      commission: 399.9,
-      commissionRate: 10,
-      date: '2024-01-09',
-      status: 'shipped',
-      paymentStatus: 'paid',
-      channel: 'youtube',
-    },
-    {
-      id: '8',
-      orderNumber: 'ORD-2024-008',
-      customerName: 'Anna Garcia',
-      productName: 'Laptop Stand',
-      orderValue: 2499,
-      commission: 249.9,
-      commissionRate: 10,
-      date: '2024-01-08',
-      status: 'delivered',
-      paymentStatus: 'paid',
-      channel: 'coupon',
-    },
-    {
-      id: '9',
-      orderNumber: 'ORD-2024-009',
-      customerName: 'Chris Taylor',
-      productName: 'Monitor Mount',
-      orderValue: 5999,
-      commission: 599.9,
-      commissionRate: 10,
-      date: '2024-01-07',
-      status: 'processing',
-      paymentStatus: 'paid',
-      channel: 'facebook',
-    },
-    {
-      id: '10',
-      orderNumber: 'ORD-2024-010',
-      customerName: 'Maria Rodriguez',
-      productName: 'Desk Organizer',
-      orderValue: 1499,
-      commission: 149.9,
-      commissionRate: 10,
-      date: '2024-01-06',
-      status: 'delivered',
-      paymentStatus: 'paid',
-      channel: 'instagram',
-    },
-    {
-      id: '11',
-      orderNumber: 'ORD-2024-011',
-      customerName: 'James Lee',
-      productName: 'Cable Management Kit',
-      orderValue: 999,
-      commission: 99.9,
-      commissionRate: 10,
-      date: '2024-01-05',
-      status: 'shipped',
-      paymentStatus: 'paid',
-      channel: 'youtube',
-    },
-    {
-      id: '12',
-      orderNumber: 'ORD-2024-012',
-      customerName: 'Jennifer White',
-      productName: 'Ergonomic Chair',
-      orderValue: 24999,
-      commission: 2499.9,
-      commissionRate: 10,
-      date: '2024-01-04',
-      status: 'pending',
-      paymentStatus: 'pending',
-      channel: 'coupon',
-    },
-  ];
+  // Debounce order number filter
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedOrderNumber(orderNumberFilter);
+    }, 500); // 500ms delay
 
-  const sortedOrders = useMemo(() => {
-    return [...mockOrders].sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return sortDirection === 'asc' 
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-      }
-      
-      return 0;
-    });
-  }, [sortField, sortDirection]);
+    return () => clearTimeout(timer);
+  }, [orderNumberFilter]);
 
-  const handleSort = (field: keyof Order) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const filters: { paymentStatus?: string; orderNumber?: string } = {};
+      if (paymentStatusFilter) {
+        filters.paymentStatus = paymentStatusFilter;
+      }
+      if (debouncedOrderNumber) {
+        filters.orderNumber = debouncedOrderNumber;
+      }
+
+      const response = await apiClient.getCreatorOrders({
+        page: currentPage,
+        pageSize: itemsPerPage,
+        filters: Object.keys(filters).length > 0 ? filters : undefined,
+        sort: {
+          by: sortBy,
+          direction: sortDirection,
+        },
+      });
+
+      // Handle cases where orders might not be an array
+      const ordersArray = Array.isArray(response.orders) ? response.orders : [];
+      const mappedOrders = ordersArray.map(mapApiOrderToOrder);
+      setOrders(mappedOrders);
+      setTotalPages(response.pagination?.totalPages || 1);
+      setTotalItems(response.pagination?.total || 0);
+    } catch (error) {
+      showError(error instanceof Error ? error.message : 'Failed to fetch orders');
+      setOrders([]);
+      setTotalPages(1);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Calculate summary data
-  const summaryData = useMemo(() => ({
-    totalOrders: mockOrders.length,
-    totalRevenue: mockOrders.reduce((sum, order) => sum + order.orderValue, 0),
-    totalCommission: mockOrders.reduce((sum, order) => sum + order.commission, 0),
-    averageOrderValue: mockOrders.reduce((sum, order) => sum + order.orderValue, 0) / mockOrders.length,
-  }), [mockOrders]);
+  useEffect(() => {
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, paymentStatusFilter, debouncedOrderNumber, sortBy, sortDirection]);
+
+  const handleSort = (field: keyof Order) => {
+    // Map display fields to API sort fields
+    const sortFieldMap: Record<string, string> = {
+      date: 'createdAt',
+      orderValue: 'totalAmount',
+      commission: 'commissionAmount',
+      orderNumber: 'orderNumber',
+    };
+    
+    const apiSortField = sortFieldMap[field] || 'createdAt';
+    
+    if (sortBy === apiSortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(apiSortField);
+      setSortDirection('desc');
+    }
+    setCurrentPage(1); // Reset to first page on sort change
+  };
+
+  const handleSortChange = (by: string, direction: 'asc' | 'desc') => {
+    setSortBy(by);
+    setSortDirection(direction);
+    setCurrentPage(1); // Reset to first page on sort change
+  };
+
+  const handleClearFilters = () => {
+    setPaymentStatusFilter('');
+    setOrderNumberFilter('');
+    setDebouncedOrderNumber('');
+    setCurrentPage(1);
+  };
+
+  // Calculate summary data from all orders
+  const summaryData = useMemo(() => {
+    if (orders.length === 0) {
+      return {
+        totalOrders: totalItems,
+        totalRevenue: 0,
+        totalCommission: 0,
+        averageOrderValue: 0,
+      };
+    }
+
+    const totalRevenue = orders.reduce((sum, order) => sum + order.orderValue, 0);
+    const totalCommission = orders.reduce((sum, order) => sum + order.commission, 0);
+    
+    return {
+      totalOrders: totalItems,
+      totalRevenue,
+      totalCommission,
+      averageOrderValue: totalRevenue / totalItems || 0,
+    };
+  }, [orders, totalItems]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-foreground">Loading orders...</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Map sortBy back to display field for table
+  const sortFieldMap: Record<string, keyof Order> = {
+    createdAt: 'date',
+    totalAmount: 'orderValue',
+    commissionAmount: 'commission',
+    orderNumber: 'orderNumber',
+  };
+  const displaySortField = sortFieldMap[sortBy] || 'date';
 
   return (
     <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
       <div className="max-w-7xl mx-auto p-6 md:p-12">
         <OrdersHeader />
         <OrderSummaryCards data={summaryData} />
-        <OrdersTable
-          orders={sortedOrders}
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          onSort={handleSort}
-          onPageChange={setCurrentPage}
-        />
+        
+        {totalItems === 0 ? (
+          // Show empty state when no orders
+          <OrdersEmptyState />
+        ) : (
+          <>
+            {/* Filters */}
+            <OrdersFilters
+              paymentStatus={paymentStatusFilter}
+              orderNumber={orderNumberFilter}
+              onPaymentStatusChange={setPaymentStatusFilter}
+              onOrderNumberChange={setOrderNumberFilter}
+              onClearFilters={handleClearFilters}
+            />
+
+            {/* Sort */}
+            <OrdersSort
+              sortBy={sortBy}
+              sortDirection={sortDirection}
+              onSortChange={handleSortChange}
+            />
+
+            {/* Orders Table */}
+            <OrdersTable
+              orders={orders}
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              sortField={displaySortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
     </div>
   );

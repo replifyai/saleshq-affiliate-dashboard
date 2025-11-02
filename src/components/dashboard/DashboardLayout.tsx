@@ -30,6 +30,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       'dashboard': '/dashboard',
       'orders': '/orders',
       'products': '/products',
+      'coupons': '/coupons',
       'profile': '/profile',
       'insights': '/insights',
       'reports': '/reports',

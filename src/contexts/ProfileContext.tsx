@@ -94,6 +94,7 @@ interface ProfileContextType {
     phoneNumberVerified?: boolean;
     [key: string]: any;
   }) => Promise<void>;
+  setInitialProfile: (profile: CreatorProfile, tokens: { idToken: string; refreshToken: string }, completionScore: CompletionScore) => void;
   logout: () => void;
   clearError: () => void;
 }
@@ -110,34 +111,9 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
   const [state, dispatch] = useReducer(profileReducer, initialState);
   const fetchingProfileRef = useRef(false); // Ref to prevent multiple simultaneous fetch calls
 
-  // Load tokens from cookies on mount
-  useEffect(() => {
-    const loadStoredTokens = () => {
-      try {
-        const tokens = getTokens();
-        console.log('ProfileContext - Loading stored tokens:', { hasIdToken: !!tokens.idToken, hasRefreshToken: !!tokens.refreshToken });
-
-        if (tokens.idToken) {
-          console.log('ProfileContext - Setting authentication with stored tokens');
-          dispatch({
-            type: 'SET_AUTHENTICATION',
-            payload: { 
-              profile: null as any, // Will be fetched from API
-              tokens: tokens as { idToken: string; refreshToken: string }, 
-              completionScore: null as any 
-            },
-          });
-        } else {
-          console.log('ProfileContext - No stored tokens found');
-        }
-      } catch (error) {
-        console.error('ProfileContext - Error loading stored tokens:', error);
-        clearTokens();
-      }
-    };
-
-    loadStoredTokens();
-  }, []);
+  // NOTE: We no longer load tokens from cookies on mount
+  // Profile data is now fetched server-side and passed to setInitialProfile
+  // This prevents duplicate fetching and improves performance
 
   // Store tokens in cookies when they change
   useEffect(() => {
@@ -303,6 +279,14 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     dispatch({ type: 'SET_ERROR', payload: null });
   };
 
+  const setInitialProfile = (profile: CreatorProfile, tokens: { idToken: string; refreshToken: string }, completionScore: CompletionScore) => {
+    console.log('ProfileContext - Setting initial profile from server');
+    dispatch({
+      type: 'SET_AUTHENTICATION',
+      payload: { profile, tokens, completionScore },
+    });
+  };
+
   const value: ProfileContextType = {
     state,
     createProfile,
@@ -310,6 +294,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     verifyOtp,
     fetchProfile,
     updateProfile,
+    setInitialProfile,
     logout,
     clearError,
   };

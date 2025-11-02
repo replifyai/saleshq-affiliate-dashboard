@@ -14,6 +14,11 @@ const Pagination: React.FC<PaginationProps> = ({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getVisiblePages = () => {
+    // Handle single page case
+    if (totalPages <= 1) {
+      return [1];
+    }
+
     const delta = 2;
     const range = [];
     const rangeWithDots = [];
@@ -32,7 +37,8 @@ const Pagination: React.FC<PaginationProps> = ({
 
     if (currentPage + delta < totalPages - 1) {
       rangeWithDots.push('...', totalPages);
-    } else {
+    } else if (totalPages > 1) {
+      // Only add totalPages if it's different from 1
       rangeWithDots.push(totalPages);
     }
 

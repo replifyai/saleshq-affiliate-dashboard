@@ -14,12 +14,16 @@ interface ShareLinkSectionProps {
 }
 
 const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
-  shareUrl = 'https://myfrido.com',
-  referralCode = 'AFF123',
+  shareUrl: propShareUrl,
+  referralCode: propReferralCode,
   className,
 }) => {
   const { showSuccess } = useSnackbar();
   const { state } = useProfile();
+
+  // Use referral code from profile, fallback to prop or placeholder
+  const referralCode = state.profile?.uniqueReferralCode || propReferralCode || 'Loading...';
+  const shareUrl = propShareUrl || `https://myfrido.com?ref=${referralCode}`;
 
   const completion = state.completionScore;
   const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);
