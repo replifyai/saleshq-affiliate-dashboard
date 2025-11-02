@@ -77,7 +77,7 @@ const mockData: AnalyticsData[] = generateHistoricalData(90); // Last 90 days fo
 
 const AnalyticsChart: React.FC<{ data: AnalyticsData[] }> = ({ data }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [visibleCount, setVisibleCount] = React.useState(14); // Show 14 days by default
+  const [visibleCount] = React.useState(14); // Show 14 days by default
   const [chartKey, setChartKey] = React.useState(0);
   
   // Prepare chart data with all dates visible
@@ -125,7 +125,8 @@ const AnalyticsChart: React.FC<{ data: AnalyticsData[] }> = ({ data }) => {
         yAxisID: 'y1',
       },
     ],
-  }), [visibleData, currentIndex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [visibleData]);
 
   const options: ChartOptions<'bar'> = React.useMemo(() => ({
     responsive: true,
@@ -181,6 +182,7 @@ const AnalyticsChart: React.FC<{ data: AnalyticsData[] }> = ({ data }) => {
           },
           maxRotation: 0,
           minRotation: 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           callback: function(value: any, index: number) {
             if (index >= 0 && index < visibleData.length) {
               return formatLabel(visibleData[index].date);

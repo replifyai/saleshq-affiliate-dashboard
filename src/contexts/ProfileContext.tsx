@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { CreatorProfile, VerifyOtpVerified, CompletionScore, SocialMediaHandle } from '@/types/api';
+import { CreatorProfile, CompletionScore, SocialMediaHandle } from '@/types/api';
 import apiClient from '@/services/apiClient';
-import { setTokens, getTokens, clearTokens } from '@/lib/cookies';
+import { setTokens, clearTokens } from '@/lib/cookies';
 
 // Context state interface
 interface ProfileState {

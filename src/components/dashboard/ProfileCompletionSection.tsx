@@ -91,7 +91,17 @@ const StepItem: React.FC<StepItemProps> = ({ step, isCompleted }) => {
 
 export default function ProfileCompletionSection() {
   const { state } = useProfile();
-  const { completionScore, profile } = state;
+  const { completionScore } = state;
+
+  // Auto-expand if there are remaining steps, collapse if complete
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Update isExpanded when leftCount changes
+  useEffect(() => {
+    if (completionScore) {
+      setIsExpanded(completionScore.leftCount > 0);
+    }
+  }, [completionScore]);
 
   if (!completionScore) {
     return null;
@@ -101,14 +111,6 @@ export default function ProfileCompletionSection() {
   const totalSteps = completedCount + leftCount;
   const completionPercentage = totalSteps > 0 ? Math.round((completedCount / totalSteps) * 100) : 0;
   const isFullyCompleted = completionPercentage === 100;
-
-  // Auto-expand if there are remaining steps, collapse if complete
-  const [isExpanded, setIsExpanded] = useState(leftCount > 0);
-
-  // Update isExpanded when leftCount changes
-  useEffect(() => {
-    setIsExpanded(leftCount > 0);
-  }, [leftCount]);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
@@ -326,7 +328,7 @@ export default function ProfileCompletionSection() {
             {isFullyCompleted && (
               <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 rounded-xl border border-green-500/20">
                 <p className="text-sm text-foreground/80 text-center">
-                  ✨ <span className="font-medium">Awesome!</span> Your profile is fully set up. You're ready to maximize your earnings!
+                  ✨ <span className="font-medium">Awesome!</span> Your profile is fully set up. You&apos;re ready to maximize your earnings!
                 </p>
               </div>
             )}

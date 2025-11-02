@@ -13,7 +13,6 @@ import {
   ProductDetailModal,
   PerformanceChartModal,
   Product,
-  Category,
   SummaryCard as SummaryCardType
 } from '@/components/products';
 import { mockProducts, mockCategories } from '@/components/products/mockData';
@@ -99,7 +98,7 @@ const ProductsPage: React.FC = () => {
       showSuccess(`Affiliate link for "${productName}" copied to clipboard!`, {
         duration: 3000
       });
-    } catch (error) {
+    } catch {
       showError('Failed to copy link to clipboard. Please try again.', {
         duration: 3000
       });

@@ -37,11 +37,11 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
   isOpen, 
   onClose 
 }) => {
-  if (!product || !isOpen || !product.salesData) return null;
-
   const [selectedMetric, setSelectedMetric] = useState<'sales' | 'clicks' | 'conversions'>('sales');
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
+
+  if (!product || !isOpen || !product.salesData) return null;
 
   const getFilteredData = () => {
     const data = product.salesData || [];
@@ -130,9 +130,11 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
         cornerRadius: 8,
         displayColors: false,
         callbacks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           title: function(context: any) {
             return context[0].label;
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           label: function(context: any) {
             const value = context.parsed.y;
             return selectedMetric === 'sales' 
@@ -165,6 +167,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
           font: {
             size: 12
           },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           callback: function(value: any) {
             return selectedMetric === 'sales' 
               ? `₹${value.toLocaleString()}`

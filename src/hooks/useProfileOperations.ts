@@ -1,5 +1,5 @@
 import { useProfile } from '@/contexts/ProfileContext';
-import { CreatorProfile, SocialMediaHandle } from '@/types/api';
+import { SocialMediaHandle } from '@/types/api';
 
 // Custom hook for profile operations
 export function useProfileOperations() {

@@ -27,7 +27,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   const featureConfig = getFeatureConfig();
   
   // Profile operations and snackbar
-  const { sendOtp, verifyOtp, isLoading, error, clearError } = useProfileOperations();
+  const { sendOtp, verifyOtp } = useProfileOperations();
   const { showSnackbar } = useSnackbar();
 
   const startCountdown = () => {
@@ -177,7 +177,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                 />
                 {mobileNumber && mobileNumber.length === 10 && (
                   <p className="text-xs text-secondary -mt-2">
-                    We'll send OTP to +91 {mobileNumber}
+                    We&apos;ll send OTP to +91 {mobileNumber}
                   </p>
                 )}
                 
@@ -250,7 +250,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full bg-primary-gradient text-white font-bold text-lg py-4"
+                  className="w-full bg-primary-gradient text-black font-bold text-lg py-4"
                   disabled={otp.length !== featureConfig.auth.otpLength || isVerifying}
                 >
                   {isVerifying ? 'Verifying...' : contentConfig.auth.login.verifyText}

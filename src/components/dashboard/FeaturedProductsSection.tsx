@@ -86,19 +86,19 @@ const CustomRightArrow = ({ onClick }: { onClick?: () => void }) => (
   </button>
 );
 
-// Custom Dot Component
-const CustomDot = ({ onClick, active }: { onClick?: () => void; active?: boolean }) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      "w-3 h-3 rounded-full transition-all duration-300 mx-1",
-      active 
-        ? "bg-primary scale-125" 
-        : "bg-primary/30 hover:bg-primary/50"
-    )}
-    aria-label={`Go to slide ${active ? '(current)' : ''}`}
-  />
-);
+// Custom Dot Component - currently unused but kept for future use
+// const CustomDot = ({ onClick, active }: { onClick?: () => void; active?: boolean }) => (
+//   <button
+//     onClick={onClick}
+//     className={cn(
+//       "w-3 h-3 rounded-full transition-all duration-300 mx-1",
+//       active 
+//         ? "bg-primary scale-125" 
+//         : "bg-primary/30 hover:bg-primary/50"
+//     )}
+//     aria-label={`Go to slide ${active ? '(current)' : ''}`}
+//   />
+// );
 
 interface FeaturedProductsSectionProps {
   products?: Product[];

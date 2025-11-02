@@ -135,7 +135,7 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
             )}
           </div>
           {approved === 'pending' && (
-            <p className="text-xs text-muted-foreground mt-1">Your account is under review. You'll be notified once approved.</p>
+            <p className="text-xs text-muted-foreground mt-1">Your account is under review. You&apos;ll be notified once approved.</p>
           )}
           {approved === 'rejected' && (
             <p className="text-xs text-muted-foreground mt-1">Your account application was rejected. Please contact support for more information.</p>

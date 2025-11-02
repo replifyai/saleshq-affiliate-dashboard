@@ -10,7 +10,7 @@ const OrdersEmptyState: React.FC = () => {
         </div>
         <h3 className="text-2xl font-semibold text-foreground mb-2">No Orders Yet</h3>
         <p className="text-muted-foreground max-w-md">
-          You haven't received any orders yet. Share your coupon codes and referral links to start earning commissions!
+          You haven&apos;t received any orders yet. Share your coupon codes and referral links to start earning commissions!
         </p>
       </div>
     </div>

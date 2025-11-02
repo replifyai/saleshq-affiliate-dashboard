@@ -46,7 +46,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = ({
       
       <select
         value={sortBy}
-        onChange={(e) => setSortBy(e.target.value as any)}
+        onChange={(e) => setSortBy(e.target.value as 'commission' | 'sales' | 'newest')}
         className="px-4 py-2 bg-card border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <option value="commission">Sort by: Highest Commission</option>

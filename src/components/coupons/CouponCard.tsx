@@ -26,7 +26,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
       setCopied(true);
       showSuccess('Coupon code copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       showError('Failed to copy coupon code. Please try again.');
     }
   };

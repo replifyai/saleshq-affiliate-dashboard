@@ -1,5 +1,4 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { Order } from './types';
 import StatusBadge from './StatusBadge';

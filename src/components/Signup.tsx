@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Button from './common/Button';
 import TextField from './common/TextField';
 import { cn } from '@/lib/utils';
-import { getContentConfig, getFeatureConfig, formatContent } from '@/lib/constants';
+import { getContentConfig, getFeatureConfig } from '@/lib/constants';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
 
@@ -27,7 +27,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const featureConfig = getFeatureConfig();
   
   // Profile operations and snackbar
-  const { createProfile, sendOtp, verifyOtp, isLoading, error, clearError } = useProfileOperations();
+  const { createProfile, sendOtp, verifyOtp } = useProfileOperations();
   const { showSnackbar } = useSnackbar();
 
   const startCountdown = () => {
@@ -191,7 +191,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                 />
                 {mobileNumber && mobileNumber.length === 10 && (
                   <p className="text-xs text-secondary -mt-2">
-                    We'll send OTP to +91 {mobileNumber}
+                    We&apos;ll send OTP to +91 {mobileNumber}
                   </p>
                 )}
 

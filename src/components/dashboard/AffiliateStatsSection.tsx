@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { useSnackbar } from '@/components/snackbar';
 import { Tooltip } from 'react-tooltip';
 import { useProfile } from '@/contexts/ProfileContext';
 import LockOverlay from '@/components/LockOverlay';

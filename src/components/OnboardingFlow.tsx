@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { useRouter } from 'next/navigation';
 import Button from './common/Button';
 import TextField from './common/TextField';
-import { cn } from '@/lib/utils';
 import { useProfile } from '@/contexts/ProfileContext';
 import { SocialMediaHandle } from '@/types/api';
 
@@ -207,9 +206,9 @@ const CreatorNameStep: React.FC<{
         <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
           <span className="text-2xl">👤</span>
         </div>
-        <h2 className="text-3xl font-bold text-foreground">What's your creator name?</h2>
+        <h2 className="text-3xl font-bold text-foreground">What&apos;s your creator name?</h2>
         <p className="text-lg text-muted-foreground">
-          This is how you'll be known in our affiliate program
+          This is how you&apos;ll be known in our affiliate program
         </p>
       </div>
 
@@ -280,9 +279,9 @@ const EmailStep: React.FC<{
         <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
           <span className="text-2xl">📧</span>
         </div>
-        <h2 className="text-3xl font-bold text-foreground">What's your email address?</h2>
+        <h2 className="text-3xl font-bold text-foreground">What&apos;s your email address?</h2>
         <p className="text-lg text-muted-foreground">
-          We'll use this to send you important updates and earnings reports
+          We&apos;ll use this to send you important updates and earnings reports
         </p>
       </div>
 

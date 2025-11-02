@@ -19,7 +19,7 @@ const PremiumBanner: React.FC<PremiumBannerProps> = ({ className }) => {
       <div className="relative z-10 flex items-center justify-between">
         <div className="space-y-2 text-white">
           <h3 className="text-2xl font-bold">Meet Premium</h3>
-          <p className="text-sm opacity-90">Increase your company's<br />annual revenue</p>
+          <p className="text-sm opacity-90">Increase your company&apos;s<br />annual revenue</p>
         </div>
         
         <div className="flex items-center space-x-4">

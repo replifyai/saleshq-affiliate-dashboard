@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { SummaryCard } from './types';
 
-interface SummaryCardProps extends SummaryCard {}
+type SummaryCardProps = SummaryCard;
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, subtitle, icon, trend, trendValue }) => (
   <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px]">

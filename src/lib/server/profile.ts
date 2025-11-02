@@ -61,21 +61,7 @@ export async function fetchCreatorProfileServer(): Promise<{
       const refreshResult = await refreshIdToken(refreshToken);
       if (refreshResult) {
         idToken = refreshResult.idToken;
-        // Set new tokens in cookies
-        cookieStore.set('idToken', refreshResult.idToken, {
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          httpOnly: false,
-          path: '/',
-        });
-        cookieStore.set('refreshToken', refreshResult.refreshToken, {
-          maxAge: 60 * 60 * 24 * 7,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          httpOnly: false,
-          path: '/',
-        });
+        // Note: Cookies will be set on client side via the returned tokens
       } else {
         return { profile: null, tokens: null, error: 'Token refresh failed' };
       }
@@ -104,21 +90,7 @@ export async function fetchCreatorProfileServer(): Promise<{
         const refreshResult = await refreshIdToken(refreshToken);
         if (refreshResult) {
           idToken = refreshResult.idToken;
-          // Set new tokens in cookies
-          cookieStore.set('idToken', refreshResult.idToken, {
-            maxAge: 60 * 60 * 24 * 7,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            httpOnly: false,
-            path: '/',
-          });
-          cookieStore.set('refreshToken', refreshResult.refreshToken, {
-            maxAge: 60 * 60 * 24 * 7,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            httpOnly: false,
-            path: '/',
-          });
+          // Note: Cookies will be set on client side via the returned tokens
 
           // Retry fetch with new token
           const retryResponse = await fetch(`${FIREBASE_FUNCTION_URL}/getCreatorProfile`, {

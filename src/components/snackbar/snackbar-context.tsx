@@ -63,6 +63,7 @@ export function SnackbarProvider({
         removeMessage(id);
       }, newMessage.duration);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maxMessages]);
 
   const removeMessage = useCallback((id: string) => {

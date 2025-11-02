@@ -31,6 +31,7 @@ export default function CouponsPage() {
 
   useEffect(() => {
     fetchCoupons();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const sortedCoupons = useMemo(() => {
