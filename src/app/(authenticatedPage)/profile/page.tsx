@@ -60,7 +60,7 @@ export default function ProfilePage() {
         socialMedia: convertApiSocialMediaToUI(creatorProfile.socialMediaHandles),
         commissionRate: 15, // Default value, will come from backend later
         totalEarnings: 0, // Will come from backend later
-        affiliateCode: `CREATOR${creatorProfile.id.slice(0, 6).toUpperCase()}`, // Generated
+        affiliateCode: creatorProfile.uniqueReferralCode || `CREATOR${creatorProfile.id.slice(0, 6).toUpperCase()}`, // From API with fallback
       });
     }
   }, [state.profile]);
@@ -127,7 +127,7 @@ export default function ProfilePage() {
         socialMedia: convertApiSocialMediaToUI(creatorProfile.socialMediaHandles),
         commissionRate: 15,
         totalEarnings: 0,
-        affiliateCode: `CREATOR${creatorProfile.id.slice(0, 6).toUpperCase()}`,
+        affiliateCode: creatorProfile.uniqueReferralCode || `CREATOR${creatorProfile.id.slice(0, 6).toUpperCase()}`, // From API with fallback
       });
     }
   };

@@ -4,8 +4,6 @@ import React from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import {
   AffiliateStatsSection,
-  AnalyticsOverviewSection,
-  FeaturedProductsSection,
   ShareLinkSection,
   ProfileCompletionSection,
 } from '@/components/dashboard';
@@ -62,19 +60,18 @@ export default function DashboardPage() {
 
         {/* Affiliate Stats Section */}
         <AffiliateStatsSection
-          totalEarnings="₹1,24,300"
-          monthlyEarnings="₹18,900"
-          conversionRate="4.8%"
-          totalClicks="12,340"
-          totalSales="238"
-          nextPayout="₹0"
+          totalOrders="238"
+          totalCoupons="45"
+          totalEarningsTillDate="₹1,24,300"
+          averageOrderValue="₹2,150"
+          averageEarningPerOrder="₹522"
         />
 
         {/* Analytics Overview */}
-        <AnalyticsOverviewSection />
+        {/* <AnalyticsOverviewSection /> */}
 
         {/* Featured Products */}
-        <FeaturedProductsSection />
+        {/* <FeaturedProductsSection /> */}
       </div>
     </div>
   );

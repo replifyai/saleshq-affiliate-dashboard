@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
 import { apiClient } from '@/services/apiClient';
 import { CouponValue } from '@/types/api';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
@@ -29,15 +30,20 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
     appliesOnEachItem: false,
     usageLimit: '0',
     usesPerOrderLimit: '1',
-    startsAt: '',
-    endsAt: '',
+    startsAt: new Date() as Date | null,
+    endsAt: null as Date | null,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.code || !formData.startsAt || !formData.endsAt) {
+    if (!formData.title || !formData.code || !formData.startsAt) {
       showError('Please fill in all required fields');
+      return;
+    }
+
+    if (formData.endsAt && formData.startsAt >= formData.endsAt) {
+      showError('End date must be after start date');
       return;
     }
 
@@ -73,16 +79,17 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
 
     setIsSubmitting(true);
     try {
+      const parsedUsageLimit = parseInt(formData.usageLimit);
       await apiClient.createCouponForCreator({
         title: formData.title,
         code: formData.code,
         description: formData.description,
         value: couponValue,
-        usageLimit: parseInt(formData.usageLimit) || 0,
+        usageLimit: (isNaN(parsedUsageLimit) || parsedUsageLimit === 0) ? null : parsedUsageLimit,
         usesPerOrderLimit: parseInt(formData.usesPerOrderLimit) || 1,
         itemsSelection: {},
-        startsAt: new Date(formData.startsAt).toISOString(),
-        endsAt: new Date(formData.endsAt).toISOString(),
+        startsAt: formData.startsAt.toISOString(),
+        endsAt: formData.endsAt ? formData.endsAt.toISOString() : null,
       });
 
       showSuccess('Coupon created successfully! It will be reviewed by admin before activation.');
@@ -99,8 +106,8 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
         appliesOnEachItem: false,
         usageLimit: '0',
         usesPerOrderLimit: '1',
-        startsAt: '',
-        endsAt: '',
+        startsAt: new Date(),
+        endsAt: null,
       });
       setDiscountType('percentage');
     } catch (error) {
@@ -292,25 +299,36 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
                 <label className="block text-xs font-medium text-foreground">
                   Start Date <span className="text-destructive">*</span>
                 </label>
-                <input
-                  type="datetime-local"
-                  value={formData.startsAt}
-                  onChange={(e) => setFormData({ ...formData, startsAt: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 text-sm rounded-lg border-2 border-border bg-card text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-20 transition-all"
+                <DatePicker
+                  selected={formData.startsAt}
+                  onChange={(date: Date | null) => setFormData({ ...formData, startsAt: date ?? formData.startsAt })}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  placeholderText="Select start date and time"
+                  wrapperClassName="w-full"
+                  className="w-full"
+                  minDate={new Date()}
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-medium text-foreground">
-                  End Date <span className="text-destructive">*</span>
+                  End Date (Optional - leave empty for no expiry)
                 </label>
-                <input
-                  type="datetime-local"
-                  value={formData.endsAt}
-                  onChange={(e) => setFormData({ ...formData, endsAt: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 text-sm rounded-lg border-2 border-border bg-card text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-20 transition-all"
+                <DatePicker
+                  selected={formData.endsAt}
+                  onChange={(date: Date | null) => setFormData({ ...formData, endsAt: date })}
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  placeholderText="Select end date and time (optional)"
+                  wrapperClassName="w-full"
+                  className="w-full"
+                  minDate={formData.startsAt || new Date()}
+                  isClearable
                 />
               </div>
             </div>

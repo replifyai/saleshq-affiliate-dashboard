@@ -55,22 +55,20 @@ const StatItem: React.FC<StatItemProps> = ({ label, value, showCopy, onCopy, too
 };
 
 interface AffiliateStatsSectionProps {
-  totalEarnings?: string;
-  monthlyEarnings?: string;
-  conversionRate?: string;
-  totalClicks?: string;
-  totalSales?: string;
-  nextPayout?: string;
+  totalOrders?: string;
+  totalCoupons?: string;
+  totalEarningsTillDate?: string;
+  averageOrderValue?: string;
+  averageEarningPerOrder?: string;
   className?: string;
 }
 
 const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
-  totalEarnings = '₹1,24,300',
-  monthlyEarnings = '₹18,900',
-  conversionRate = '4.8%',
-  totalClicks = '12,340',
-  totalSales = '238',
-  nextPayout = '₹0',
+  totalOrders = '0',
+  totalCoupons = '0',
+  totalEarningsTillDate = '₹0',
+  averageOrderValue = '₹0',
+  averageEarningPerOrder = '₹0',
   className,
 }) => {
 	const { state } = useProfile();
@@ -99,48 +97,42 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <StatItem
-              label="Total Earnings"
-              value={totalEarnings}
+              label="Total Orders"
+              value={totalOrders}
+              tooltip="Total number of orders placed through your affiliate links"
+            />
+            <StatItem 
+              label="Total Coupons"
+              value={totalCoupons}
+              tooltip="Total number of coupons created and distributed"
+            />
+            <StatItem 
+              label="Total Earnings Till Date"
+              value={totalEarningsTillDate}
               tooltip="Total amount earned from all affiliate commissions since joining the program"
             />
             <StatItem 
-              label="This Month's Earnings"
-              value={monthlyEarnings}
-              tooltip="Commission earned in the current calendar month from affiliate sales"
+              label="Average Order Value"
+              value={averageOrderValue}
+              tooltip="Average value of orders placed through your affiliate links"
             />
             <StatItem 
-              label="Conversion Rate"
-              value={conversionRate}
-              tooltip="Percentage of visitors who clicked your affiliate links and made a purchase"
-            />
-            <StatItem 
-              label="Total Clicks"
-              value={totalClicks}
-              tooltip="Total number of clicks on your affiliate links across all channels"
-            />
-            <StatItem 
-              label="Total Sales"
-              value={totalSales}
-              tooltip="Total number of purchases made through your affiliate links"
-            />
-            <StatItem 
-              label="Next Payout"
-              value={nextPayout}
-              tooltip="Amount scheduled to be paid in the next commission payout cycle"
+              label="Average Earning per Order"
+              value={averageEarningPerOrder}
+              tooltip="Average commission earned per order from your affiliate links"
             />
           </div>
         </div>
       </div>
 
       {/* Tooltips */}
-      <Tooltip id="tooltip-total-earnings" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-this-month's-earnings" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-conversion-rate" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-total-clicks" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-total-sales" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-next-payout" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-orders" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-coupons" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-earnings-till-date" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-average-order-value" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-average-earning-per-order" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
 
     </div>
   );

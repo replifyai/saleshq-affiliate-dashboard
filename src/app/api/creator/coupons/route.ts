@@ -27,7 +27,7 @@ async function callFirebaseFunctionWithAuth(endpoint: string, authToken: string,
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || 'Firebase function call failed');
+    throw new Error(errorData.error || 'Firebase function call failed');
   }
 
   return response.json();

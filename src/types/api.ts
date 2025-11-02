@@ -105,7 +105,7 @@ export interface Coupon {
   code: string;
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'EXPIRED';
   startsAt: string;
-  endsAt: string;
+  endsAt: string | null;
   value: CouponValue;
   usageLimit: number;
   usesPerOrderLimit: number;
@@ -126,12 +126,12 @@ export interface CreateCouponForCreatorRequest {
   title: string;
   code: string;
   value: CouponValue;
-  usageLimit: number;
+  usageLimit: number | null;
   usesPerOrderLimit: number;
   itemsSelection: CouponItemsSelection;
   description: string;
   startsAt: string;
-  endsAt: string;
+  endsAt: string | null;
 }
 
 export interface CreateCouponForCreatorResponse {

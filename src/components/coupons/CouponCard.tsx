@@ -40,16 +40,21 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
 
   return (
     <div className="bg-card rounded-2xl border border-border p-6 hover:border-primary/50 transition-all duration-300">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-foreground mb-1">{coupon.title}</h3>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <h3 className="text-xl font-bold text-foreground flex-1 min-w-0">{coupon.title}</h3>
+            <div className="flex-shrink-0 mt-0.5">
+              <CouponStatusBadge status={coupon.status} />
+            </div>
+          </div>
           <div className="flex items-center gap-2 mb-2">
-            <Hash className="w-4 h-4 text-muted-foreground" />
+            <Hash className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <code className="text-lg font-mono font-bold text-primary">{coupon.code}</code>
             <button
               onClick={handleCopyCode}
               className={cn(
-                'p-1.5 rounded-lg transition-all duration-200 hover:bg-primary/10 active:scale-95',
+                'p-1.5 rounded-lg transition-all duration-200 hover:bg-primary/10 active:scale-95 flex-shrink-0',
                 copied ? 'text-success' : 'text-muted-foreground hover:text-primary'
               )}
               aria-label="Copy coupon code"
@@ -66,7 +71,6 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
             <p className="text-sm text-muted-foreground mb-3">{coupon.description}</p>
           )}
         </div>
-        <CouponStatusBadge status={coupon.status} />
       </div>
 
       <div className="mb-4 space-y-3">
@@ -89,10 +93,17 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
           <Calendar className="w-3 h-3 flex-shrink-0" />
           <span className="truncate">Starts: {new Date(coupon.startsAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
         </div>
-        <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
-          <Calendar className="w-3 h-3 flex-shrink-0" />
-          <span className="truncate">Ends: {new Date(coupon.endsAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-        </div>
+        {coupon.endsAt ? (
+          <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">Ends: {new Date(coupon.endsAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 min-w-0 flex-shrink-0">
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">No expiry</span>
+          </div>
+        )}
       </div>
 
       {isPending && (

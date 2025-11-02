@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
-import { Package, DollarSign, Target, Sparkles } from 'lucide-react';
+import { Package, DollarSign, Target, Sparkles, Clock } from 'lucide-react';
 import {
   SummaryCard,
   ProductCard,
@@ -110,8 +110,23 @@ const ProductsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Notification Banner */}
+    <div className="relative w-full min-h-screen bg-background">
+      {/* Coming Soon Overlay - Only covers products page content */}
+      <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
+        <div className="flex flex-col items-center text-center space-y-4 p-6">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Clock className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-semibold text-foreground">Coming Soon</h2>
+          <p className="text-sm text-muted-foreground max-w-md">
+            Our products page is currently under development. Check back soon for exciting updates!
+          </p>
+        </div>
+      </div>
+
+      {/* Content behind overlay */}
+      <div className="opacity-0 pointer-events-none hidden">
+        {/* Notification Banner */}
       <div className="bg-primary/10 border-l-4 border-primary p-4 mb-6">
         <div className="flex items-center space-x-2">
           <div className="text-primary text-lg">🪄</div>
@@ -163,6 +178,7 @@ const ProductsPage: React.FC = () => {
 
         {/* Dynamic Insights */}
         <DynamicInsights />
+      </div>
       </div>
 
       {/* Product Detail Modal */}
