@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
 import { Package, DollarSign, Target, Sparkles, Clock } from 'lucide-react';
 import {

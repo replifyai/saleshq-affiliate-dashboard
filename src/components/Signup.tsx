@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react';
 import Button from './common/Button';
 import TextField from './common/TextField';
 import { cn } from '@/lib/utils';
-import { getContentConfig, getFeatureConfig } from '@/lib/constants';
+import { getFeatureConfig } from '@/lib/constants';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
 
@@ -24,7 +24,6 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
   
   // Get configuration
-  const contentConfig = getContentConfig();
   const featureConfig = getFeatureConfig();
   
   // Profile operations and snackbar

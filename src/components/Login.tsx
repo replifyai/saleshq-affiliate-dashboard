@@ -5,7 +5,7 @@ import Button from './common/Button';
 import TextField from './common/TextField';
 import Toggle from './common/Toggle';
 import { cn } from '@/lib/utils';
-import { getContentConfig, getFeatureConfig, formatContent } from '@/lib/constants';
+import { getContentConfig, getFeatureConfig } from '@/lib/constants';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
 

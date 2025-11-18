@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreatorOrder } from '@/types/api';
+import { CreatorOrder, OrderLineItem } from '@/types/api';
 import PaymentStatusBadge from './PaymentStatusBadge';
 import ChannelBadge from './ChannelBadge';
 
@@ -170,7 +170,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
 
             {/* Compact list on mobile */}
             <div className="space-y-2 sm:hidden text-xs">
-              {order.lineItems?.map((item: any) => {
+            {order.lineItems?.map((item: OrderLineItem) => {
                 const price = parseFloat(item.price ?? '0') || 0;
                 const quantity = item.quantity ?? 1;
                 const lineTotal = price * quantity;
@@ -212,7 +212,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
                   </tr>
                 </thead>
                 <tbody>
-                  {order.lineItems?.map((item: any) => {
+                  {order.lineItems?.map((item: OrderLineItem) => {
                     const price = parseFloat(item.price ?? '0') || 0;
                     const quantity = item.quantity ?? 1;
                     const lineTotal = price * quantity;
