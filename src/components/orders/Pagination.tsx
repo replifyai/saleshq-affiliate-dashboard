@@ -45,52 +45,65 @@ const Pagination: React.FC<PaginationProps> = ({
     return rangeWithDots;
   };
 
+  // If there are no items, don't render pagination
+  if (totalItems === 0 || totalPages <= 1) {
+    return null;
+  }
+
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-card/50 border-t border-border/50">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex flex-col gap-2 sm:gap-3 items-stretch sm:items-center sm:flex-row sm:justify-between px-3 sm:px-4 py-3 sm:py-4 bg-card/50 border-t border-border/50 rounded-b-3xl">
+      <div className="text-[11px] sm:text-sm text-muted-foreground text-center sm:text-left">
         Showing {startItem} to {endItem} of {totalItems} orders
       </div>
-      
-      <div className="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-1"
-        >
-          Previous
-        </Button>
-        
-        <div className="flex items-center space-x-1">
-          {getVisiblePages().map((page, index) => (
-            <button
-              key={index}
-              onClick={() => typeof page === 'number' && onPageChange(page)}
-              disabled={page === '...'}
-              className={cn(
-                'px-3 py-1 text-sm rounded-lg transition-colors',
-                page === currentPage
-                  ? 'bg-primary text-white'
-                  : page === '...'
-                  ? 'text-muted-foreground cursor-default'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/20'
-              )}
-            >
-              {page}
-            </button>
-          ))}
+
+      <div className="flex flex-col xs:flex-row items-center justify-center gap-1.5 sm:gap-2">
+        <div className="flex items-center justify-center gap-1 sm:gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-2.5 sm:px-3 py-1 text-xs sm:text-sm"
+          >
+            Prev
+          </Button>
+
+          {/* Compact info on very small screens */}
+          <div className="flex sm:hidden items-center justify-center px-1 text-[11px] text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </div>
+
+          {/* Numbered pages on sm+ screens */}
+          <div className="hidden sm:flex items-center space-x-1">
+            {getVisiblePages().map((page, index) => (
+              <button
+                key={index}
+                onClick={() => typeof page === 'number' && onPageChange(page)}
+                disabled={page === '...'}
+                className={cn(
+                  'px-3 py-1 text-sm rounded-lg transition-colors',
+                  page === currentPage
+                    ? 'bg-primary text-white'
+                    : page === '...'
+                    ? 'text-muted-foreground cursor-default'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/20'
+                )}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-2.5 sm:px-3 py-1 text-xs sm:text-sm"
+          >
+            Next
+          </Button>
         </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-1"
-        >
-          Next
-        </Button>
       </div>
     </div>
   );

@@ -48,10 +48,10 @@ export default function CouponsPage() {
   if (isLoading) {
     return (
       <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-foreground">Loading coupons...</h2>
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-2">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mx-auto mb-2 sm:mb-4"></div>
+            <h2 className="text-base sm:text-xl font-semibold text-foreground">Loading coupons...</h2>
           </div>
         </div>
       </div>
@@ -59,15 +59,15 @@ export default function CouponsPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
-      <div className="max-w-7xl mx-auto p-6 md:p-12">
+    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-none md:rounded-3xl min-h-[100dvh] overflow-y-auto">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-6 sm:space-y-8">
         <CouponsHeader onCreateClick={() => setIsCreateModalOpen(true)} />
 
         {/* Coupons Grid */}
         {sortedCoupons.length === 0 ? (
           <CouponsEmptyState onCreateClick={() => setIsCreateModalOpen(true)} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {sortedCoupons.map((coupon) => (
               <CouponCard key={coupon.id} coupon={coupon} />
             ))}

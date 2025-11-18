@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
   return (
     <aside
       className={cn(
-        'bg-card flex flex-col h-full',
+        'bg-card flex flex-col h-full max-h-screen z-20 overflow-y-auto',
         className
       )}
     >

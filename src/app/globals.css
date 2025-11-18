@@ -67,11 +67,55 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Global Typography Scale - keep font sizes consistent across the app */
+@layer utilities {
+  /* Body text (default across app) */
+  .text-xs,
+  .text-sm,
+  .text-base {
+    font-size: 0.9375rem; /* ~15px */
+    line-height: 1.5;
+  }
+
+  /* Headings - normalized hierarchy */
+  .text-lg {
+    font-size: 1.125rem; /* ~18px */
+    line-height: 1.5;
+  }
+
+  .text-xl {
+    font-size: 1.25rem; /* ~20px */
+    line-height: 1.4;
+  }
+
+  .text-2xl {
+    font-size: 1.5rem; /* ~24px */
+    line-height: 1.35;
+  }
+
+  .text-3xl {
+    font-size: 1.875rem; /* ~30px */
+    line-height: 1.25;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Optional helper: hide scrollbars on specific containers (not used globally) */
+@media (max-width: 768px) {
+  .scroll-hidden {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scroll-hidden::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
 }
 
 /* Custom Utility Classes */
@@ -342,6 +386,29 @@ html {
   opacity: 0.6;
 }
 
+/* Hide scrollbars only on mobile (while keeping scroll behavior) */
+@media (max-width: 767px) {
+  /* Utility class for specific containers */
+  .scrollbar-hide-mobile {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide-mobile::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Global: hide scrollbars for all scrollable elements on mobile */
+  * {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
 /* React DatePicker Custom Styles */
 .react-datepicker-wrapper {
   width: 100%;
@@ -460,4 +527,15 @@ html {
 .react-datepicker__day--today {
   font-weight: 700;
   border: 1px solid var(--primary) !important;
+}
+
+/* Native select + option dark theme alignment */
+select {
+  background-color: var(--card);
+  color: var(--foreground);
+}
+
+select option {
+  background-color: var(--card);
+  color: var(--foreground);
 }

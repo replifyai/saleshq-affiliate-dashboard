@@ -138,7 +138,16 @@ const OnboardingFlow: React.FC = () => {
       case 2:
         return <EmailStep data={data} setData={setData} onNext={nextStep} onPrev={prevStep} onSkip={skipStep} />;
       case 3:
-        return <SocialHandlesStep data={data} setData={setData} onComplete={handleComplete} onPrev={prevStep} onSkip={skipStep} isSubmitting={isSubmitting} />;
+        return (
+          <SocialHandlesStep
+            data={data}
+            setData={setData}
+            onComplete={handleComplete}
+            onPrev={prevStep}
+            onSkip={skipStep}
+            isSubmitting={isSubmitting}
+          />
+        );
       default:
         return null;
     }
@@ -148,27 +157,62 @@ const OnboardingFlow: React.FC = () => {
     <div ref={containerRef} className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="bg-card border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          {/* Top navigation (back + skip) */}
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-foreground">Complete Your Profile</h1>
-            <div className="text-sm text-muted-foreground">
-              Step {currentStep} of {totalSteps}
-            </div>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <span className="text-lg leading-none">←</span>
+              <span>Back</span>
+            </button>
+            <button
+              type="button"
+              onClick={skipStep}
+              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Skip
+            </button>
           </div>
-          
-          {/* Progress Bar */}
-          <div className="mt-4 w-full bg-muted rounded-full h-2">
-            <div 
-              className="bg-primary-gradient h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            />
+
+          {/* Title + step info + segmented progress */}
+          <div className="mt-4">
+            <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              Profile Setup
+            </p>
+            <div className="mt-1 flex items-baseline justify-between gap-2">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
+                {currentStep === 1
+                  ? 'Tell us about you'
+                  : currentStep === 2
+                  ? 'Add your email'
+                  : 'Connect your socials'}
+              </h1>
+              <span className="text-xs text-muted-foreground">
+                Step {currentStep} of {totalSteps}
+              </span>
+            </div>
+
+            {/* Segmented progress bar */}
+            <div className="mt-4 flex gap-1">
+              {Array.from({ length: totalSteps }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-1 flex-1 rounded-full transition-colors ${
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex items-start justify-center px-4 sm:px-6 py-8 sm:py-12">
+        <div className="w-full max-w-2xl bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
           {renderStep()}
         </div>
       </div>
@@ -201,14 +245,11 @@ const CreatorNameStep: React.FC<{
   };
 
   return (
-    <div ref={stepRef} className="space-y-8">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
-          <span className="text-2xl">👤</span>
-        </div>
-        <h2 className="text-3xl font-bold text-foreground">What&apos;s your creator name?</h2>
-        <p className="text-lg text-muted-foreground">
-          This is how you&apos;ll be known in our affiliate program
+    <div ref={stepRef} className="space-y-6 sm:space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">What&apos;s your creator name?</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          This is how you&apos;ll be known in our affiliate program.
         </p>
       </div>
 
@@ -221,7 +262,7 @@ const CreatorNameStep: React.FC<{
           className="w-full text-lg"
         />
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             onClick={onSkip}
             variant="outline"
@@ -274,14 +315,11 @@ const EmailStep: React.FC<{
   };
 
   return (
-    <div ref={stepRef} className="space-y-8">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
-          <span className="text-2xl">📧</span>
-        </div>
-        <h2 className="text-3xl font-bold text-foreground">What&apos;s your email address?</h2>
-        <p className="text-lg text-muted-foreground">
-          We&apos;ll use this to send you important updates and earnings reports
+    <div ref={stepRef} className="space-y-6 sm:space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">What&apos;s your email address?</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          We&apos;ll use this to send you important updates and earnings reports.
         </p>
       </div>
 
@@ -295,7 +333,7 @@ const EmailStep: React.FC<{
           type="email"
         />
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             onClick={onPrev}
             variant="outline"
@@ -367,14 +405,11 @@ const SocialHandlesStep: React.FC<{
   };
 
   return (
-    <div ref={stepRef} className="space-y-8">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary-gradient rounded-full flex items-center justify-center mx-auto">
-          <span className="text-2xl">📱</span>
-        </div>
-        <h2 className="text-3xl font-bold text-foreground">Add your social media handles</h2>
-        <p className="text-lg text-muted-foreground">
-          Share your social media presence to help us connect with you
+    <div ref={stepRef} className="space-y-6 sm:space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Add your social media handles</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          Share your social media presence to help us connect with you.
         </p>
       </div>
 
@@ -447,7 +482,7 @@ const SocialHandlesStep: React.FC<{
         )}
 
         {/* Navigation */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <Button
             onClick={onPrev}
             variant="outline"

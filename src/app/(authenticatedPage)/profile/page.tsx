@@ -183,10 +183,10 @@ export default function ProfilePage() {
   // Show loading state while fetching profile
   if (state.isLoading || !profile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-muted-foreground">Loading profile...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center space-y-2">
+          <div className="inline-block w-10 h-10 sm:w-12 sm:h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-2 sm:mb-4"></div>
+          <p className="text-sm sm:text-base text-muted-foreground">Loading profile...</p>
         </div>
       </div>
     );
@@ -195,18 +195,18 @@ export default function ProfilePage() {
   // Show error state if profile failed to load
   if (state.error && !profile) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="text-destructive mb-4">
-            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-destructive mb-3 sm:mb-4">
+            <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold mb-2">Failed to Load Profile</h2>
-          <p className="text-muted-foreground mb-4">{state.error}</p>
+          <h2 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Failed to Load Profile</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{state.error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+            className="px-4 py-2 text-sm sm:text-base bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
             Reload Page
           </button>
@@ -217,7 +217,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
         {/* Profile Header */}
         <ProfileHeader
           profile={profile}

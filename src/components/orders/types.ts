@@ -3,7 +3,11 @@ export interface Order {
   orderNumber: string;
   customerName: string;
   productName: string;
+  customerCity?: string;
+  customerCountry?: string;
   orderValue: number;
+  discountAmount?: number;
+  couponCode?: string;
   commission: number;
   commissionRate: number;
   date: string;

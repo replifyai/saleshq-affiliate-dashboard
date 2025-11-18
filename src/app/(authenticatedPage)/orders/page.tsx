@@ -4,13 +4,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { apiClient } from '@/services/apiClient';
 import { CreatorOrder } from '@/types/api';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
-import { OrdersHeader, OrderSummaryCards, OrdersTable, OrdersFilters, OrdersSort, OrdersEmptyState, Order } from '@/components/orders';
+import {
+  OrdersHeader,
+  OrderSummaryCards,
+  OrdersTable,
+  OrdersFilters,
+  OrdersSort,
+  OrdersEmptyState,
+  OrderDetailsModal,
+  Order,
+} from '@/components/orders';
 
 // Helper function to map API order to display order
 const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
   const orderValue = parseFloat(apiOrder.totalAmount) || 0;
   const commissionAmount = parseFloat(apiOrder.commissionAmount) || 0;
   const commissionRateValue = parseFloat(apiOrder.commissionRateValue) || 0;
+  const discountAmount = parseFloat(apiOrder.discountsTotal) || 0;
   
   // Extract product name from line items
   let productName = 'Multiple Items';
@@ -45,15 +55,37 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     status = 'pending';
   }
 
-  // Extract customer name from email (fallback)
-  const customerName = apiOrder.customerEmail?.split('@')[0] || 'Customer';
+  // Extract customer name and location from rawEvent where available
+  const rawCustomer = apiOrder.rawEvent?.customer;
+  const shippingAddress = apiOrder.rawEvent?.shipping_address;
+
+  const firstName =
+    rawCustomer?.first_name ||
+    (apiOrder.customerEmail ? apiOrder.customerEmail.split('@')[0] : '') ||
+    'Customer';
+  const lastName = rawCustomer?.last_name || '';
+  const customerName = `${firstName}${lastName ? ` ${lastName}` : ''}`;
+
+  const customerCity = shippingAddress?.city || undefined;
+  const customerCountry = shippingAddress?.country || undefined;
+
+  // Coupon code shown to creator – prefer attributed coupon, then applied coupons
+  const couponCode =
+    apiOrder.attributedCouponCode ||
+    (Array.isArray(apiOrder.appliedCoupons) && apiOrder.appliedCoupons.length > 0
+      ? apiOrder.appliedCoupons[0]
+      : undefined);
 
   return {
     id: apiOrder.id,
     orderNumber: apiOrder.orderNumber,
     customerName,
     productName,
+    customerCity,
+    customerCountry,
     orderValue,
+    discountAmount,
+    couponCode,
     commission: commissionAmount,
     commissionRate: commissionRateValue,
     date: new Date(apiOrder.createdAt).toISOString().split('T')[0],
@@ -66,6 +98,7 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
 export default function OrdersPage() {
   const { showError } = useSnackbar();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [rawOrders, setRawOrders] = useState<CreatorOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
@@ -80,6 +113,10 @@ export default function OrdersPage() {
   // Sort state
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Details modal state
+  const [selectedOrder, setSelectedOrder] = useState<CreatorOrder | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   // Debounce order number filter
   useEffect(() => {
@@ -115,6 +152,7 @@ export default function OrdersPage() {
       const ordersArray = Array.isArray(response.orders) ? response.orders : [];
       const mappedOrders = ordersArray.map(mapApiOrderToOrder);
       setOrders(mappedOrders);
+      setRawOrders(ordersArray);
       setTotalPages(response.pagination?.totalPages || 1);
       setTotalItems(response.pagination?.total || 0);
     } catch (error) {
@@ -165,6 +203,14 @@ export default function OrdersPage() {
     setCurrentPage(1);
   };
 
+  const handleViewDetails = (orderId: string) => {
+    const fullOrder = rawOrders.find((o) => o.id === orderId);
+    if (fullOrder) {
+      setSelectedOrder(fullOrder);
+      setIsDetailsOpen(true);
+    }
+  };
+
   // Calculate summary data from all orders
   const summaryData = useMemo(() => {
     if (orders.length === 0) {
@@ -189,11 +235,11 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
-        <div className="max-w-7xl mx-auto p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-foreground">Loading orders...</h2>
+      <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto scrollbar-hide-mobile">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-2">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mx-auto mb-2 sm:mb-4"></div>
+            <h2 className="text-base sm:text-xl font-semibold text-foreground">Loading orders...</h2>
           </div>
         </div>
       </div>
@@ -210,8 +256,8 @@ export default function OrdersPage() {
   const displaySortField = sortFieldMap[sortBy] || 'date';
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
-      <div className="max-w-7xl mx-auto p-6 md:p-12">
+    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto scrollbar-hide-mobile">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-6 sm:space-y-8">
         <OrdersHeader />
         <OrderSummaryCards data={summaryData} />
         
@@ -247,9 +293,19 @@ export default function OrdersPage() {
               sortDirection={sortDirection}
               onSort={handleSort}
               onPageChange={setCurrentPage}
+              onViewDetails={handleViewDetails}
             />
           </>
         )}
+
+        <OrderDetailsModal
+          order={selectedOrder}
+          isOpen={isDetailsOpen}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            setSelectedOrder(null);
+          }}
+        />
       </div>
     </div>
   );

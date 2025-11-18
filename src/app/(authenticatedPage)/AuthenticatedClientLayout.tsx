@@ -6,6 +6,7 @@ import { useProfile } from '@/contexts/ProfileContext';
 import LockOverlay from '@/components/LockOverlay';
 import { usePathname } from 'next/navigation';
 import { GetCreatorProfileResponse } from '@/types/api';
+import PendingApproval from '@/components/PendingApproval';
 
 interface AuthenticatedClientLayoutProps {
   children: React.ReactNode;
@@ -30,18 +31,30 @@ export default function AuthenticatedClientLayout({
   }, [initialProfile, initialTokens, state.profile, setInitialProfile]);
 
   const completion = state.completionScore;
-  const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);
-  const completionPercentage = totalSteps > 0 ? Math.round(((completion?.completedCount || 0) / totalSteps) * 100) : 0;
+  const isPendingApproval = state.profile?.approved === 'pending';
+  const isProfileIncomplete = Boolean(
+    state.profile &&
+    completion &&
+    completion.leftCount > 0
+  );
   
   // Pages that should not show the lock overlay
   const pagesThatShouldNotShowLockOverlay = ['/profile', '/dashboard', '/onboarding'];
   const showLockOverlay = Boolean(
     state.isAuthenticated && 
-    state.profile && 
-    completionPercentage < 100 && 
+    isProfileIncomplete &&
     pathname && 
     !pagesThatShouldNotShowLockOverlay.includes(pathname)
   );
+
+  // If creator is pending approval, show a dedicated informative screen and hide other pages
+  if (state.isAuthenticated && isPendingApproval) {
+    return (
+      <DashboardLayout>
+        <PendingApproval />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

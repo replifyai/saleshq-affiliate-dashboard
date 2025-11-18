@@ -22,18 +22,18 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onCancel,
 }) => {
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-6">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-black text-2xl font-bold">
+    <div className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-black text-xl sm:text-2xl font-bold">
             {profile.name.charAt(0)}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{profile.name}</h1>
-            <p className="text-muted-foreground">{profile.email}</p>
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">{profile.name}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">{profile.email}</p>
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-2 sm:space-x-3">
           {!isEditing ? (
             <Button
               onClick={onEdit}

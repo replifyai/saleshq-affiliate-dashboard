@@ -49,28 +49,38 @@ const OrderSummaryCards: React.FC<OrderSummaryCardsProps> = ({ data }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div className="w-full max-w-full overflow-hidden grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
       {cards.map((card, index) => (
-        <div key={index} className="bg-card/80 backdrop-blur-sm rounded-2xl p-4 border border-border/50">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">{card.title}</p>
-              <p className="text-2xl font-bold text-foreground">{card.value}</p>
+        <div
+          key={index}
+          className="bg-card/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-border/50 min-w-0"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[11px] md:text-sm text-muted-foreground truncate">{card.title}</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground truncate">
+                {card.value}
+              </p>
             </div>
-            <div className={cn(
-              'w-10 h-10 rounded-xl flex items-center justify-center',
-              card.color === 'primary' && 'bg-primary/20',
-              card.color === 'success' && 'bg-success/20',
-              card.color === 'accent' && 'bg-accent/20',
-              card.color === 'secondary' && 'bg-primary/20'
-            )}>
-              <card.icon className={cn(
-                'w-5 h-5',
-                card.color === 'primary' && 'text-primary',
-                card.color === 'success' && 'text-success',
-                card.color === 'accent' && 'text-accent',
-                card.color === 'secondary' && 'text-primary'
-              )} />
+            <div
+              className={cn(
+                'flex items-center justify-center rounded-xl flex-shrink-0',
+                'w-8 h-8 md:w-10 md:h-10',
+                card.color === 'primary' && 'bg-primary/20',
+                card.color === 'success' && 'bg-success/20',
+                card.color === 'accent' && 'bg-accent/20',
+                card.color === 'secondary' && 'bg-primary/20'
+              )}
+            >
+              <card.icon
+                className={cn(
+                  'w-4 h-4 md:w-5 md:h-5',
+                  card.color === 'primary' && 'text-primary',
+                  card.color === 'success' && 'text-success',
+                  card.color === 'accent' && 'text-accent',
+                  card.color === 'secondary' && 'text-primary'
+                )}
+              />
             </div>
           </div>
         </div>

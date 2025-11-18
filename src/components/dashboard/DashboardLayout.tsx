@@ -73,7 +73,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Mobile Sidebar Drawer */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-50 lg:hidden"
+          className="fixed inset-0 z-[60] lg:hidden"
           onClick={closeSidebar}
         >
           {/* Backdrop */}
@@ -104,9 +104,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto bg-card">
-        {/* Mobile Header with Hamburger Menu */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-border bg-card">
+      <div className="flex-1 flex flex-col bg-card">
+        {/* Mobile Header with Hamburger Menu (fixed / sticky on mobile) */}
+        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 border-b border-border bg-card">
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-secondary/20 transition-colors"
@@ -116,11 +116,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-lg font-semibold text-foreground">Dashboard</h1>
+          <h1 className="text-base sm:text-lg font-semibold text-foreground">Dashboard</h1>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
-        
-        {children}
+
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );

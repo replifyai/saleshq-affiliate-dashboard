@@ -78,15 +78,15 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
 	const isLocked = completionPercentage < 100;
 
   return (
-    <div className={cn('space-y-8', className)}>
+    <div className={cn('space-y-6 sm:space-y-8', className)}>
       
 
       {/* Stats Section */}
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
-        <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-8 border border-border/50">
+        <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border/50">
           <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Your Performance." roundedClassName="rounded-3xl" />
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-2">Your Performance</h2>
               <p className="text-muted-foreground">Track your affiliate performance trends</p>
@@ -97,7 +97,7 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
             </div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <StatItem
               label="Total Orders"
               value={totalOrders}

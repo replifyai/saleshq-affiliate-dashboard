@@ -57,7 +57,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, isCompleted }) => {
   };
 
   return (
-    <div className="flex items-center gap-3 group">
+    <div className="flex items-center gap-2.5 sm:gap-3 group">
       <div className={`
         flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300
         ${isCompleted 
@@ -77,7 +77,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, isCompleted }) => {
         <div className={`transition-colors duration-300 ${isCompleted ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
           {getStepIcon(step)}
         </div>
-        <span className={`text-sm font-medium transition-colors duration-300 ${
+        <span className={`text-xs sm:text-sm font-medium transition-colors duration-300 ${
           isCompleted 
             ? 'text-foreground/80 line-through' 
             : 'text-foreground group-hover:text-primary'
@@ -126,17 +126,17 @@ export default function ProfileCompletionSection() {
         {/* Accordion Header - Always Visible */}
         <button
           onClick={toggleExpanded}
-          className="w-full p-6 md:p-8 flex items-center justify-between hover:bg-secondary/5 transition-colors duration-200"
+          className="w-full px-4 py-4 sm:px-6 md:p-8 flex items-center justify-between hover:bg-secondary/5 transition-colors duration-200"
           aria-expanded={isExpanded}
           aria-label="Toggle profile completion details"
         >
-          <div className="flex items-start gap-4 flex-1">
+          <div className="flex items-start gap-3 sm:gap-4 flex-1">
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold text-foreground mb-1 flex items-center gap-2">
-                <span className="inline-block w-1 h-6 bg-gradient-to-b from-primary to-purple-500 rounded-full" />
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-1 flex items-center gap-2">
+                <span className="inline-block w-1 h-5 sm:h-6 bg-gradient-to-b from-primary to-purple-500 rounded-full" />
                 Profile Completion
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {isFullyCompleted 
                   ? '🎉 Your profile is complete!' 
                   : `Complete your profile to unlock all features`
@@ -145,12 +145,12 @@ export default function ProfileCompletionSection() {
             </div>
 
             {/* Compact Progress Display */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="text-right">
-                <div className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-primary to-purple-600 bg-clip-text text-transparent">
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-br from-primary to-purple-600 bg-clip-text text-transparent">
                   {completionPercentage}%
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[11px] sm:text-xs text-muted-foreground">
                   {completedCount}/{totalSteps} steps
                 </div>
               </div>
@@ -176,13 +176,13 @@ export default function ProfileCompletionSection() {
             isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
           }`}
         >
-          <div className="px-6 md:px-8 pb-6 md:pb-8">
+          <div className="px-4 sm:px-6 md:px-8 pb-4 sm:pb-6 md:pb-8">
             {/* Complete Now Button - Only show when expanded and incomplete */}
             {!isFullyCompleted && (
-              <div className="mb-6 flex gap-3">
+              <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Link 
                   href="/onboarding"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-purple-600 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-purple-600 text-white text-xs sm:text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@ export default function ProfileCompletionSection() {
                 </Link>
                 <Link 
                   href="/profile"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-card border border-border text-foreground text-sm font-medium rounded-xl hover:bg-secondary/20 transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border text-foreground text-xs sm:text-sm font-medium rounded-xl hover:bg-secondary/20 transition-all duration-300"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,16 +204,16 @@ export default function ProfileCompletionSection() {
             )}
 
             {/* Progress Circle and Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-4 md:mb-6">
               {/* Circular Progress */}
               <div className="flex items-center justify-center">
-                <div className="relative w-40 h-40">
-                  <svg className="transform -rotate-90 w-40 h-40">
+              <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                  <svg className="transform -rotate-90 w-32 h-32 sm:w-40 sm:h-40">
                     {/* Background circle */}
                     <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="64"
+                      cy="64"
+                      r="56"
                       stroke="currentColor"
                       strokeWidth="12"
                       fill="none"
@@ -221,15 +221,15 @@ export default function ProfileCompletionSection() {
                     />
                     {/* Progress circle */}
                     <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="64"
+                      cy="64"
+                      r="56"
                       stroke="url(#gradient)"
                       strokeWidth="12"
                       fill="none"
                       strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 70}`}
-                      strokeDashoffset={`${2 * Math.PI * 70 * (1 - completionPercentage / 100)}`}
+                      strokeDasharray={`${2 * Math.PI * 56}`}
+                      strokeDashoffset={`${2 * Math.PI * 56 * (1 - completionPercentage / 100)}`}
                       className="transition-all duration-1000 ease-out"
                     />
                     <defs>
@@ -241,33 +241,33 @@ export default function ProfileCompletionSection() {
                   </svg>
                   {/* Percentage text */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-bold bg-gradient-to-br from-primary to-purple-600 bg-clip-text text-transparent">
+                    <span className="text-2xl sm:text-4xl font-bold bg-gradient-to-br from-primary to-purple-600 bg-clip-text text-transparent">
                       {completionPercentage}%
                     </span>
-                    <span className="text-xs text-muted-foreground mt-1">Complete</span>
+                    <span className="text-[11px] sm:text-xs text-muted-foreground mt-1">Complete</span>
                   </div>
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="flex flex-col justify-center gap-4">
-                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-4 border border-green-500/20">
+              <div className="flex flex-col justify-center gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-xl p-3 sm:p-4 border border-green-500/20">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Completed</span>
-                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">{completedCount}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">Completed</span>
+                    <span className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">{completedCount}</span>
                   </div>
                 </div>
-                <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-xl p-4 border border-orange-500/20">
+                <div className="bg-gradient-to-br from-orange-500/10 to-amber-500/10 rounded-xl p-3 sm:p-4 border border-orange-500/20">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Remaining</span>
-                    <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">{leftCount}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">Remaining</span>
+                    <span className="text-xl sm:text-2xl font-bold text-orange-600 dark:text-orange-400">{leftCount}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Progress bar (linear) */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <div className="h-2 bg-secondary/30 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-primary via-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
@@ -278,17 +278,17 @@ export default function ProfileCompletionSection() {
 
             {/* Steps List */}
             {(completed.length > 0 || left.length > 0) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Completed Steps */}
                 {completed.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-3 flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-green-600 dark:text-green-400 mb-2 sm:mb-3 flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Completed Steps
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-2.5 sm:space-y-3">
                       {completed.map((step) => (
                         <StepItem key={step} step={step} isCompleted={true} />
                       ))}
@@ -299,13 +299,13 @@ export default function ProfileCompletionSection() {
                 {/* Pending Steps */}
                 {left.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-orange-600 dark:text-orange-400 mb-3 flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-semibold text-orange-600 dark:text-orange-400 mb-2 sm:mb-3 flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Pending Steps
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-2.5 sm:space-y-3">
                       {left.map((step) => (
                         <StepItem key={step} step={step} isCompleted={false} />
                       ))}
@@ -317,8 +317,8 @@ export default function ProfileCompletionSection() {
 
             {/* Motivational message */}
             {!isFullyCompleted && left.length > 0 && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-xl border border-primary/20">
-                <p className="text-sm text-foreground/80 text-center">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-xl border border-primary/20">
+                <p className="text-xs sm:text-sm text-foreground/80 text-center">
                   💡 <span className="font-medium">Just {leftCount} more {leftCount === 1 ? 'step' : 'steps'} to go!</span> Complete your profile to get better opportunities.
                 </p>
               </div>
@@ -326,8 +326,8 @@ export default function ProfileCompletionSection() {
 
             {/* Success message */}
             {isFullyCompleted && (
-              <div className="mt-6 p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 rounded-xl border border-green-500/20">
-                <p className="text-sm text-foreground/80 text-center">
+              <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 rounded-xl border border-green-500/20">
+                <p className="text-xs sm:text-sm text-foreground/80 text-center">
                   ✨ <span className="font-medium">Awesome!</span> Your profile is fully set up. You&apos;re ready to maximize your earnings!
                 </p>
               </div>

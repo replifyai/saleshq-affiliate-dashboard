@@ -7,5 +7,6 @@ export { default as OrdersEmptyState } from './OrdersEmptyState';
 export { default as StatusBadge } from './StatusBadge';
 export { default as PaymentStatusBadge } from './PaymentStatusBadge';
 export { default as ChannelBadge } from './ChannelBadge';
+export { default as OrderDetailsModal } from './OrderDetailsModal';
 export { default as Pagination } from './Pagination';
 export * from './types';

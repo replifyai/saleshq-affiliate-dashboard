@@ -10,6 +10,7 @@ import {
 
 export default function DashboardPage() {
   const { state } = useProfile();
+  console.log(state);
   const showProfileCompletion = !!state.completionScore && state.completionScore.leftCount > 0;
 
   // Show loading state while profile is being fetched or not yet available
@@ -49,8 +50,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto">
-      <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-12">
+    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-none md:rounded-3xl min-h-[100dvh]">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-8 sm:space-y-12">
         {/* Profile Completion Section (hidden when all steps completed) */}
         {showProfileCompletion && <ProfileCompletionSection />}
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">

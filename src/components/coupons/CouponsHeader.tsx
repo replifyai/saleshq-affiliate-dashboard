@@ -8,22 +8,24 @@ interface CouponsHeaderProps {
 
 const CouponsHeader: React.FC<CouponsHeaderProps> = ({ onCreateClick }) => {
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-            <Tag className="w-8 h-8 text-primary" />
+    <div className="mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2 sm:gap-3">
+            <Tag className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             My Coupons
           </h1>
-          <p className="text-muted-foreground mt-1">Manage and create your affiliate coupons</p>
+          <p className="text-sm sm:text-base text-muted-foreground mt-0.5 sm:mt-1">
+            Manage and create your affiliate coupons
+          </p>
         </div>
         <Button
           variant="primary"
-          size="lg"
+          size="sm"
           onClick={onCreateClick}
-          className="flex items-center gap-2"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
           Create Coupon
         </Button>
       </div>
