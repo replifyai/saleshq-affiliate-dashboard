@@ -54,21 +54,38 @@ const StatItem: React.FC<StatItemProps> = ({ label, value, showCopy, onCopy, too
   );
 };
 
+import { StatusMapEntry } from '@/types/api';
+
 interface AffiliateStatsSectionProps {
   totalOrders?: string;
   totalCoupons?: string;
   totalEarningsTillDate?: string;
-  averageOrderValue?: string;
-  averageEarningPerOrder?: string;
+  earningsStatusMap?: Record<string, StatusMapEntry>;
+  ordersStatusMap?: Record<string, StatusMapEntry>;
   className?: string;
 }
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+const formatLabel = (key: string) => {
+  return key
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
 
 const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
   totalOrders = '0',
   totalCoupons = '0',
   totalEarningsTillDate = '₹0',
-  averageOrderValue = '₹0',
-  averageEarningPerOrder = '₹0',
+  earningsStatusMap,
+  ordersStatusMap,
   className,
 }) => {
 	const { state } = useProfile();
@@ -109,20 +126,30 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
               tooltip="Total number of coupons created and distributed"
             />
             <StatItem 
-              label="Total Earnings Till Date"
+              label="Total Earnings"
               value={totalEarningsTillDate}
               tooltip="Total amount earned from all affiliate commissions since joining the program"
             />
-            <StatItem 
-              label="Average Order Value"
-              value={averageOrderValue}
-              tooltip="Average value of orders placed through your affiliate links"
-            />
-            <StatItem 
-              label="Average Earning per Order"
-              value={averageEarningPerOrder}
-              tooltip="Average commission earned per order from your affiliate links"
-            />
+            
+            {/* Dynamic Earnings Status Items */}
+            {earningsStatusMap && Object.entries(earningsStatusMap).map(([key, data]) => (
+              <StatItem
+                key={`earnings-${key}`}
+                label={formatLabel(key)}
+                value={data.amount ? formatCurrency(data.amount) : data.count.toString()}
+                tooltip={`${data.count} payment${data.count !== 1 ? 's' : ''} ${formatLabel(key).toLowerCase()}`}
+              />
+            ))}
+
+            {/* Dynamic Orders Status Items */}
+            {ordersStatusMap && Object.entries(ordersStatusMap).map(([key, data]) => (
+              <StatItem
+                key={`orders-${key}`}
+                label={`${formatLabel(key)} Orders`}
+                value={data.count.toString()}
+                tooltip={`Total ${data.count} orders with status ${formatLabel(key).toLowerCase()}`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -130,9 +157,15 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
       {/* Tooltips */}
       <Tooltip id="tooltip-total-orders" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
       <Tooltip id="tooltip-total-coupons" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-total-earnings-till-date" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-average-order-value" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-average-earning-per-order" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-earnings" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      
+      {/* Dynamic Tooltips */}
+      {earningsStatusMap && Object.keys(earningsStatusMap).map((key) => (
+        <Tooltip key={`tooltip-earnings-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}`} place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      ))}
+      {ordersStatusMap && Object.keys(ordersStatusMap).map((key) => (
+        <Tooltip key={`tooltip-orders-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}-orders`} place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      ))}
 
     </div>
   );

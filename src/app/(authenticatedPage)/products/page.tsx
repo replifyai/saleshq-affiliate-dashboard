@@ -1,201 +1,248 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
-import { Package, DollarSign, Target, Sparkles, Clock } from 'lucide-react';
-import {
-  SummaryCard,
-  ProductCard,
-  CategoryCard,
-  ProductsHeader,
-  ProductsFilters,
-  DynamicInsights,
-  ProductDetailModal,
-  PerformanceChartModal,
-  Product,
-} from '@/components/products';
-import type { SummaryCard as SummaryCardType } from '@/components/products/types';
 import { mockProducts, mockCategories } from '@/components/products/mockData';
+import { Share2, ArrowLeft, Package } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Main Component
+// --- Types ---
+
+interface SimpleProductCardProps {
+  product: typeof mockProducts[0];
+  showShare?: boolean;
+  onShare?: (product: typeof mockProducts[0]) => void;
+}
+
+interface SimpleCategoryCardProps {
+  category: typeof mockCategories[0];
+  onClick: () => void;
+}
+
+// --- Components ---
+
+const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShare = true, onShare }) => {
+  return (
+    <div className="group relative bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+      {/* Image Area - Using emoji/placeholder logic from mock data */}
+      <div className="aspect-[4/3] bg-muted/30 flex items-center justify-center relative overflow-hidden">
+        <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
+          {product.image}
+        </div>
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+
+      <div className="p-5">
+        <div className="mb-4">
+          <div className="text-xs font-medium text-primary mb-1 uppercase tracking-wider opacity-80">
+            {product.category}
+          </div>
+          <h3 className="font-bold text-lg text-foreground leading-tight line-clamp-2">
+            {product.name}
+          </h3>
+        </div>
+
+        {showShare && (
+          <button
+            onClick={() => onShare?.(product)}
+            className="w-full flex items-center justify-center gap-2 bg-primary text-black py-2.5 px-4 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90"
+          >
+            <Share2 size={18} />
+            <span>Share Product</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const SimpleCategoryCard: React.FC<SimpleCategoryCardProps> = ({ category, onClick }) => {
+  return (
+    <div 
+      onClick={onClick}
+      className="group cursor-pointer bg-card border border-border/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/20 relative overflow-hidden"
+    >
+      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <Package size={64} />
+      </div>
+      
+      <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+        {category.name}
+      </h3>
+      <p className="text-muted-foreground mb-4">
+        {category.productCount} Products
+      </p>
+      
+      <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+        View Collection <ArrowLeft className="ml-2 rotate-180" size={16} />
+      </div>
+    </div>
+  );
+};
+
+// --- Main Page Component ---
+
 const ProductsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'all' | 'products' | 'categories'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'commission' | 'sales' | 'newest'>('commission');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+  const { state: profileState } = useProfile();
   const { showSuccess, showError } = useSnackbar();
+  
+  const [activeTab, setActiveTab] = useState<'all' | 'categories'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const filteredProducts = useMemo(() => {
-    let filtered = mockProducts;
-    
-    if (searchQuery) {
-      filtered = filtered.filter(product => 
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  // Helper to generate slug
+  const getSlug = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
 
-    return filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'commission':
-          return b.commission - a.commission;
-        case 'sales':
-          return b.performance - a.performance;
-        case 'newest':
-          return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
-        default:
-          return 0;
-      }
+  // Generate Link Logic
+  const generateLink = (type: 'product' | 'category', slug: string) => {
+    if (typeof window === 'undefined') return '';
+    const baseUrl = window.location.origin;
+    const refId = profileState.profile?.id || 'guest';
+    return `${baseUrl}/${type}/${slug}?ref=${refId}`;
+  };
+
+  const handleShare = (text: string, type: 'Product' | 'Collection') => {
+    navigator.clipboard.writeText(text).then(() => {
+      showSuccess(`${type} link copied to clipboard!`);
+    }).catch(() => {
+      showError('Failed to copy link');
     });
-  }, [searchQuery, sortBy]);
-
-  const summaryCards: SummaryCardType[] = [
-    {
-      title: 'Total Affiliated Products',
-      value: mockProducts.length,
-      icon: <Package className="w-6 h-6" />,
-      trend: 'up',
-      trendValue: '+3 this week'
-    },
-    {
-      title: 'Average Commission',
-      value: `${(mockProducts.reduce((sum, p) => sum + p.commission, 0) / mockProducts.length).toFixed(1)}%`,
-      icon: <DollarSign className="w-6 h-6" />,
-      trend: 'up',
-      trendValue: '+0.5%'
-    },
-    {
-      title: 'Active Discounts',
-      value: mockProducts.filter(p => p.referralDiscount > 0).length,
-      icon: <Target className="w-6 h-6" />,
-      trend: 'neutral',
-      trendValue: 'Stable'
-    },
-    {
-      title: 'Top Earning Category',
-      value: 'Beauty',
-      icon: <Sparkles className="w-6 h-6" />,
-      trend: 'up',
-      trendValue: '+12%'
-    }
-  ];
-
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(null);
+  const handleProductShare = (product: typeof mockProducts[0]) => {
+    const link = generateLink('product', getSlug(product.name));
+    handleShare(link, 'Product');
   };
 
-  const handleCopyLink = async (link: string, productName: string) => {
-    try {
-      await navigator.clipboard.writeText(link);
-      showSuccess(`Affiliate link for "${productName}" copied to clipboard!`, {
-        duration: 3000
-      });
-    } catch {
-      showError('Failed to copy link to clipboard. Please try again.', {
-        duration: 3000
-      });
-    }
+  const handleCategoryShare = (categoryName: string) => {
+    const link = generateLink('category', getSlug(categoryName));
+    handleShare(link, 'Collection');
   };
 
-  const handleViewChart = () => {
-    setIsChartModalOpen(true);
-  };
+  // Filter products for category view
+  const categoryProducts = selectedCategory 
+    ? mockProducts.filter(p => p.category === selectedCategory)
+    : [];
 
   return (
-    <div className="relative w-full min-h-screen bg-background">
-      {/* Coming Soon Overlay - Only covers products page content */}
-      <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/90 backdrop-blur-sm">
-        <div className="flex flex-col items-center text-center space-y-4 p-6">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Clock className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-2xl font-semibold text-foreground">Coming Soon</h2>
-          <p className="text-sm text-muted-foreground max-w-md">
-            Our products page is currently under development. Check back soon for exciting updates!
-          </p>
-        </div>
-      </div>
-
-      {/* Content behind overlay */}
-      <div className="opacity-0 pointer-events-none hidden">
-        {/* Notification Banner */}
-      <div className="bg-primary/10 border-l-4 border-primary p-4 mb-6">
-        <div className="flex items-center space-x-2">
-          <div className="text-primary text-lg">🪄</div>
-          <p className="text-sm text-foreground">
-            Commission or discount rates may vary dynamically based on performance, campaign type, or product lifecycle. Updates will be reflected in real time.
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background p-6 lg:p-10">
+      <div className="max-w-7xl mx-auto">
+        
         {/* Header Section */}
-        <ProductsHeader />
-
-        {/* Hero Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {summaryCards.map((card, index) => (
-            <SummaryCard key={index} {...card} />
-          ))}
+        <div className="mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-2">
+            Marketplace
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Discover and share premium products with your audience.
+          </p>
         </div>
 
-        {/* Filters and Search */}
-        <ProductsFilters
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-        />
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-muted/30 p-1 rounded-xl w-fit mb-8">
+          <button
+            onClick={() => {
+              setActiveTab('all');
+              setSelectedCategory(null);
+            }}
+            className={cn(
+              "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              activeTab === 'all' 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            )}
+          >
+            All Products
+          </button>
+          <button
+            onClick={() => setActiveTab('categories')}
+            className={cn(
+              "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+              activeTab === 'categories'
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            )}
+          >
+            Categories
+          </button>
+        </div>
 
-        {/* Main Content */}
-        {activeTab === 'all' || activeTab === 'products' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onClick={() => handleProductClick(product)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockCategories.map((category, index) => (
-              <CategoryCard key={index} category={category} />
-            ))}
-          </div>
-        )}
+        {/* Content Area */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          
+          {/* ALL PRODUCTS TAB */}
+          {activeTab === 'all' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {mockProducts.map((product) => (
+                <SimpleProductCard 
+                  key={product.id} 
+                  product={product} 
+                  onShare={handleProductShare}
+                />
+              ))}
+            </div>
+          )}
 
-        {/* Dynamic Insights */}
-        <DynamicInsights />
+          {/* CATEGORIES TAB */}
+          {activeTab === 'categories' && (
+            <>
+              {/* Category List View */}
+              {!selectedCategory ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mockCategories.map((category) => (
+                    <SimpleCategoryCard 
+                      key={category.name} 
+                      category={category} 
+                      onClick={() => setSelectedCategory(category.name)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                /* Category Detail View */
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/50 rounded-2xl p-6">
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={() => setSelectedCategory(null)}
+                        className="p-2 hover:bg-muted rounded-full transition-colors"
+                      >
+                        <ArrowLeft size={24} />
+                      </button>
+                      <div>
+                        <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
+                        <p className="text-muted-foreground text-sm">
+                          {categoryProducts.length} Products in this collection
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => handleCategoryShare(selectedCategory)}
+                      className="flex items-center justify-center gap-2 bg-primary text-black py-3 px-6 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90 shadow-lg shadow-primary/20"
+                    >
+                      <Share2 size={20} />
+                      <span>Share Collection</span>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {categoryProducts.map((product) => (
+                      <SimpleProductCard 
+                        key={product.id} 
+                        product={product} 
+                        showShare={false} // Requirement: Creator can only share the whole collection link
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
       </div>
-      </div>
-
-      {/* Product Detail Modal */}
-      <ProductDetailModal
-        product={selectedProduct}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onCopyLink={handleCopyLink}
-        onViewChart={handleViewChart}
-      />
-
-      {/* Performance Chart Modal */}
-      <PerformanceChartModal
-        product={selectedProduct}
-        isOpen={isChartModalOpen}
-        onClose={() => setIsChartModalOpen(false)}
-      />
     </div>
   );
 };

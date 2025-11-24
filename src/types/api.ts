@@ -201,3 +201,29 @@ export interface GetCreatorOrdersResponse {
   orders: CreatorOrder[];
   pagination: PaginationInfo;
 }
+
+// Dashboard Summary Types
+export interface StatusMapEntry {
+  count: number;
+  amount?: number;
+}
+
+export interface CreatorDashboardSummary {
+  totalOrders?: number | string;
+  totalCoupons?: number | string;
+  totalEarningsTillDate?: number | string;
+  totalEarnings?: number | string; // From API
+  earningsStatusMap?: Record<string, StatusMapEntry>;
+  ordersStatusMap?: Record<string, StatusMapEntry>;
+  averageOrderValue?: number | string;
+  averageEarningPerOrder?: number | string;
+  [key: string]: unknown;
+}
+
+export interface GetCreatorDashboardSummaryResponse {
+  summary?: CreatorDashboardSummary;
+  dashboardSummary?: CreatorDashboardSummary;
+  data?: CreatorDashboardSummary;
+  result?: CreatorDashboardSummary;
+  [key: string]: unknown;
+}

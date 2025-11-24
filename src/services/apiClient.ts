@@ -14,6 +14,7 @@ import {
   CreateCouponForCreatorResponse,
   GetCreatorOrdersRequest,
   GetCreatorOrdersResponse,
+  GetCreatorDashboardSummaryResponse,
 } from '@/types/api';
 import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
 import config from '@/lib/config';
@@ -215,6 +216,12 @@ class ApiClient {
     return this.request<GetCreatorOrdersResponse>('/creator/orders', {
       method: 'POST',
       body: JSON.stringify(data),
+    }, true);
+  }
+
+  async getCreatorDashboardSummary(): Promise<GetCreatorDashboardSummaryResponse> {
+    return this.request<GetCreatorDashboardSummaryResponse>('/creator/dashboard-summary', {
+      method: 'POST',
     }, true);
   }
 }

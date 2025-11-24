@@ -1,17 +1,109 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import {
   AffiliateStatsSection,
   ShareLinkSection,
   ProfileCompletionSection,
 } from '@/components/dashboard';
+import { useSnackbar } from '@/components/snackbar';
+import apiClient from '@/services/apiClient';
+import { CreatorDashboardSummary } from '@/types/api';
+
+const isCreatorDashboardSummary = (payload: unknown): payload is CreatorDashboardSummary => {
+  if (!payload || typeof payload !== 'object') {
+    return false;
+  }
+
+  return ['totalOrders', 'totalCoupons', 'totalEarningsTillDate', 'averageOrderValue', 'averageEarningPerOrder'].some(
+    (key) => key in payload
+  );
+};
 
 export default function DashboardPage() {
   const { state } = useProfile();
-  console.log(state);
+  const { showError } = useSnackbar();
+  const showErrorRef = useRef(showError);
+  const [dashboardSummary, setDashboardSummary] = useState<CreatorDashboardSummary | null>(null);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
   const showProfileCompletion = !!state.completionScore && state.completionScore.leftCount > 0;
+
+  useEffect(() => {
+    showErrorRef.current = showError;
+  }, [showError]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchDashboardSummary = async () => {
+      setIsSummaryLoading(true);
+      setSummaryError(null);
+
+      try {
+        const response = await apiClient.getCreatorDashboardSummary();
+        const fallback = isCreatorDashboardSummary(response) ? response : null;
+        const normalized =
+          response.summary ??
+          response.dashboardSummary ??
+          response.data ??
+          response.result ??
+          fallback;
+
+        if (isMounted) {
+          setDashboardSummary(normalized || null);
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load dashboard summary';
+        if (isMounted) {
+          setSummaryError(message);
+        }
+        showErrorRef.current?.(message);
+      } finally {
+        if (isMounted) {
+          setIsSummaryLoading(false);
+        }
+      }
+    };
+
+    fetchDashboardSummary();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const parseNumericValue = (value?: number | string | null): number | undefined => {
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      const cleaned = value.replace(/,/g, '').trim();
+      const parsed = parseFloat(cleaned);
+      return Number.isNaN(parsed) ? undefined : parsed;
+    }
+    return undefined;
+  };
+
+  const formatNumberStat = (value?: number | string): string => {
+    const parsed = parseNumericValue(value);
+    if (parsed === undefined) {
+      return isSummaryLoading ? 'Loading...' : '--';
+    }
+    return new Intl.NumberFormat('en-IN').format(parsed);
+  };
+
+  const formatCurrencyStat = (value?: number | string): string => {
+    const parsed = parseNumericValue(value);
+    if (parsed === undefined) {
+      return isSummaryLoading ? 'Loading...' : '₹0';
+    }
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(parsed);
+  };
 
   // Show loading state while profile is being fetched or not yet available
   if (!state.profile) {
@@ -61,12 +153,19 @@ export default function DashboardPage() {
 
         {/* Affiliate Stats Section */}
         <AffiliateStatsSection
-          totalOrders="238"
-          totalCoupons="45"
-          totalEarningsTillDate="₹1,24,300"
-          averageOrderValue="₹2,150"
-          averageEarningPerOrder="₹522"
+          totalOrders={formatNumberStat(dashboardSummary?.totalOrders)}
+          totalCoupons={formatNumberStat(dashboardSummary?.totalCoupons)}
+          totalEarningsTillDate={formatCurrencyStat(
+            dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings
+          )}
+          earningsStatusMap={dashboardSummary?.earningsStatusMap}
+          ordersStatusMap={dashboardSummary?.ordersStatusMap}
         />
+        {summaryError && (
+          <p className="text-sm text-destructive">
+            Unable to load the latest dashboard summary. Showing placeholders for now.
+          </p>
+        )}
 
         {/* Analytics Overview */}
         {/* <AnalyticsOverviewSection /> */}
