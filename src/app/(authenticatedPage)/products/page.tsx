@@ -1,38 +1,104 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback, CSSProperties, ReactElement } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
-import { mockProducts, mockCategories } from '@/components/products/mockData';
-import { Share2, ArrowLeft, Package } from 'lucide-react';
+import { Share2, ArrowLeft, Package, Loader2, Search, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import apiClient from '@/services/apiClient';
+import { Product, Category } from '@/components/products/types';
+import { ProductCollection } from '@/types/api';
+import { List } from 'react-window';
 
 // --- Types ---
 
 interface SimpleProductCardProps {
-  product: typeof mockProducts[0];
+  product: Product;
   showShare?: boolean;
-  onShare?: (product: typeof mockProducts[0]) => void;
+  onShare?: (product: Product) => void;
 }
 
 interface SimpleCategoryCardProps {
-  category: typeof mockCategories[0];
+  category: Category;
+  onClick: () => void;
+}
+
+interface SimpleCollectionCardProps {
+  collection: ProductCollection;
+  productCount: number;
   onClick: () => void;
 }
 
 // --- Components ---
 
 const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShare = true, onShare }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const images = product.images && product.images.length > 0 
+    ? product.images 
+    : (product.image ? [product.image] : []);
+
+  useEffect(() => {
+    if (isHovered && images.length > 1) {
+      intervalRef.current = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setCurrentImageIndex(0);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isHovered, images.length]);
+
+  const currentImage = images[currentImageIndex];
+
   return (
-    <div className="group relative bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-      {/* Image Area - Using emoji/placeholder logic from mock data */}
+    <div 
+      className="group relative bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Image Area - Handle actual images vs emoji placeholder */}
       <div className="aspect-[4/3] bg-muted/30 flex items-center justify-center relative overflow-hidden">
-        <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
-          {product.image}
-        </div>
+        {currentImage && currentImage.startsWith('http') ? (
+          <img 
+            src={currentImage} 
+            alt={product.name}
+            className="w-full h-full object-cover transition-opacity duration-300"
+          />
+        ) : (
+          <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
+            {currentImage || '📦'}
+          </div>
+        )}
         
+        {/* Slideshow Indicators (dots) */}
+        {images.length > 1 && isHovered && (
+          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
+            {images.map((_, idx) => (
+              <div 
+                key={idx}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                  idx === currentImageIndex ? "bg-white scale-110" : "bg-white/50"
+                )}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
       <div className="p-5">
@@ -83,24 +149,305 @@ const SimpleCategoryCard: React.FC<SimpleCategoryCardProps> = ({ category, onCli
   );
 };
 
+const SimpleCollectionCard: React.FC<SimpleCollectionCardProps> = ({ collection, productCount, onClick }) => {
+  return (
+    <div 
+      onClick={onClick}
+      className="group cursor-pointer bg-card border border-border/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/20 relative overflow-hidden"
+    >
+      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        <Package size={64} />
+      </div>
+      
+      <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+        {collection.name}
+      </h3>
+      {collection.description && (
+        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+          {collection.description}
+        </p>
+      )}
+      <p className="text-muted-foreground mb-4">
+        {productCount} Products
+      </p>
+      
+      <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+        View Collection <ArrowLeft className="ml-2 rotate-180" size={16} />
+      </div>
+    </div>
+  );
+};
+
+// --- Virtualized Grid Component ---
+
+const GUTTER_SIZE = 24; // gap-6 = 1.5rem = 24px
+const ROW_HEIGHT = 420; // Card height + gutter to prevent overlap
+
+interface VirtualizedProductGridProps {
+  products: Product[];
+  onShare: (product: Product) => void;
+  showShare?: boolean;
+  emptyState: React.ReactNode;
+}
+
+// Row component props for react-window v2
+interface RowProps {
+  products: Product[];
+  columnCount: number;
+  containerWidth: number;
+  showShare: boolean;
+  onShare: (product: Product) => void;
+}
+
+// Row component for react-window v2
+const ProductRow = ({
+  index,
+  style,
+  products,
+  columnCount,
+  containerWidth,
+  showShare,
+  onShare,
+}: {
+  ariaAttributes: { "aria-posinset": number; "aria-setsize": number; role: "listitem" };
+  index: number;
+  style: CSSProperties;
+} & RowProps): ReactElement => {
+  const startIndex = index * columnCount;
+  const rowProducts = products.slice(startIndex, startIndex + columnCount);
+  const itemWidth = (containerWidth - (columnCount - 1) * GUTTER_SIZE) / columnCount;
+
+  return (
+    <div
+      style={{
+        ...style,
+        display: 'flex',
+        gap: GUTTER_SIZE,
+        boxSizing: 'border-box',
+      }}
+    >
+      {rowProducts.map((product) => (
+        <div key={product.id} style={{ width: itemWidth, flexShrink: 0, height: ROW_HEIGHT - GUTTER_SIZE }}>
+          <SimpleProductCard
+            product={product}
+            showShare={showShare}
+            onShare={onShare}
+          />
+        </div>
+      ))}
+      {/* Fill empty slots to maintain grid alignment */}
+      {rowProducts.length < columnCount &&
+        Array.from({ length: columnCount - rowProducts.length }).map((_, i) => (
+          <div key={`spacer-${i}`} style={{ width: itemWidth, flexShrink: 0 }} />
+        ))}
+    </div>
+  );
+};
+
+const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
+  products,
+  onShare,
+  showShare = true,
+  emptyState,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [listHeight, setListHeight] = useState(500);
+
+  // Calculate columns based on container width - default to 4 columns
+  const getColumnCount = useCallback((width: number) => {
+    if (width >= 900) return 4;  // 4 columns for most screens
+    if (width >= 640) return 3;  // 3 columns for tablets
+    if (width >= 480) return 2;  // 2 columns for large phones
+    return 1;                    // 1 column for small phones
+  }, []);
+
+  const columnCount = useMemo(() => getColumnCount(containerWidth), [containerWidth, getColumnCount]);
+  const rowCount = useMemo(() => Math.ceil(products.length / Math.max(columnCount, 1)), [products.length, columnCount]);
+
+  // Update container width on resize
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateDimensions = () => {
+      setContainerWidth(container.offsetWidth);
+      setListHeight(Math.max(500, window.innerHeight - 300));
+    };
+
+    updateDimensions();
+
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    resizeObserver.observe(container);
+
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+
+  if (products.length === 0) {
+    return <>{emptyState}</>;
+  }
+
+  return (
+    <div ref={containerRef} className="w-full h-full flex-1 overflow-x-hidden" style={{ minHeight: 500 }}>
+      {containerWidth > 0 && (
+        <List<RowProps>
+          style={{ height: '100%', width: containerWidth, overflowX: 'hidden' }}
+          rowCount={rowCount}
+          rowHeight={ROW_HEIGHT}
+          rowComponent={ProductRow}
+          rowProps={{
+            products,
+            columnCount,
+            containerWidth,
+            showShare,
+            onShare,
+          }}
+          overscanCount={2}
+        />
+      )}
+    </div>
+  );
+};
+
 // --- Main Page Component ---
 
 const ProductsPage: React.FC = () => {
   const { state: profileState } = useProfile();
   const { showSuccess, showError } = useSnackbar();
   
-  const [activeTab, setActiveTab] = useState<'all' | 'categories'>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'collections'>('all');
+  const [selectedCollection, setSelectedCollection] = useState<ProductCollection | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<ProductCollection[]>([]);
+  const [collectionProducts, setCollectionProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCollectionProducts, setIsLoadingCollectionProducts] = useState(false);
+  
+  // Search and Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [productTypeFilter, setProductTypeFilter] = useState('all');
 
-  // Helper to generate slug
-  const getSlug = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
+  // Fetch products and collections
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch both products and collections in parallel
+        const [productsResponse, collectionsResponse] = await Promise.all([
+          apiClient.getAllShopifyProducts(),
+          apiClient.getAllProductCollections(),
+        ]);
+        
+        if (productsResponse.productCollection.success) {
+          const mappedProducts: Product[] = productsResponse.productCollection.data.map((p) => ({
+            id: p.id,
+            name: p.title,
+            handle: p.handle,
+            category: p.productType || 'Uncategorized',
+            commission: 0, // Placeholder
+            referralDiscount: 0, // Placeholder
+            performance: 0,
+            status: p.status === 'ACTIVE' ? 'active' : 'inactive', // Map status
+            image: p.images?.[0] || '📦', // Use first image or placeholder
+            images: p.images || [], // Store all images
+            description: '',
+            lastUpdated: new Date().toISOString(),
+            salesData: [],
+          }));
+          
+          setProducts(mappedProducts);
+        }
+        
+        if (collectionsResponse.productCollections) {
+          setCollections(collectionsResponse.productCollections);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        showError('Failed to load products');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Generate Link Logic
-  const generateLink = (type: 'product' | 'category', slug: string) => {
-    if (typeof window === 'undefined') return '';
-    const baseUrl = window.location.origin;
-    const refId = profileState.profile?.id || 'guest';
-    return `${baseUrl}/${type}/${slug}?ref=${refId}`;
+    fetchData();
+  }, []);
+
+  // Derive categories from products
+  const categories = useMemo(() => {
+    const catMap = new Map<string, Category>();
+    
+    products.forEach(product => {
+      const catName = product.category;
+      if (!catMap.has(catName)) {
+        catMap.set(catName, {
+          name: catName,
+          productCount: 0,
+          avgCommission: 0,
+          avgDiscount: 0,
+          revenueShare: 0,
+          topProduct: product.name,
+        });
+      }
+      
+      const cat = catMap.get(catName)!;
+      cat.productCount++;
+    });
+    
+    return Array.from(catMap.values());
+  }, [products]);
+
+  // Filter products logic
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = productTypeFilter === 'all' || product.category === productTypeFilter;
+      return matchesSearch && matchesType;
+    });
+  }, [products, searchQuery, productTypeFilter]);
+
+  // Generate product share link with referral info
+  // Format: https://myfrido.com/products/{handle}?rfname={name}&dispc={percentage}&discount={code}&tt-cart-mod=true
+  // Or for amount: https://myfrido.com/products/{handle}?rfname={name}&disam={amount}&discount={code}&tt-cart-mod=true
+  const generateProductLink = (productHandle: string) => {
+    const profile = profileState.profile;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const coupon = (profile as any)?.coupons;
+    
+    const baseUrl = 'https://myfrido.com';
+    const productUrl = `${baseUrl}/products/${productHandle}`;
+    
+    // Build query params
+    const params = new URLSearchParams();
+    
+    // Add referral name (URL encoded)
+    if (profile?.name) {
+      params.set('rfname', profile.name);
+    }
+    
+    // Add discount value based on type
+    if (coupon?.value) {
+      if (coupon.value.type === 'percentage' && coupon.value.percentage) {
+        params.set('dispc', String(coupon.value.percentage));
+      } else if (coupon.value.type === 'amount' && coupon.value.amount) {
+        params.set('disam', String(coupon.value.amount));
+      }
+    }
+    
+    // Add discount code
+    if (coupon?.code) {
+      params.set('discount', coupon.code);
+    }
+    
+    // Add cart mod flag
+    params.set('tt-cart-mod', 'true');
+    
+    return `${productUrl}?${params.toString()}`;
   };
 
   const handleShare = (text: string, type: 'Product' | 'Collection') => {
@@ -111,24 +458,103 @@ const ProductsPage: React.FC = () => {
     });
   };
 
-  const handleProductShare = (product: typeof mockProducts[0]) => {
-    const link = generateLink('product', getSlug(product.name));
+  const handleProductShare = (product: Product) => {
+    const link = generateProductLink(product.handle);
     handleShare(link, 'Product');
   };
 
-  const handleCategoryShare = (categoryName: string) => {
-    const link = generateLink('category', getSlug(categoryName));
+  // Generate collection share link (same format as product but with /collections/)
+  const generateCollectionLink = (collectionHandle: string) => {
+    const profile = profileState.profile;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const coupon = (profile as any)?.coupons;
+    
+    const baseUrl = 'https://myfrido.com';
+    const collectionUrl = `${baseUrl}/collections/${collectionHandle}`;
+    
+    // Build query params
+    const params = new URLSearchParams();
+    
+    // Add referral name (URL encoded)
+    if (profile?.name) {
+      params.set('rfname', profile.name);
+    }
+    
+    // Add discount value based on type
+    if (coupon?.value) {
+      if (coupon.value.type === 'percentage' && coupon.value.percentage) {
+        params.set('dispc', String(coupon.value.percentage));
+      } else if (coupon.value.type === 'amount' && coupon.value.amount) {
+        params.set('disam', String(coupon.value.amount));
+      }
+    }
+    
+    // Add discount code
+    if (coupon?.code) {
+      params.set('discount', coupon.code);
+    }
+    
+    // Add cart mod flag
+    params.set('tt-cart-mod', 'true');
+    
+    return `${collectionUrl}?${params.toString()}`;
+  };
+
+  const handleCollectionShare = (collection: ProductCollection) => {
+    const link = generateCollectionLink(collection.handle);
     handleShare(link, 'Collection');
   };
 
-  // Filter products for category view
-  const categoryProducts = selectedCategory 
-    ? mockProducts.filter(p => p.category === selectedCategory)
-    : [];
+  // Fetch collection products when a collection is selected
+  const handleCollectionClick = useCallback(async (collection: ProductCollection) => {
+    setSelectedCollection(collection);
+    setCollectionProducts([]);
+    
+    if (collection.productIds.length === 0) {
+      return;
+    }
+    
+    try {
+      setIsLoadingCollectionProducts(true);
+      const response = await apiClient.getShopifyProductsByIds({ ids: collection.productIds });
+      
+      if (response.products) {
+        const mappedProducts: Product[] = response.products.map((p) => ({
+          id: p.id,
+          name: p.title,
+          handle: p.handle,
+          category: p.productType || 'Uncategorized',
+          commission: 0,
+          referralDiscount: 0,
+          performance: 0,
+          status: p.status === 'ACTIVE' ? 'active' : 'inactive',
+          image: p.images?.[0] || '📦',
+          images: p.images || [],
+          description: '',
+          lastUpdated: new Date().toISOString(),
+          salesData: [],
+        }));
+        setCollectionProducts(mappedProducts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch collection products:', error);
+      showError('Failed to load collection products');
+    } finally {
+      setIsLoadingCollectionProducts(false);
+    }
+  }, [showError]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={48} />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background p-6 lg:p-10">
-      <div className="max-w-7xl mx-auto">
+    <div className="h-screen flex flex-col bg-background p-6 lg:p-10 overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
         
         {/* Header Section */}
         <div className="mb-8">
@@ -140,86 +566,155 @@ const ProductsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-muted/30 p-1 rounded-xl w-fit mb-8">
-          <button
-            onClick={() => {
-              setActiveTab('all');
-              setSelectedCategory(null);
-            }}
-            className={cn(
-              "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-              activeTab === 'all' 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            )}
-          >
-            All Products
-          </button>
-          <button
-            onClick={() => setActiveTab('categories')}
-            className={cn(
-              "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-              activeTab === 'categories'
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            )}
-          >
-            Categories
-          </button>
+        {/* Tab Navigation and Filters */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="flex space-x-1 bg-muted/30 p-1 rounded-xl w-fit">
+            <button
+              onClick={() => {
+                setActiveTab('all');
+                setSelectedCollection(null);
+              }}
+              className={cn(
+                "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                activeTab === 'all' 
+                  ? "bg-background text-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              All Products
+            </button>
+            <button
+              onClick={() => setActiveTab('collections')}
+              className={cn(
+                "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                activeTab === 'collections'
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+              )}
+            >
+              Collections
+            </button>
+          </div>
+
+          {activeTab === 'all' && (
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+              <div className="relative w-full sm:w-48">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <select
+                  value={productTypeFilter}
+                  onChange={(e) => setProductTypeFilter(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl border border-border bg-card text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                >
+                  <option value="all">All Types</option>
+                  {categories.map((cat) => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content Area */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex-1 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
           
           {/* ALL PRODUCTS TAB */}
           {activeTab === 'all' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {mockProducts.map((product) => (
-                <SimpleProductCard 
-                  key={product.id} 
-                  product={product} 
-                  onShare={handleProductShare}
-                />
-              ))}
-            </div>
+            <VirtualizedProductGrid
+              products={filteredProducts}
+              onShare={handleProductShare}
+              showShare={true}
+              emptyState={
+                <div className="py-12 text-center">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Package className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium text-foreground">No products found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your search or filters to find what you're looking for.
+                  </p>
+                  <button 
+                    onClick={() => {
+                      setSearchQuery('');
+                      setProductTypeFilter('all');
+                    }}
+                    className="mt-4 text-primary hover:underline text-sm font-medium"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              }
+            />
           )}
 
-          {/* CATEGORIES TAB */}
-          {activeTab === 'categories' && (
+          {/* COLLECTIONS TAB */}
+          {activeTab === 'collections' && (
             <>
-              {/* Category List View */}
-              {!selectedCategory ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockCategories.map((category) => (
-                    <SimpleCategoryCard 
-                      key={category.name} 
-                      category={category} 
-                      onClick={() => setSelectedCategory(category.name)}
-                    />
-                  ))}
+              {/* Collection List View */}
+              {!selectedCollection ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto">
+                  {collections.length > 0 ? (
+                    collections.map((collection) => (
+                      <SimpleCollectionCard 
+                        key={collection.id} 
+                        collection={collection}
+                        productCount={collection.productIds.length}
+                        onClick={() => handleCollectionClick(collection)}
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-full py-12 text-center">
+                      <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                        <Package className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium text-foreground">No collections yet</h3>
+                      <p className="text-muted-foreground">
+                        Collections will appear here once they are created.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
-                /* Category Detail View */
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/50 rounded-2xl p-6">
+                /* Collection Detail View */
+                <div className="flex flex-col h-full gap-6">
+                  <div className="flex-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/50 rounded-2xl p-6">
                     <div className="flex items-center gap-4">
                       <button 
-                        onClick={() => setSelectedCategory(null)}
+                        onClick={() => {
+                          setSelectedCollection(null);
+                          setCollectionProducts([]);
+                        }}
                         className="p-2 hover:bg-muted rounded-full transition-colors"
                       >
                         <ArrowLeft size={24} />
                       </button>
                       <div>
-                        <h2 className="text-2xl font-bold text-foreground">{selectedCategory}</h2>
+                        <h2 className="text-2xl font-bold text-foreground">{selectedCollection.name}</h2>
                         <p className="text-muted-foreground text-sm">
-                          {categoryProducts.length} Products in this collection
+                          {isLoadingCollectionProducts ? 'Loading...' : `${collectionProducts.length} Products in this collection`}
                         </p>
                       </div>
                     </div>
                     
                     <button
-                      onClick={() => handleCategoryShare(selectedCategory)}
+                      onClick={() => handleCollectionShare(selectedCollection)}
                       className="flex items-center justify-center gap-2 bg-primary text-black py-3 px-6 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90 shadow-lg shadow-primary/20"
                     >
                       <Share2 size={20} />
@@ -227,14 +722,26 @@ const ProductsPage: React.FC = () => {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {categoryProducts.map((product) => (
-                      <SimpleProductCard 
-                        key={product.id} 
-                        product={product} 
-                        showShare={false} // Requirement: Creator can only share the whole collection link
+                  <div className="flex-1 min-h-0">
+                    {isLoadingCollectionProducts ? (
+                      <div className="flex items-center justify-center h-full">
+                        <Loader2 className="animate-spin text-primary" size={48} />
+                      </div>
+                    ) : (
+                      <VirtualizedProductGrid
+                        products={collectionProducts}
+                        onShare={handleProductShare}
+                        showShare={false}
+                        emptyState={
+                          <div className="py-12 text-center">
+                            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
+                              <Package className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-lg font-medium text-foreground">No products in this collection</h3>
+                          </div>
+                        }
                       />
-                    ))}
+                    )}
                   </div>
                 </div>
               )}

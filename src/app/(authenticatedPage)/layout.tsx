@@ -12,7 +12,7 @@ export default async function AuthenticatedLayout({
 }) {
   // Fetch profile on server-side with automatic token refresh
   const { profile, tokens, error } = await fetchCreatorProfileServer();
-
+console.log('profile', JSON.stringify(profile, null, 2));
   if (error) {
     console.error('Server: Profile fetch error:', error);
   }

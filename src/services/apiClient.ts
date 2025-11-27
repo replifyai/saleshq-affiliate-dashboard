@@ -15,6 +15,10 @@ import {
   GetCreatorOrdersRequest,
   GetCreatorOrdersResponse,
   GetCreatorDashboardSummaryResponse,
+  GetShopifyProductsResponse,
+  GetProductCollectionsResponse,
+  GetShopifyProductsByIdsRequest,
+  GetShopifyProductsByIdsResponse,
 } from '@/types/api';
 import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
 import config from '@/lib/config';
@@ -104,7 +108,7 @@ class ApiClient {
     options: RequestInit = {},
     requireAuth: boolean = false
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
     
     const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -222,6 +226,34 @@ class ApiClient {
   async getCreatorDashboardSummary(): Promise<GetCreatorDashboardSummaryResponse> {
     return this.request<GetCreatorDashboardSummaryResponse>('/creator/dashboard-summary', {
       method: 'POST',
+    }, true);
+  }
+
+  async getAllShopifyProducts(): Promise<GetShopifyProductsResponse> {
+    return this.request<GetShopifyProductsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllShopifyProducts', {
+      method: 'GET',
+      headers: {
+        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
+      },
+    }, true);
+  }
+
+  async getAllProductCollections(): Promise<GetProductCollectionsResponse> {
+    return this.request<GetProductCollectionsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllProductCollectionsForCreator', {
+      method: 'GET',
+      headers: {
+        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
+      },
+    }, true);
+  }
+
+  async getShopifyProductsByIds(data: GetShopifyProductsByIdsRequest): Promise<GetShopifyProductsByIdsResponse> {
+    return this.request<GetShopifyProductsByIdsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getShopifyProductsByIds', {
+      method: 'POST',
+      headers: {
+        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
+      },
+      body: JSON.stringify(data),
     }, true);
   }
 }

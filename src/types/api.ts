@@ -227,3 +227,45 @@ export interface GetCreatorDashboardSummaryResponse {
   result?: CreatorDashboardSummary;
   [key: string]: unknown;
 }
+
+// Shopify Products Types
+export interface ShopifyProduct {
+  id: string;
+  title: string;
+  handle: string;
+  status: string;
+  productType: string;
+  images?: string[];
+}
+
+export interface GetShopifyProductsResponse {
+  productCollection: {
+    success: boolean;
+    data: ShopifyProduct[];
+    total: number;
+  };
+}
+
+// Product Collections Types
+export interface ProductCollection {
+  id: string;
+  name: string;
+  handle: string;
+  description: string;
+  productIds: string[];
+  createdAt: number;
+  updatedAt: number;
+  createdBy: string;
+}
+
+export interface GetProductCollectionsResponse {
+  productCollections: ProductCollection[];
+}
+
+export interface GetShopifyProductsByIdsRequest {
+  ids: string[];
+}
+
+export interface GetShopifyProductsByIdsResponse {
+  products: ShopifyProduct[];
+}

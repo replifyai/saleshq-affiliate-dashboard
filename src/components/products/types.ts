@@ -9,12 +9,14 @@ export interface SalesDataPoint {
 export interface Product {
   id: string;
   name: string;
+  handle: string;
   category: string;
   commission: number;
   referralDiscount: number;
   performance: number;
   status: 'active' | 'paused' | 'inactive';
   image?: string;
+  images?: string[];
   description?: string;
   lastUpdated: string;
   isFavorite?: boolean;
