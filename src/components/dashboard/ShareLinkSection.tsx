@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useSnackbar } from '@/components/snackbar';
-import { Facebook, Linkedin, MessageCircle, Copy } from 'lucide-react';
+import { Copy } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
 import LockOverlay from '@/components/LockOverlay';
 
@@ -63,32 +63,6 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
     showSuccess(message);
   };
 
-  const socialShares = [
-    {
-      name: 'Facebook',
-      icon: Facebook,
-      color: 'text-blue-600 hover:text-blue-700',
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-    },
-    {
-      name: 'LinkedIn',
-      icon: Linkedin,
-      color: 'text-blue-700 hover:text-blue-800',
-      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
-    },
-    {
-      name: 'WhatsApp',
-      icon: MessageCircle,
-      color: 'text-green-600 hover:text-green-700',
-      url: `https://wa.me/?text=${encodeURIComponent(shareUrl)}`,
-    },
-  ];
-
-  const handleSocialShare = (url: string) => {
-    if (isLocked) return;
-    window.open(url, '_blank', 'width=600,height=400');
-  };
-
   return (
     <div className={cn('relative overflow-hidden rounded-xl space-y-5 sm:space-y-8', className)}>
       <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 rounded-xl blur-xl"></div>
@@ -100,32 +74,6 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Share & Earn</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">Spread the word and earn more</p>
           </div>
-          {/* Social Media Share Buttons - Compact Row */}
-          {/* <div>
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              {socialShares.map((social, index) => (
-                <button
-                  key={social.name}
-                  onClick={() => handleSocialShare(social.url)}
-                  className={cn(
-                    'group bg-gradient-to-br from-yellow-500/20 to-yellow-500/5relative p-3 rounded-lg transition-all duration-300 hover:scale-110 shadow-md hover:shadow-lg',
-                    'bg-card/60 backdrop-blur-sm border border-border/50 hover:border-primary/30',
-                    'flex items-center justify-center',
-                    social.color,
-                    isLocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''
-                  )}
-                  aria-label={`Share on ${social.name}`}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                  disabled={isLocked}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative w-5 h-5 flex items-center justify-center">
-                    <social.icon className="w-5 h-5" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div> */}
         </div>
 
         {/* Referral Code and Link in Grid Layout */}

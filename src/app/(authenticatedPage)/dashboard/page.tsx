@@ -167,9 +167,6 @@ export default function DashboardPage() {
           </p>
         )}
 
-        {/* Analytics Overview */}
-        {/* <AnalyticsOverviewSection /> */}
-
         {/* Featured Products */}
         {/* <FeaturedProductsSection /> */}
       </div>

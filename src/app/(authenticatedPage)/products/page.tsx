@@ -18,11 +18,6 @@ interface SimpleProductCardProps {
   onShare?: (product: Product) => void;
 }
 
-interface SimpleCategoryCardProps {
-  category: Category;
-  onClick: () => void;
-}
-
 interface SimpleCollectionCardProps {
   collection: ProductCollection;
   productCount: number;
@@ -120,30 +115,6 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
             <span>Share</span>
           </button>
         )}
-      </div>
-    </div>
-  );
-};
-
-const SimpleCategoryCard: React.FC<SimpleCategoryCardProps> = ({ category, onClick }) => {
-  return (
-    <div 
-      onClick={onClick}
-      className="group cursor-pointer bg-card border border-border/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/20 relative overflow-hidden"
-    >
-      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Package size={64} />
-      </div>
-      
-      <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-        {category.name}
-      </h3>
-      <p className="text-muted-foreground mb-4">
-        {category.productCount} Products
-      </p>
-      
-      <div className="flex items-center text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-        View Collection <ArrowLeft className="ml-2 rotate-180" size={16} />
       </div>
     </div>
   );
@@ -252,7 +223,6 @@ const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
-  const [listHeight, setListHeight] = useState(500);
 
   // Responsive columns: 4 on desktop, 2 on mobile
   const getColumnCount = useCallback((width: number) => {
@@ -270,7 +240,6 @@ const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
 
     const updateDimensions = () => {
       setContainerWidth(container.offsetWidth);
-      setListHeight(Math.max(500, window.innerHeight - 300));
     };
 
     updateDimensions();
@@ -374,6 +343,7 @@ const ProductsPage: React.FC = () => {
     };
 
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Derive categories from products
@@ -645,7 +615,7 @@ const ProductsPage: React.FC = () => {
                   </div>
                   <h3 className="text-lg font-medium text-foreground">No products found</h3>
                   <p className="text-muted-foreground">
-                    Try adjusting your search or filters to find what you're looking for.
+                    Try adjusting your search or filters to find what you&apos;re looking for.
                   </p>
                   <button 
                     onClick={() => {
