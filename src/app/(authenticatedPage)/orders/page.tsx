@@ -266,21 +266,21 @@ export default function OrdersPage() {
           <OrdersEmptyState />
         ) : (
           <>
-            {/* Filters */}
-            <OrdersFilters
-              paymentStatus={paymentStatusFilter}
-              orderNumber={orderNumberFilter}
-              onPaymentStatusChange={setPaymentStatusFilter}
-              onOrderNumberChange={setOrderNumberFilter}
-              onClearFilters={handleClearFilters}
-            />
-
-            {/* Sort */}
-            <OrdersSort
-              sortBy={sortBy}
-              sortDirection={sortDirection}
-              onSortChange={handleSortChange}
-            />
+            {/* Filters & Sort - Single Line */}
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <OrdersFilters
+                paymentStatus={paymentStatusFilter}
+                orderNumber={orderNumberFilter}
+                onPaymentStatusChange={setPaymentStatusFilter}
+                onOrderNumberChange={setOrderNumberFilter}
+                onClearFilters={handleClearFilters}
+              />
+              <OrdersSort
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                onSortChange={handleSortChange}
+              />
+            </div>
 
             {/* Orders Table */}
             <OrdersTable

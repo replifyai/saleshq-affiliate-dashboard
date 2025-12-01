@@ -64,12 +64,12 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
 
   return (
     <div 
-      className="group relative bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+      className="group relative bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Area - Handle actual images vs emoji placeholder */}
-      <div className="aspect-[4/3] bg-muted/30 flex items-center justify-center relative overflow-hidden">
+      <div className="aspect-square bg-muted/30 flex items-center justify-center relative overflow-hidden">
         {currentImage && currentImage.startsWith('http') ? (
           <img 
             src={currentImage} 
@@ -77,19 +77,19 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
             className="w-full h-full object-cover transition-opacity duration-300"
           />
         ) : (
-          <div className="text-6xl transform group-hover:scale-110 transition-transform duration-500">
+          <div className="text-4xl transform group-hover:scale-110 transition-transform duration-500">
             {currentImage || '📦'}
           </div>
         )}
         
         {/* Slideshow Indicators (dots) */}
         {images.length > 1 && isHovered && (
-          <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10">
+          <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1 z-10">
             {images.map((_, idx) => (
               <div 
                 key={idx}
                 className={cn(
-                  "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                  "w-1 h-1 rounded-full transition-all duration-300",
                   idx === currentImageIndex ? "bg-white scale-110" : "bg-white/50"
                 )}
               />
@@ -101,12 +101,12 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
-      <div className="p-5">
-        <div className="mb-4">
-          <div className="text-xs font-medium text-primary mb-1 uppercase tracking-wider opacity-80">
+      <div className="p-2.5 sm:p-3 flex flex-col flex-1">
+        <div className="mb-2 flex-1">
+          <div className="text-[10px] sm:text-xs font-medium text-primary mb-0.5 uppercase tracking-wider opacity-80 truncate">
             {product.category}
           </div>
-          <h3 className="font-bold text-lg text-foreground leading-tight line-clamp-2">
+          <h3 className="font-semibold text-xs sm:text-sm text-foreground leading-tight line-clamp-2">
             {product.name}
           </h3>
         </div>
@@ -114,10 +114,10 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
         {showShare && (
           <button
             onClick={() => onShare?.(product)}
-            className="w-full flex items-center justify-center gap-2 bg-primary text-black py-2.5 px-4 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90"
+            className="w-full flex items-center justify-center gap-1.5 bg-primary text-black py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-transform active:scale-95 hover:bg-primary/90"
           >
-            <Share2 size={18} />
-            <span>Share Product</span>
+            <Share2 size={14} />
+            <span>Share</span>
           </button>
         )}
       </div>
@@ -180,8 +180,8 @@ const SimpleCollectionCard: React.FC<SimpleCollectionCardProps> = ({ collection,
 
 // --- Virtualized Grid Component ---
 
-const GUTTER_SIZE = 24; // gap-6 = 1.5rem = 24px
-const ROW_HEIGHT = 420; // Card height + gutter to prevent overlap
+const GUTTER_SIZE = 16; // gap-4 = 1rem = 16px
+const ROW_HEIGHT = 300; // Compact card height + gutter
 
 interface VirtualizedProductGridProps {
   products: Product[];
@@ -254,12 +254,10 @@ const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
   const [containerWidth, setContainerWidth] = useState(0);
   const [listHeight, setListHeight] = useState(500);
 
-  // Calculate columns based on container width - default to 4 columns
+  // Responsive columns: 4 on desktop, 2 on mobile
   const getColumnCount = useCallback((width: number) => {
-    if (width >= 900) return 4;  // 4 columns for most screens
-    if (width >= 640) return 3;  // 3 columns for tablets
-    if (width >= 480) return 2;  // 2 columns for large phones
-    return 1;                    // 1 column for small phones
+    if (width >= 768) return 4;  // Desktop: 4 cards
+    return 2;                     // Mobile: 2 cards
   }, []);
 
   const columnCount = useMemo(() => getColumnCount(containerWidth), [containerWidth, getColumnCount]);
@@ -553,84 +551,83 @@ const ProductsPage: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background p-6 lg:p-10 overflow-hidden">
+    <div className="h-screen flex flex-col bg-background p-4 sm:p-6 lg:p-10 overflow-hidden">
       <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
         
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-2">
+        <div className="mb-4 sm:mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground mb-1 sm:mb-2">
             Marketplace
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
             Discover and share premium products with your audience.
           </p>
         </div>
 
-        {/* Tab Navigation and Filters */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div className="flex space-x-1 bg-muted/30 p-1 rounded-xl w-fit">
-            <button
-              onClick={() => {
-                setActiveTab('all');
-                setSelectedCollection(null);
-              }}
-              className={cn(
-                "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                activeTab === 'all' 
-                  ? "bg-background text-foreground shadow-sm" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              )}
-            >
-              All Products
-            </button>
-            <button
-              onClick={() => setActiveTab('collections')}
-              className={cn(
-                "px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                activeTab === 'collections'
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              )}
-            >
-              Collections
-            </button>
-          </div>
+        {/* Tab Navigation */}
+        <div className="flex space-x-0.5 bg-muted/30 p-0.5 rounded-lg w-fit mb-3">
+          <button
+            onClick={() => {
+              setActiveTab('all');
+              setSelectedCollection(null);
+            }}
+            className={cn(
+              "px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200",
+              activeTab === 'all' 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            )}
+          >
+            Products
+          </button>
+          <button
+            onClick={() => setActiveTab('collections')}
+            className={cn(
+              "px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-all duration-200",
+              activeTab === 'collections'
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            )}
+          >
+            Collections
+          </button>
+        </div>
 
-          {activeTab === 'all' && (
-            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-              </div>
-              <div className="relative w-full sm:w-48">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <select
-                  value={productTypeFilter}
-                  onChange={(e) => setProductTypeFilter(e.target.value)}
-                  className="w-full pl-9 pr-8 py-2.5 rounded-xl border border-border bg-card text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                >
-                  <option value="all">All Types</option>
-                  {categories.map((cat) => (
-                    <option key={cat.name} value={cat.name}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
+        {/* Search and Filter Row */}
+        {activeTab === 'all' && (
+          <div className="flex flex-row gap-2 mb-4">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-border bg-card text-xs focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+            <div className="relative w-[120px] sm:w-[140px]">
+              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <select
+                value={productTypeFilter}
+                onChange={(e) => setProductTypeFilter(e.target.value)}
+                className="w-full pl-8 pr-6 py-1.5 rounded-lg border border-border bg-card text-xs appearance-none focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all"
+              >
+                <option value="all">All Types</option>
+                {categories.map((cat) => (
+                  <option key={cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="h-3 w-3 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Content Area */}
         <div className="flex-1 min-h-0 animate-in fade-in slide-in-from-bottom-4 duration-500">

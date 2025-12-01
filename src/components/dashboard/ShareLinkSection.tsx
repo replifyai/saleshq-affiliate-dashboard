@@ -95,13 +95,13 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
       <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border/50">
         <LockOverlay isLocked={isLocked} message={lockMessage} roundedClassName="rounded-3xl" />
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0 sm:space-x-2 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2 mb-3 sm:mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Share & Earn</h2>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Share & Earn</h2>
             <p className="text-xs sm:text-sm text-muted-foreground">Spread the word and earn more</p>
           </div>
           {/* Social Media Share Buttons - Compact Row */}
-          <div>
+          {/* <div>
             <div className="flex items-center justify-center space-x-2 sm:space-x-3">
               {socialShares.map((social, index) => (
                 <button
@@ -125,7 +125,7 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Referral Code and Link in Grid Layout */}

@@ -21,19 +21,16 @@ const OrdersSort: React.FC<OrdersSortProps> = ({
   ];
 
   return (
-    <div className="flex items-center gap-2 mb-6">
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <ArrowUpDown className="w-4 h-4" />
-        <span>Sort by</span>
-      </div>
+    <div className="flex items-center gap-1.5">
+      <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
       
       <select
         value={sortBy}
         onChange={(e) => onSortChange(e.target.value, sortDirection)}
         className={cn(
-          'px-3 py-2 text-sm rounded-lg border-2 transition-all',
+          'px-2 py-1.5 text-xs rounded-lg border transition-all',
           'bg-card text-foreground',
-          'border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-20',
+          'border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30',
           'hover:border-primary/50'
         )}
       >
@@ -47,10 +44,10 @@ const OrdersSort: React.FC<OrdersSortProps> = ({
       <button
         onClick={() => onSortChange(sortBy, sortDirection === 'asc' ? 'desc' : 'asc')}
         className={cn(
-          'px-3 py-2 text-sm rounded-lg border-2 transition-all',
+          'px-2 py-1.5 text-xs rounded-lg border transition-all',
           'bg-card text-foreground border-border',
           'hover:border-primary hover:bg-primary/5',
-          'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-20'
+          'focus:outline-none focus:ring-1 focus:ring-primary/30'
         )}
         title={`Sort ${sortDirection === 'asc' ? 'Descending' : 'Ascending'}`}
       >

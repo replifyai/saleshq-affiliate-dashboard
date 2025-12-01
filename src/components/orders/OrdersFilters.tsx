@@ -34,39 +34,32 @@ const OrdersFilters: React.FC<OrdersFiltersProps> = (props) => {
   };
 
   return (
-    <div className="mb-4 sm:mb-6">
-      {/* Top bar with trigger and compact summary */}
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setIsDrawerOpen(true)}
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-card/60 px-2.5 py-1.5 text-xs',
+          'shadow-sm hover:border-primary/60 hover:bg-primary/5 hover:text-foreground transition-colors'
+        )}
+      >
+        <Filter className="h-3.5 w-3.5 text-primary" />
+        <span className="font-medium">Filter</span>
+        {hasActiveFilters && (
+          <span className="rounded-full bg-primary/20 w-2 h-2" />
+        )}
+      </button>
+
+      {hasActiveFilters && (
         <button
           type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 sm:px-4 py-1.5 text-xs sm:text-sm',
-            'shadow-sm hover:border-primary/60 hover:bg-primary/5 hover:text-foreground transition-colors'
-          )}
+          onClick={onClearFilters}
+          className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground"
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Filter className="h-3.5 w-3.5" />
-          </span>
-          <span className="font-medium tracking-tight">Filters</span>
-          {hasActiveFilters && (
-            <span className="ml-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-              Active
-            </span>
-          )}
+          <X className="h-3 w-3" />
+          <span className="hidden sm:inline">Clear</span>
         </button>
-
-        {hasActiveFilters && (
-          <button
-            type="button"
-            onClick={onClearFilters}
-            className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-muted-foreground hover:text-foreground"
-          >
-            <X className="h-3 w-3" />
-            <span>Clear all</span>
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Drawer with full filter controls */}
       <FilterDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Order filters">

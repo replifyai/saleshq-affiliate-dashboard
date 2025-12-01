@@ -45,7 +45,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
         <div className="flex flex-col items-center space-y-3">
           <div className="text-left">
             <h3 className="font-semibold text-foreground text-base text-lg flex items-center gap-2">
-              Hi {creatorName}!
+              Hi {creatorName?.split(' ')[0]}!
               {isVerified && (
                 <img
                   src="/verified.png"
@@ -54,7 +54,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
                 />
               )}
             </h3>
-            <p className="text-xs text-muted-foreground">Welcome to your affiliate dashboard</p>
           </div>
         </div>
       </div>

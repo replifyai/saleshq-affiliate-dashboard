@@ -103,10 +103,10 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
         <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
         <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border/50">
           <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Your Performance." roundedClassName="rounded-3xl" />
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Your Performance</h2>
-              <p className="text-muted-foreground">Track your affiliate performance trends</p>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-1 sm:mb-2">Your Performance</h2>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground">Track your affiliate performance trends</p>
             </div>
             <div className="hidden md:flex items-center space-x-2 px-4 py-2 bg-success/10 rounded-full">
               <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
@@ -120,11 +120,11 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
               value={totalOrders}
               tooltip="Total number of orders placed through your affiliate links"
             />
-            <StatItem 
+            {/* <StatItem 
               label="Total Coupons"
               value={totalCoupons}
               tooltip="Total number of coupons created and distributed"
-            />
+            /> */}
             <StatItem 
               label="Total Earnings"
               value={totalEarningsTillDate}
