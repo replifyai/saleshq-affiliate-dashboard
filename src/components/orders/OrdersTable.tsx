@@ -55,11 +55,11 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 
   return (
     <div className="relative w-full max-w-full rounded-3xl overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-3xl blur-xl" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#FFD100]/15 via-[#FFFAE6]/25 to-[#FFD100]/10 rounded-3xl blur-xl" />
 
-      <div className="relative bg-card/80 backdrop-blur-sm rounded-3xl border border-border/50 shadow-2xl">
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-3xl border border-[#FFD100]/40 shadow-2xl">
         {/* Header */}
-        <div className="px-4 sm:px-6 py-4 border-b border-border/50 bg-card/50">
+        <div className="px-4 sm:px-6 py-4 border-b border-[#FFD100]/30 bg-[#FFFAE6]/30">
           <h2 className="text-lg sm:text-xl font-semibold text-foreground">Order History</h2>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Track your earnings and order performance
@@ -70,7 +70,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         <div className="hidden md:block">
           <div className="w-full max-w-full overflow-x-auto scrollbar-thin">
             <table className="min-w-full border-separate border-spacing-0">
-              <thead className="bg-card/30 border-b border-border/50">
+              <thead className="bg-[#FFFAE6]/40 border-b border-[#FFD100]/30">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <button
@@ -145,9 +145,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/50">
+              <tbody className="divide-y divide-[#FFD100]/20">
                 {paginatedOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-card/50 transition-colors">
+                  <tr key={order.id} className="hover:bg-[#FFFAE6]/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                       {order.orderNumber}
                     </td>
@@ -214,7 +214,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           {paginatedOrders.map((order) => (
             <div
               key={order.id}
-              className="rounded-2xl border border-border/60 bg-card/60 p-3 flex flex-col gap-2"
+              className="rounded-2xl border border-[#FFD100]/40 bg-gradient-to-br from-[#FFFAE6]/50 to-white p-3 flex flex-col gap-2"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

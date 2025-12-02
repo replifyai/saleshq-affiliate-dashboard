@@ -146,17 +146,17 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   return (
     <div className={cn('flex min-h-screen', className)}>
       {/* Left Panel - Background Image & Branding */}
-      <div className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-        {/* Background Image */}
+      <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden" style={{ background: 'linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%)' }}>
+        {/* Decorative pattern overlay */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 600'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%238B5CF6;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%236366F1;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='url(%23grad)' d='M0 0h800v600H0z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0 100c50 0 100 50 100 100s50 100 100 100 100-50 100-100 50-100 100-100 100 50 100 100s50 100 100 100v400H0V200z'/%3E%3C/svg%3E")`,
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 600'%3E%3Cpath fill='%23231F20' fill-opacity='0.1' d='M0 100c50 0 100 50 100 100s50 100 100 100 100-50 100-100 50-100 100-100 100 50 100 100s50 100 100 100v400H0V200z'/%3E%3C/svg%3E")`,
           }}
         />
         
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-start px-8 xl:px-12 text-white">
+        <div className="relative z-10 flex flex-col justify-center items-start px-8 xl:px-12 text-[#231F20]">
           <div className="space-y-3">
             <h2 className="text-xs sm:text-sm font-medium uppercase tracking-wider opacity-75">
               JOIN THE PROGRAM
@@ -164,7 +164,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
             <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-snug">
               AFFILIATE PROGRAM
             </h3>
-            <p className="text-sm sm:text-base opacity-90 mt-3 sm:mt-4 max-w-md">
+            <p className="text-sm sm:text-base opacity-80 mt-3 sm:mt-4 max-w-md">
               Start your journey as a creator and earn with us
             </p>
           </div>
@@ -257,7 +257,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
                       ref={(el: HTMLInputElement | null) => {
                         otpInputsRef.current[index] = el;
                       }}
-                      className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl border border-white bg-gray-800 text-white text-center text-lg sm:text-xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-white/80"
+                      className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-[#FFD100] bg-[#FFFAE6] text-foreground text-center text-lg sm:text-xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-[#FFD100]/50"
                     />
                   ))}
                 </div>

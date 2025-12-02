@@ -16,7 +16,7 @@ interface ScheduleSectionProps {
 
 const ScheduleItem: React.FC<ScheduleItemProps> = ({ date, title, subtitle, time }) => {
   return (
-    <div className="flex items-center justify-between p-4 rounded-xl hover:bg-secondary/10 transition-colors group">
+    <div className="flex items-center justify-between p-4 rounded-xl hover:bg-[#FFFAE6]/50 transition-colors group">
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center flex-shrink-0 group-hover:bg-secondary/30 transition-colors">
           <span className="text-lg font-bold text-foreground">{date}</span>
@@ -51,7 +51,7 @@ const ScheduleSection: React.FC<ScheduleSectionProps> = ({ className }) => {
   ];
 
   return (
-    <div className={cn('bg-card rounded-2xl p-6 shadow-md border border-border', className)}>
+    <div className={cn('bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl p-6 shadow-md border border-[#FFD100]/40', className)}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-foreground">Schedule</h2>
         <button className="text-sm text-primary hover:text-primary-hover font-medium transition-colors">

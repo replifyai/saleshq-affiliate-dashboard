@@ -55,9 +55,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border w-full h-full max-h-full rounded-none shadow-2xl overflow-y-auto scrollbar-hide-mobile sm:h-auto sm:max-h-[85vh] sm:max-w-3xl sm:rounded-2xl sm:mx-4">
-        <div className="flex items-start justify-between px-3 py-2.5 border-b border-border/50 sm:px-5 sm:py-3.5">
+      <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/80 to-white border border-[#FFD100]/40 w-full h-full max-h-full rounded-none shadow-2xl overflow-y-auto scrollbar-hide-mobile sm:h-auto sm:max-h-[85vh] sm:max-w-3xl sm:rounded-2xl sm:mx-4">
+        <div className="flex items-start justify-between px-3 py-2.5 border-b border-[#FFD100]/30 bg-[#FFFAE6]/30 sm:px-5 sm:py-3.5">
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base sm:text-xl font-semibold text-foreground">
@@ -82,7 +82,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
         <div className="px-3 py-3 space-y-3 sm:px-5 sm:py-4 sm:space-y-3">
           {/* Compact summary — 2 cards per row, extra text trimmed on mobile */}
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <div className="bg-background/60 rounded-xl border border-border/60 p-2.5 sm:p-4 text-xs sm:text-sm">
+            <div className="bg-[#FFFAE6]/50 rounded-xl border border-[#FFD100]/30 p-2.5 sm:p-4 text-xs sm:text-sm">
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Total</div>
               <div className="text-base sm:text-lg font-semibold text-foreground">
                 {formatCurrency(order.totalAmount)}
@@ -91,7 +91,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
                 Subtotal {formatCurrency(order.subtotalAmount)} · Shipping {formatCurrency(order.shippingAmount)}
               </div>
             </div>
-            <div className="bg-background/60 rounded-xl border border-border/60 p-2.5 sm:p-4 text-xs sm:text-sm">
+            <div className="bg-[#FFFAE6]/50 rounded-xl border border-[#FFD100]/30 p-2.5 sm:p-4 text-xs sm:text-sm">
               <div className="text-xs text-muted-foreground uppercase tracking-wide">Commission</div>
               <div className="text-base sm:text-lg font-semibold text-success">
                 {formatCurrency(order.commissionAmount)}
@@ -120,7 +120,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
 
           {/* Customer & payment cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5">
-            <div className="bg-background/40 rounded-xl border border-border/60 p-3 sm:p-3.5 text-xs sm:text-sm">
+            <div className="bg-[#FFFAE6]/40 rounded-xl border border-[#FFD100]/30 p-3 sm:p-3.5 text-xs sm:text-sm">
               <h3 className="text-sm font-semibold text-foreground mb-1.5 sm:mb-2">Customer</h3>
               <div className="space-y-1">
                 <div className="font-medium">
@@ -137,7 +137,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
               </div>
             </div>
 
-            <div className="bg-background/40 rounded-xl border border-border/60 p-3 sm:p-3.5 text-xs sm:text-sm">
+            <div className="bg-[#FFFAE6]/40 rounded-xl border border-[#FFD100]/30 p-3 sm:p-3.5 text-xs sm:text-sm">
               <h3 className="text-sm font-semibold text-foreground mb-1.5 sm:mb-2">Payment</h3>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
           </div>
 
           {/* Line Items */}
-          <div className="bg-background/40 rounded-xl border border-border/60 p-3 sm:p-3.5">
+          <div className="bg-[#FFFAE6]/40 rounded-xl border border-[#FFD100]/30 p-3 sm:p-3.5">
             <h3 className="text-sm font-semibold text-foreground mb-2.5 sm:mb-3">Items</h3>
 
             {/* Compact list on mobile */}

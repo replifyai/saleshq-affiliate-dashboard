@@ -35,13 +35,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
   return (
     <aside
       className={cn(
-        'bg-card flex flex-col h-full max-h-screen z-20 overflow-y-auto',
+        'bg-gradient-to-b from-[#FFFAE6]/50 to-white flex flex-col h-full max-h-screen z-20 overflow-y-auto border-r border-[#FFD100]/30',
         className
       )}
     >
 
       {/* Profile Section */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-[#FFD100]/30">
         <div className="flex flex-col items-center space-y-3">
           <div className="text-left">
             <h3 className="font-semibold text-foreground text-base text-lg flex items-center gap-2">
@@ -68,8 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
                 className={cn(
                   'w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 touch-manipulation',
                   item.active
-                    ? 'bg-primary text-black shadow-md'
-                    : 'text-muted-foreground hover:bg-secondary/20 hover:text-foreground active:bg-secondary/30'
+                    ? 'bg-primary text-[#231F20] shadow-md border border-[#FFD100]'
+                    : 'text-muted-foreground hover:bg-[#FFFAE6] hover:text-foreground active:bg-[#FFFAE6]/70'
                 )}
               >
                 <item.icon className="w-5 h-5" />
@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       </nav>
 
       {/* Logout Section */}
-      <div className="p-6 border-t border-border">
+      <div className="p-6 border-t border-[#FFD100]/30">
         <button
           onClick={() => setShowLogoutConfirm(true)}
           className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all duration-200 font-medium"
@@ -95,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowLogoutConfirm(false)}>
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" />
           
           {/* Modal */}
           <div 

@@ -17,7 +17,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isOpen, onClose, title = 'F
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300',
+          'fixed inset-0 z-40 bg-[#231F20]/30 backdrop-blur-sm transition-opacity duration-300',
           !isOpen && 'pointer-events-none opacity-0',
           isOpen && 'opacity-100'
         )}
@@ -28,7 +28,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isOpen, onClose, title = 'F
       {/* Drawer */}
       <aside
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full max-w-md transform bg-card shadow-2xl border-l border-border',
+          'fixed inset-y-0 right-0 z-50 w-full max-w-md transform bg-gradient-to-br from-[#FFFAE6]/80 to-white shadow-2xl border-l border-[#FFD100]/40',
           'transition-transform duration-300 ease-out',
           'flex flex-col',
           isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -36,7 +36,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isOpen, onClose, title = 'F
         aria-label="Filters"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border/60">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[#FFD100]/30 bg-[#FFFAE6]/30">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Filter className="h-4 w-4" />
@@ -51,7 +51,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({ isOpen, onClose, title = 'F
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-card/40 text-muted-foreground hover:bg-primary/10 hover:text-foreground transition-colors"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#FFD100]/50 bg-white text-muted-foreground hover:bg-[#FFFAE6] hover:text-foreground transition-colors"
             aria-label="Close filters"
           >
             <X className="h-4 w-4" />

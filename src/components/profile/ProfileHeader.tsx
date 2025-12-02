@@ -22,7 +22,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onCancel,
 }) => {
   return (
-    <div className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-sm">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-xl border border-[#FFD100]/40 p-4 sm:p-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4 sm:space-x-6">
           <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-black text-xl sm:text-2xl font-bold">

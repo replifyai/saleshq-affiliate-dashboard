@@ -9,7 +9,7 @@ interface CouponStatusBadgeProps {
 const CouponStatusBadge: React.FC<CouponStatusBadgeProps> = ({ status }) => {
   const statusStyles = {
     ACTIVE: 'bg-success/20 text-success border-success',
-    INACTIVE: 'bg-muted text-muted-foreground border-border',
+    INACTIVE: 'bg-muted text-muted-foreground border-[#FFD100]/30',
     PENDING: 'bg-warning/20 text-warning border-warning',
     EXPIRED: 'bg-destructive/20 text-destructive border-destructive',
   };

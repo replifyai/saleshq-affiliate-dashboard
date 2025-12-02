@@ -253,7 +253,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                       ref={(el: HTMLInputElement | null) => {
                         otpInputsRef.current[index] = el;
                       }}
-                      className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl border border-white bg-gray-800 text-white text-center text-lg sm:text-xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-white/80"
+                      className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-[#FFD100] bg-[#FFFAE6] text-foreground text-center text-lg sm:text-xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-[#FFD100]/50"
                     />
                   ))}
                 </div>

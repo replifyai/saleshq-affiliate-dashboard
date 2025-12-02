@@ -23,7 +23,7 @@ const PendingApproval: React.FC = () => {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center px-4 py-6 sm:py-10">
       <div className="max-w-xl w-full">
-        <div className="bg-card/80 backdrop-blur-sm border border-border/60 rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
+        <div className="bg-gradient-to-br from-[#FFFAE6]/80 to-white backdrop-blur-sm border border-[#FFD100]/40 rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-3 py-1 text-xs font-medium text-secondary-foreground">
             <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
             <span>Account pending review</span>
@@ -45,7 +45,7 @@ const PendingApproval: React.FC = () => {
           </div>
 
           <div className="grid gap-3 sm:gap-5 sm:grid-cols-3">
-            <div className="flex flex-col gap-2 rounded-2xl bg-secondary/10 p-3 sm:p-4">
+            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
               <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <ShieldCheck className="h-4 w-4" />
               </div>
@@ -62,7 +62,7 @@ const PendingApproval: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 rounded-2xl bg-secondary/10 p-3 sm:p-4">
+            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
               <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Clock className="h-4 w-4" />
               </div>
@@ -79,7 +79,7 @@ const PendingApproval: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 rounded-2xl bg-secondary/10 p-3 sm:p-4">
+            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
               <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Sparkles className="h-4 w-4" />
               </div>

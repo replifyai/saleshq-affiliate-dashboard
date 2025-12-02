@@ -24,8 +24,8 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
   return (
     <div className="group relative overflow-hidden h-full rounded-3xl">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <div className="relative bg-card/60 backdrop-blur-sm border border-border/50 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFD100]/15 to-[#FFFAE6]/30 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/50 to-white/90 backdrop-blur-sm border border-[#FFD100]/40 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#FFD100]/60 transition-all duration-300 h-full flex flex-col">
         <div className="aspect-square bg-gradient-to-br from-secondary/10 to-primary/10 overflow-hidden relative">
           <img
             src={product.image}
@@ -66,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
 const CustomLeftArrow = ({ onClick }: { onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white/95 hover:bg-white shadow-lg hover:shadow-xl backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 border border-primary/20"
+    className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white hover:bg-[#FFFAE6] shadow-lg hover:shadow-xl backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 border border-[#FFD100]/50"
     aria-label="Previous products"
   >
     <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@ const CustomLeftArrow = ({ onClick }: { onClick?: () => void }) => (
 const CustomRightArrow = ({ onClick }: { onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white/95 hover:bg-white shadow-lg hover:shadow-xl backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 border border-primary/20"
+    className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 bg-white hover:bg-[#FFFAE6] shadow-lg hover:shadow-xl backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 border border-[#FFD100]/50"
     aria-label="Next products"
   >
     <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,8 +274,8 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
         }
       `}</style>
       <div className={cn('relative overflow-hidden rounded-3xl', className)}>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 rounded-3xl blur-xl"></div>
-        <div className="relative bg-card/80 backdrop-blur-sm rounded-3xl p-8 border border-border/50 shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FFD100]/15 via-[#FFFAE6]/25 to-[#FFD100]/10 rounded-3xl blur-xl"></div>
+        <div className="relative bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-3xl p-8 border border-[#FFD100]/40 shadow-2xl">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3">
               <div>
@@ -329,7 +329,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
       {/* Share Modal */}
       {shareModalOpen && selectedProduct && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#231F20]/30 backdrop-blur-sm"
           onClick={() => setShareModalOpen(false)}
         >
           <div
@@ -360,7 +360,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
               />
               <button
                 onClick={handleCopyLink}
-                className="bg-accent hover:bg-accent-hover text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-[#FFD100] hover:bg-[#e6bc00] text-[#231F20] px-4 py-2 rounded-lg transition-colors font-medium"
               >
                 Copy
               </button>
@@ -377,7 +377,7 @@ const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
                   <div className={cn(
                     'w-12 h-12 rounded-full flex items-center justify-center',
                     platform === 'facebook' && 'bg-blue-600 text-white',
-                    platform === 'twitter' && 'bg-gray-900 text-white',
+                    platform === 'twitter' && 'bg-[#231F20] text-white',
                     platform === 'linkedin' && 'bg-blue-700 text-white',
                     platform === 'whatsapp' && 'bg-green-600 text-white'
                   )}>

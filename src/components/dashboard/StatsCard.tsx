@@ -19,7 +19,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('bg-card rounded-2xl p-6 shadow-md border border-border', className)}>
+    <div className={cn('bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl p-6 shadow-md border border-[#FFD100]/40 hover:border-[#FFD100]/60 transition-all', className)}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground font-medium">{title}</p>

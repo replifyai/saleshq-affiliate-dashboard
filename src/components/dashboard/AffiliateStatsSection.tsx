@@ -16,8 +16,8 @@ interface StatItemProps {
 
 const StatItem: React.FC<StatItemProps> = ({ label, value, showCopy, onCopy, tooltip }) => {
   return (
-    <div className="relative group rounded-2xl h-full bg-gradient-to-br from-primary/20 to-primary/5">
-      <div className="relative bg-card/60 backdrop-blur-sm rounded-2xl p-6 border border-border/50 shadow-lg hover:shadow-xl hover:border-primary/30 transition-all duration-300 h-full flex flex-col justify-between min-h-[120px]">
+    <div className="relative group rounded-2xl h-full bg-gradient-to-br from-[#FFD100]/25 to-[#FFFAE6]/40">
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/70 to-white/90 backdrop-blur-sm rounded-2xl p-6 border border-[#FFD100]/50 shadow-lg hover:shadow-xl hover:border-[#FFD100] transition-all duration-300 h-full flex flex-col justify-between min-h-[120px]">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground font-medium">{label}</span>
@@ -100,8 +100,8 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
 
       {/* Stats Section */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 rounded-3xl"></div>
-        <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FFD100]/15 via-[#FFFAE6]/25 to-[#FFD100]/10 rounded-3xl"></div>
+        <div className="relative bg-gradient-to-br from-[#FFFAE6]/50 to-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-[#FFD100]/40">
           <LockOverlay isLocked={isLocked} message="Complete all profile steps to unlock Your Performance." roundedClassName="rounded-3xl" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
             <div>
@@ -155,16 +155,16 @@ const AffiliateStatsSection: React.FC<AffiliateStatsSectionProps> = ({
       </div>
 
       {/* Tooltips */}
-      <Tooltip id="tooltip-total-orders" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-total-coupons" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
-      <Tooltip id="tooltip-total-earnings" place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-orders" place="top" className="!bg-[#231F20] !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-coupons" place="top" className="!bg-[#231F20] !text-white !text-xs !max-w-xs !z-[9999]" />
+      <Tooltip id="tooltip-total-earnings" place="top" className="!bg-[#231F20] !text-white !text-xs !max-w-xs !z-[9999]" />
       
       {/* Dynamic Tooltips */}
       {earningsStatusMap && Object.keys(earningsStatusMap).map((key) => (
-        <Tooltip key={`tooltip-earnings-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}`} place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+        <Tooltip key={`tooltip-earnings-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}`} place="top" className="!bg-[#231F20] !text-white !text-xs !max-w-xs !z-[9999]" />
       ))}
       {ordersStatusMap && Object.keys(ordersStatusMap).map((key) => (
-        <Tooltip key={`tooltip-orders-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}-orders`} place="top" className="!bg-gray-900 !text-white !text-xs !max-w-xs !z-[9999]" />
+        <Tooltip key={`tooltip-orders-${key}`} id={`tooltip-${formatLabel(key).replace(/\s+/g, '-').toLowerCase()}-orders`} place="top" className="!bg-[#231F20] !text-white !text-xs !max-w-xs !z-[9999]" />
       ))}
 
     </div>

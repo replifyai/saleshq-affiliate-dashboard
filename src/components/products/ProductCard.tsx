@@ -9,7 +9,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => (
   <div 
-    className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] cursor-pointer group"
+    className="bg-gradient-to-br from-[#FFFAE6]/60 to-white border border-[#FFD100]/40 rounded-xl p-6 hover:shadow-lg hover:border-[#FFD100]/60 transition-all duration-300 hover:translate-y-[-2px] cursor-pointer group"
     onClick={onClick}
   >
     <div className="flex items-start justify-between mb-4">

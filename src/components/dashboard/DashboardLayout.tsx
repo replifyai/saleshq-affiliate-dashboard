@@ -77,7 +77,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           onClick={closeSidebar}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" />
           
           {/* Drawer */}
           <div
@@ -104,9 +104,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-card">
+      <div className="flex-1 flex flex-col bg-white">
         {/* Mobile Header with Hamburger Menu */}
-        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-border bg-card">
+        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-[#FFD100]/30 bg-white">
           <button
             onClick={toggleSidebar}
             className="p-1.5 rounded-lg hover:bg-secondary/20 transition-colors"

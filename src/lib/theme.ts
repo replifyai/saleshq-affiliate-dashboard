@@ -1,4 +1,4 @@
-export type Theme = 'dark-premium';
+export type Theme = 'light';
 
 export interface ThemeConfig {
   name: string;
@@ -19,26 +19,26 @@ export interface ThemeConfig {
 }
 
 export const themeConfigs: Record<Theme, ThemeConfig> = {
-  'dark-premium': {
-    name: 'Ark Premium',
-    description: 'Premium dark theme with golden highlights',
+  'light': {
+    name: 'SalesHQ Light',
+    description: 'Clean light theme with golden yellow highlights',
     colors: {
-      bg: '#000000',
-      text: '#FFFFFF',
-      primary: '#edc200',
-      secondary: '#000000',
-      accent: '#ffefca',
-      card: '#111111',
-      border: 'rgba(255,255,255,0.06)',
-      muted: 'rgba(255,255,255,0.60)',
+      bg: '#FFFFFF',
+      text: 'rgba(35, 31, 32, 1)',
+      primary: '#ffda34',
+      secondary: '#FFFAE6',
+      accent: '#FFD100',
+      card: '#FFFFFF',
+      border: 'rgba(255, 209, 0, 0.5)',
+      muted: 'rgba(35, 31, 32, 0.50)',
       destructive: '#EF4444',
       success: '#10B981',
-      warning: '#edc200',
+      warning: '#ffda34',
     },
   },
 };
 
-export const defaultTheme: Theme = 'dark-premium';
+export const defaultTheme: Theme = 'light';
 
 export function applyTheme(theme: Theme) {
   if (typeof window === 'undefined') return;
@@ -51,7 +51,7 @@ export function getStoredTheme(): Theme {
   if (typeof window === 'undefined') return defaultTheme;
   
   const stored = localStorage.getItem('theme') as Theme;
-  return stored && stored === 'dark-premium' ? stored : defaultTheme;
+  return stored && stored === 'light' ? stored : defaultTheme;
 }
 
 export function storeTheme(theme: Theme) {

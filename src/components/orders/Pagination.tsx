@@ -51,7 +51,7 @@ const Pagination: React.FC<PaginationProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-3 items-stretch sm:items-center sm:flex-row sm:justify-between px-3 sm:px-4 py-3 sm:py-4 bg-card/50 border-t border-border/50 rounded-b-3xl">
+    <div className="flex flex-col gap-2 sm:gap-3 items-stretch sm:items-center sm:flex-row sm:justify-between px-3 sm:px-4 py-3 sm:py-4 bg-[#FFFAE6]/30 border-t border-[#FFD100]/30 rounded-b-3xl">
       <div className="text-[11px] sm:text-sm text-muted-foreground text-center sm:text-left">
         Showing {startItem} to {endItem} of {totalItems} orders
       </div>
@@ -83,10 +83,10 @@ const Pagination: React.FC<PaginationProps> = ({
                 className={cn(
                   'px-3 py-1 text-sm rounded-lg transition-colors',
                   page === currentPage
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-[#231F20]'
                     : page === '...'
                     ? 'text-muted-foreground cursor-default'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-[#FFFAE6]'
                 )}
               >
                 {page}

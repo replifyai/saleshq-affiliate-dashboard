@@ -65,8 +65,8 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
 
   return (
     <div className={cn('relative overflow-hidden rounded-xl space-y-5 sm:space-y-8', className)}>
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-primary/10 rounded-xl blur-xl"></div>
-      <div className="relative bg-card/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-border/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFD100]/20 via-[#FFFAE6]/30 to-[#FFD100]/15 rounded-xl blur-xl"></div>
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-[#FFD100]/40">
         <LockOverlay isLocked={isLocked} message={lockMessage} roundedClassName="rounded-3xl" />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 sm:space-x-2 mb-3 sm:mb-4">
@@ -84,14 +84,14 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
             <div className="flex items-center space-x-2">
               <div className="flex-1 relative min-w-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 text-foreground font-mono text-base sm:text-xl font-bold hover:border-primary/30 transition-all duration-300">
+                <div className="relative bg-white/80 backdrop-blur-sm border border-[#FFD100]/50 rounded-lg px-3 py-2 text-foreground font-mono text-base sm:text-xl font-bold hover:border-[#FFD100] transition-all duration-300">
                   {referralCodeDisplay}
                 </div>
               </div>
               <button
                 onClick={() => !isLocked && hasReferralCode && handleCopy(referralCodeDisplay, 'Referral code copied!')}
                 className={cn(
-                  'px-2 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90',
+                  'px-2 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-[#231F20] hover:opacity-90',
                   isLocked || !hasReferralCode ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : ''
                 )}
                 disabled={isLocked || !hasReferralCode}
@@ -107,14 +107,14 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
             <div className="flex items-center space-x-2">
               <div className="flex-1 relative min-w-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-background/50 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 text-foreground font-mono text-sm sm:text-base md:text-xl hover:border-primary/30 transition-all duration-300 truncate">
+                <div className="relative bg-white/80 backdrop-blur-sm border border-[#FFD100]/50 rounded-lg px-3 py-2 text-foreground font-mono text-sm sm:text-base md:text-xl hover:border-[#FFD100] transition-all duration-300 truncate">
                   {shareUrlDisplay}
                 </div>
               </div>
               <button
                 onClick={() => !isLocked && hasReferralCode && handleCopy(shareUrl, 'Referral link copied!')}
                 className={cn(
-                  'px-2 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-white hover:opacity-90',
+                  'px-2 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 flex items-center space-x-1 whitespace-nowrap shadow-md hover:shadow-lg hover:-translate-y-0.5 bg-primary-gradient text-[#231F20] hover:opacity-90',
                   isLocked || !hasReferralCode ? 'opacity-50 cursor-not-allowed hover:-translate-y-0' : ''
                 )}
                 disabled={isLocked || !hasReferralCode}

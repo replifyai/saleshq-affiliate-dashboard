@@ -14,11 +14,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variants = {
-      primary: 'bg-primary-gradient text-black hover:translate-y-[-2px] hover:shadow-lg focus:ring-primary',
-      secondary: 'bg-secondary-gradient text-white hover:translate-y-[-2px] hover:shadow-lg focus:ring-secondary',
-      accent: 'bg-accent-gradient text-black hover:translate-y-[-2px] hover:shadow-lg focus:ring-accent',
-      outline: 'border-2 border-primary text-primary bg-transparent hover:bg-primary hover:!text-black focus:ring-primary',
-      ghost: 'text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground focus:ring-muted'
+      primary: 'bg-primary-gradient text-[#231F20] hover:translate-y-[-2px] hover:shadow-lg focus:ring-primary',
+      secondary: 'bg-secondary-gradient text-[#231F20] border border-[#FFD100] hover:translate-y-[-2px] hover:shadow-lg focus:ring-secondary',
+      accent: 'bg-accent-gradient text-[#231F20] hover:translate-y-[-2px] hover:shadow-lg focus:ring-accent',
+      outline: 'border-2 border-[#FFD100] text-[#231F20] bg-transparent hover:bg-[#FFFAE6] focus:ring-primary',
+      ghost: 'text-muted-foreground bg-transparent hover:bg-[#FFFAE6] hover:text-foreground focus:ring-muted'
     };
 
     const sizes = {

@@ -25,7 +25,7 @@ const ChannelCard: React.FC<ChannelCardProps> = ({
   iconBg,
 }) => {
   return (
-    <div className="bg-background rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-border">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/50 to-white rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-[#FFD100]/40 hover:border-[#FFD100]/60">
       <div className="flex flex-col items-center space-y-4">
         <div className={cn('w-16 h-16 rounded-full flex items-center justify-center', iconBg)}>
           <span className="text-3xl">{icon}</span>
@@ -86,7 +86,7 @@ const ChannelsSection: React.FC<ChannelsSectionProps> = ({ className }) => {
   ];
 
   return (
-    <div className={cn('bg-card rounded-2xl p-6 shadow-md border border-border', className)}>
+    <div className={cn('bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl p-6 shadow-md border border-[#FFD100]/40', className)}>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-foreground mb-2">Channels</h2>
         <p className="text-sm text-muted-foreground">
@@ -100,9 +100,9 @@ const ChannelsSection: React.FC<ChannelsSectionProps> = ({ className }) => {
         ))}
         
         {/* Full Stats Button */}
-        <button className="bg-primary text-white rounded-2xl p-6 hover:opacity-90 transition-all duration-300 flex flex-col items-center justify-center space-y-2 group">
+        <button className="bg-primary text-[#231F20] rounded-2xl p-6 hover:opacity-90 transition-all duration-300 flex flex-col items-center justify-center space-y-2 group">
           <span className="text-lg font-bold">Full Stats</span>
-          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-[#231F20]/10 flex items-center justify-center group-hover:bg-[#231F20]/20 transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>

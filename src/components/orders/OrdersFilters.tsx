@@ -39,8 +39,8 @@ const OrdersFilters: React.FC<OrdersFiltersProps> = (props) => {
         type="button"
         onClick={() => setIsDrawerOpen(true)}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-card/60 px-2.5 py-1.5 text-xs',
-          'shadow-sm hover:border-primary/60 hover:bg-primary/5 hover:text-foreground transition-colors'
+          'inline-flex items-center gap-1.5 rounded-lg border border-[#FFD100]/50 bg-gradient-to-br from-[#FFFAE6]/50 to-white px-2.5 py-1.5 text-xs',
+          'shadow-sm hover:border-[#FFD100] hover:bg-[#FFFAE6] hover:text-foreground transition-colors'
         )}
       >
         <Filter className="h-3.5 w-3.5 text-primary" />

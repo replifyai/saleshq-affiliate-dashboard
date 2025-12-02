@@ -55,7 +55,7 @@ const ProductsFilters: React.FC<ProductsFiltersProps> = (props) => {
       <button
         type="button"
         onClick={() => setIsDrawerOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:border-primary/60 hover:bg-primary/5 hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-2 rounded-full border border-[#FFD100]/50 bg-gradient-to-br from-[#FFFAE6]/50 to-white px-3 py-1.5 text-xs sm:text-sm shadow-sm hover:border-[#FFD100] hover:bg-[#FFFAE6] hover:text-foreground transition-colors"
       >
         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Filter className="h-3.5 w-3.5" />

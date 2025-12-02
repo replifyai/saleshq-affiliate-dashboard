@@ -58,9 +58,9 @@ const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
           required={required}
           className={cn(
             'w-full px-4 py-3 rounded-xl border-2 transition-all duration-300 ease-in-out',
-            'bg-card text-foreground placeholder:text-muted-foreground',
-            'border-border focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-20',
-            'hover:border-secondary disabled:opacity-50 disabled:cursor-not-allowed',
+            'bg-gradient-to-br from-[#FFFAE6]/30 to-white text-foreground placeholder:text-muted-foreground',
+            'border-[#FFD100]/50 focus:border-[#FFD100] focus:outline-none focus:ring-2 focus:ring-[#FFD100] focus:ring-opacity-20',
+            'hover:border-[#FFD100]/70 disabled:opacity-50 disabled:cursor-not-allowed',
             error && 'border-destructive focus:border-destructive focus:ring-destructive',
             className
           )}

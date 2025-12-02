@@ -121,9 +121,9 @@ const CreateCouponModal: React.FC<CreateCouponModalProps> = ({ isOpen, onClose, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" />
       <div
-        className="relative bg-card rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-border"
+        className="relative bg-gradient-to-br from-[#FFFAE6]/80 to-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#FFD100]/40"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 space-y-4">

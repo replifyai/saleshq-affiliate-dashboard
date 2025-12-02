@@ -156,7 +156,7 @@ const OnboardingFlow: React.FC = () => {
   return (
     <div ref={containerRef} className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white border-b border-[#FFD100]/30">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           {/* Top navigation (back + skip) */}
           <div className="flex items-center justify-between">
@@ -463,7 +463,7 @@ const SocialHandlesStep: React.FC<{
               <div key={index} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-primary-gradient rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-white">{handle.platform[0]}</span>
+                    <span className="text-sm font-bold text-[#231F20]">{handle.platform[0]}</span>
                   </div>
                   <div>
                     <div className="font-semibold text-foreground">{handle.platform}</div>

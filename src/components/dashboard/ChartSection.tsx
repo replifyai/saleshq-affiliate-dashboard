@@ -19,7 +19,7 @@ const ChartSection: React.FC<ChartSectionProps> = ({ className }) => {
   ];
 
   return (
-    <div className={cn('bg-card rounded-2xl p-6 shadow-md border border-border', className)}>
+    <div className={cn('bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl p-6 shadow-md border border-[#FFD100]/40 hover:border-[#FFD100]/60 transition-all', className)}>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-foreground">Total hours spent</h2>

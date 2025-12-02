@@ -23,11 +23,11 @@ const RecentOrdersSection: React.FC<RecentOrdersSectionProps> = ({
 }) => {
   return (
     <div className={cn('relative overflow-hidden h-full rounded-3xl', className)}>
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-3xl blur-xl"></div>
-      <div className="relative bg-card/80 backdrop-blur-sm rounded-3xl p-8 border border-border/50 shadow-2xl h-full flex flex-col">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FFD100]/20 via-[#FFFAE6]/30 to-[#FFD100]/15 rounded-3xl blur-xl"></div>
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-3xl p-8 border border-[#FFD100]/40 shadow-2xl h-full flex flex-col">
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-12 h-12 rounded-2xl bg-primary-gradient flex items-center justify-center shadow-lg">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-[#231F20]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
@@ -47,7 +47,7 @@ const RecentOrdersSection: React.FC<RecentOrdersSectionProps> = ({
                 </svg>
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                <span className="text-white text-sm">📈</span>
+                <span className="text-[#231F20] text-sm">📈</span>
               </div>
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">No orders yet</h3>
@@ -68,7 +68,7 @@ const RecentOrdersSection: React.FC<RecentOrdersSectionProps> = ({
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-card/60 backdrop-blur-sm border border-border/50 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
+                <div className="relative bg-gradient-to-br from-[#FFFAE6]/50 to-white/90 backdrop-blur-sm border border-[#FFD100]/40 rounded-2xl p-6 shadow-lg hover:shadow-2xl hover:border-[#FFD100]/60 hover:-translate-y-1 transition-all duration-300">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h3 className="font-semibold text-foreground mb-1">{order.product}</h3>

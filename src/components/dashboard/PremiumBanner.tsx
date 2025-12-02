@@ -13,22 +13,22 @@ const PremiumBanner: React.FC<PremiumBannerProps> = ({ className }) => {
     <div
       className={cn(
         'relative overflow-hidden rounded-2xl p-6 shadow-md',
-        'bg-gradient-to-br from-purple-600 via-purple-500 to-amber-400',
+        'bg-gradient-to-br from-[#FFD100] via-[#ffda34] to-[#FFFAE6]',
         className
       )}
     >
       <div className="relative z-10 flex items-center justify-between">
-        <div className="space-y-2 text-white">
+        <div className="space-y-2 text-[#231F20]">
           <h3 className="text-2xl font-bold">Meet Premium</h3>
-          <p className="text-sm opacity-90">Increase your company&apos;s<br />annual revenue</p>
+          <p className="text-sm opacity-80">Increase your company&apos;s<br />annual revenue</p>
         </div>
         
         <div className="flex items-center space-x-4">
           <button
-            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-12 h-12 rounded-full bg-[#231F20]/10 backdrop-blur-sm flex items-center justify-center hover:bg-[#231F20]/20 transition-colors"
             aria-label="Play video"
           >
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-[#231F20] ml-1" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </button>

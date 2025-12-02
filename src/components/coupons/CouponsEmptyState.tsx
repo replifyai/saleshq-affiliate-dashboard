@@ -8,7 +8,7 @@ interface CouponsEmptyStateProps {
 
 const CouponsEmptyState: React.FC<CouponsEmptyStateProps> = ({ onCreateClick }) => {
   return (
-    <div className="bg-card rounded-2xl border border-border p-6 sm:p-10 text-center">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl border border-[#FFD100]/40 p-6 sm:p-10 text-center">
       <Tag className="w-10 h-10 sm:w-16 sm:h-16 text-muted-foreground mx-auto mb-3 sm:mb-4 opacity-50" />
       <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-1 sm:mb-2">No coupons yet</h3>
       <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">

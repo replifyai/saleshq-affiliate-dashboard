@@ -88,7 +88,7 @@ export function SnackbarDemo({ className }: SnackbarDemoProps) {
         </button>
       </div>
       
-      <div className="pt-4 border-t border-border">
+      <div className="pt-4 border-t border-[#FFD100]/30">
         <button
           onClick={handleMultiple}
           className="px-4 py-2 bg-accent text-accent-foreground rounded-md hover:opacity-80 transition-opacity mr-3"

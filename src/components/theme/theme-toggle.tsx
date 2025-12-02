@@ -34,7 +34,7 @@ export function SimpleThemeToggle({ className = '' }: ThemeToggleProps) {
     <button
       className={`
         p-2 rounded-lg transition-all duration-200
-        bg-card text-foreground border border-border cursor-default
+        bg-gradient-to-br from-[#FFFAE6]/60 to-white text-foreground border border-[#FFD100]/40 cursor-default
         ${className}
       `}
       title="Ark Premium Theme"
@@ -53,7 +53,7 @@ export function ThemeSelector({ className = '' }: ThemeToggleProps) {
   return (
     <div className={`relative ${className}`}>
       <div
-        className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-lg"
+        className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#FFFAE6]/60 to-white border border-[#FFD100]/40 rounded-lg"
         aria-label="Current theme"
       >
         <div className="flex gap-1">

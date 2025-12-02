@@ -27,8 +27,8 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/80 to-white border border-[#FFD100]/40 rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="text-4xl">{product.image}</div>
@@ -50,11 +50,11 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         )}
 
         <div className="grid grid-cols-2 gap-6 mb-6">
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Current Commission</div>
             <div className="text-2xl font-bold text-primary">{product.commission}%</div>
           </div>
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Referral Discount</div>
             <div className="text-2xl font-bold text-primary">{product.referralDiscount}%</div>
           </div>

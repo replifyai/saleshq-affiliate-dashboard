@@ -5,7 +5,7 @@ import type { SummaryCard } from './types';
 type SummaryCardProps = SummaryCard;
 
 const SummaryCardComponent: React.FC<SummaryCardProps> = ({ title, value, subtitle, icon, trend, trendValue }) => (
-  <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px]">
+  <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white border border-[#FFD100]/40 rounded-xl p-6 hover:shadow-lg hover:border-[#FFD100]/60 transition-all duration-300 hover:translate-y-[-2px]">
     <div className="flex items-center justify-between mb-2">
       <div className="text-2xl">{icon}</div>
       {trend && trendValue && (

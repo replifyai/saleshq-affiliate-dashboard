@@ -1,27 +1,32 @@
 @import "tailwindcss";
 @import "react-datepicker/dist/react-datepicker.css";
-/* Ark Premium Theme - Default and Only Theme */
+/* SalesHQ Light Theme */
 :root,
-[data-theme="dark-premium"] {
+[data-theme="light"] {
   /* Core */
-  --bg: #000000;              /* pure black background */
-  --text: #FFFFFF;            /* white text for max contrast */
-  --primary: #edc200;         /* brand yellow */
-  --secondary: #000000;       /* keep secondary black to stick to the two-color rule */
-  --accent: #ffefca;          /* light yellow accent */
+  --bg: #FFFFFF;              /* pure white background */
+  --text: rgba(35, 31, 32, 1);            /* dark text for readability */
+  --primary: #ffda34;         /* brand yellow */
+  --brand: rgba(255, 209, 0, 1);          /* brand yellow accent */
+  --secondary: #FFFAE6;       /* light yellow secondary */
+  --accent: #FFD100;          /* golden yellow accent */
 
   /* Mapped variables used across UI */
   --background: var(--bg);
   --foreground: var(--text);
-  --muted: rgba(255,255,255,0.60);        /* subtle muted text */
-  --muted-foreground: rgba(255,255,255,0.72);
-  --popover: #111111;                     /* slightly lighter than black for depth */
+  --muted: rgba(35, 31, 32, 0.50);        /* subtle muted text */
+  --muted-foreground: rgba(35, 31, 32, 0.65);
+  --popover: #FFFFFF;                     /* white popover */
   --popover-foreground: var(--text);
-  --card: #111111;                        /* card background */
+  --card: #FFFFFF;                        /* white card background */
   --card-foreground: var(--text);
-  --border: rgba(255,255,255,0.06);       /* faint border for separation */
-  --input: rgba(255,255,255,0.04);        /* input background */
-  --ring: rgba(252,208,11,0.28);          /* subtle yellow focus ring */
+  --border: rgba(255, 209, 0, 0.5);       /* visible yellow border */
+  --input: rgba(255, 218, 52, 0.12);      /* light yellow input background */
+  --ring: rgba(255, 209, 0, 0.50);        /* yellow focus ring */
+  
+  /* Section backgrounds */
+  --section-gradient: linear-gradient(135deg, rgba(255, 209, 0, 0.15) 0%, rgba(255, 250, 230, 0.4) 100%);
+  --card-gradient: linear-gradient(135deg, rgba(255, 209, 0, 0.08) 0%, rgba(255, 250, 230, 0.2) 100%);
 
   /* Status colors (kept semantic) */
   --destructive: #EF4444;
@@ -29,17 +34,17 @@
   --success: #10B981;                     /* green success */
   --success-foreground: #ffffff;
   --warning: var(--primary);
-  --warning-foreground: #000000;          /* black text on yellow warning */
+  --warning-foreground: rgba(35, 31, 32, 1);  /* dark text on yellow warning */
 
   /* Hovers / interactions */
-  --primary-hover: #e6c30a;               /* slightly darker yellow for hover */
-  --secondary-hover: #050505;
-  --accent-hover: #e6c30a;
+  --primary-hover: #e6c400;               /* slightly darker yellow for hover */
+  --secondary-hover: #FFF5CC;
+  --accent-hover: #e6bc00;
 
   /* Gradients */
-  --primary-gradient: linear-gradient(135deg, #fcd00b 0%, #e6c30a 100%);
-  --secondary-gradient: linear-gradient(135deg, #000000 0%, #0a0a0a 100%);
-  --accent-gradient: linear-gradient(135deg, #fcd00b 0%, #e6c30a 100%);
+  --primary-gradient: linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%);
+  --secondary-gradient: linear-gradient(135deg, #FFFAE6 0%, #FFF5CC 100%);
+  --accent-gradient: linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%);
 }
 
 @theme inline {
@@ -200,96 +205,98 @@ body {
 /* Shiny Button Styles */
 .btn-shiny {
   background: var(--primary-gradient);
-  color: white;
+  color: rgba(35, 31, 32, 1);
   border: none;
   border-radius: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px 0 rgba(255, 209, 0, 0.25);
 }
 
 .btn-shiny:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px 0 rgba(255, 209, 0, 0.35);
 }
 
 .btn-shiny-secondary {
   background: var(--secondary-gradient);
-  color: white;
-  border: none;
+  color: rgba(35, 31, 32, 1);
+  border: 1px solid var(--brand);
   border-radius: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px 0 rgba(255, 209, 0, 0.15);
 }
 
 .btn-shiny-secondary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px 0 rgba(255, 209, 0, 0.25);
 }
 
 .btn-shiny-accent {
   background: var(--accent-gradient);
-  color: white;
+  color: rgba(35, 31, 32, 1);
   border: none;
   border-radius: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px 0 rgba(255, 209, 0, 0.25);
 }
 
 .btn-shiny-accent:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 25px 0 rgba(255, 209, 0, 0.35);
 }
 
 /* Shiny Card Styles */
 .card-shiny {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255, 250, 230, 0.6) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border: 1px solid rgba(255, 209, 0, 0.5);
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(255, 209, 0, 0.12), 0 2px 4px -1px rgba(255, 209, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .card-shiny:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(255, 209, 0, 0.8);
+  box-shadow: 0 20px 25px -5px rgba(255, 209, 0, 0.18), 0 10px 10px -5px rgba(255, 209, 0, 0.1);
 }
 
 /* Shiny Badge Styles */
 .badge-shiny {
   background: var(--primary-gradient);
-  color: white;
+  color: rgba(35, 31, 32, 1);
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(255, 209, 0, 0.2);
 }
 
 .badge-shiny-secondary {
   background: var(--secondary-gradient);
-  color: white;
+  color: rgba(35, 31, 32, 1);
+  border: 1px solid var(--brand);
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(255, 209, 0, 0.1);
 }
 
 .badge-shiny-accent {
   background: var(--accent-gradient);
-  color: white;
+  color: rgba(35, 31, 32, 1);
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(255, 209, 0, 0.2);
 }
 
 /* Animations */
@@ -419,7 +426,7 @@ html {
   background-color: var(--card) !important;
   border: 2px solid var(--border) !important;
   border-radius: 8px !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 10px 25px rgba(255, 209, 0, 0.15) !important;
 }
 
 .react-datepicker__header {

@@ -20,7 +20,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
   onRemoveHandle: removeSocialMediaHandle,
 }) => {
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-xl border border-[#FFD100]/40 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-xl font-semibold text-foreground">Social Media Handles</h2>
@@ -42,7 +42,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
 
       <div className="space-y-4">
         {socialMedia.map((social, index) => (
-          <div key={index} className="flex items-center space-x-4 p-4 bg-secondary/10 rounded-lg">
+          <div key={index} className="flex items-center space-x-4 p-4 bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg">
             <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">Platform</label>
@@ -174,7 +174,7 @@ const SocialMediaSection: React.FC<SocialMediaSectionProps> = ({
             </div>
           )}
           {!isEditing && (
-            <p className="text-sm bg-secondary/10 rounded-lg p-4 inline-block">
+            <p className="text-sm bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg p-4 inline-block">
               Edit your profile to add social media handles
             </p>
           )}

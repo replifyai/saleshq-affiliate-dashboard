@@ -47,8 +47,17 @@ export default function AuthenticatedClientLayout({
     !pagesThatShouldNotShowLockOverlay.includes(pathname)
   );
 
+  // Pages that should allow access even when pending approval (e.g., onboarding to complete profile)
+  const pagesThatBypassPendingApproval = ['/onboarding'];
+  const shouldShowPendingApproval = Boolean(
+    state.isAuthenticated && 
+    isPendingApproval && 
+    pathname &&
+    !pagesThatBypassPendingApproval.includes(pathname)
+  );
+
   // If creator is pending approval, show a dedicated informative screen and hide other pages
-  if (state.isAuthenticated && isPendingApproval) {
+  if (shouldShowPendingApproval) {
     return (
       <DashboardLayout>
         <PendingApproval />

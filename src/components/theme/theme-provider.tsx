@@ -6,7 +6,7 @@ import { Theme, applyTheme, storeTheme } from '@/lib/theme';
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: 'dark';
+  resolvedTheme: 'light';
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -28,18 +28,18 @@ interface ThemeProviderProps {
 export function ThemeProvider({
   children,
 }: ThemeProviderProps) {
-  const [theme] = useState<Theme>('dark-premium');
-  const [resolvedTheme] = useState<'dark'>('dark');
+  const [theme] = useState<Theme>('light');
+  const [resolvedTheme] = useState<'light'>('light');
 
   const setTheme = (newTheme: Theme) => {
-    // Only dark-premium is available, so this is a no-op
+    // Only light theme is available
     storeTheme(newTheme);
     applyTheme(newTheme);
   };
 
   useEffect(() => {
-    // Always apply dark-premium theme
-    applyTheme('dark-premium');
+    // Always apply light theme
+    applyTheme('light');
   }, []);
 
   return (

@@ -35,7 +35,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick, classNam
 
       <div className="flex items-center space-x-3">
         <button
-          className="p-3 rounded-lg bg-card border border-border hover:bg-secondary/20 transition-colors relative"
+          className="p-3 rounded-lg bg-gradient-to-br from-[#FFFAE6]/50 to-white border border-[#FFD100]/40 hover:bg-[#FFFAE6] transition-colors relative"
           aria-label="Notifications"
         >
           <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onMenuClick, classNam
         </button>
         
         <button
-          className="p-3 rounded-lg bg-card border border-border hover:bg-secondary/20 transition-colors"
+          className="p-3 rounded-lg bg-gradient-to-br from-[#FFFAE6]/50 to-white border border-[#FFD100]/40 hover:bg-[#FFFAE6] transition-colors"
           aria-label="Settings"
         >
           <svg className="w-5 h-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">

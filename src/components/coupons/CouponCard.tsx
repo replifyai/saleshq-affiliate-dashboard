@@ -39,7 +39,7 @@ const CouponCard: React.FC<CouponCardProps> = ({ coupon }) => {
   const isPending = coupon.status === 'PENDING';
 
   return (
-    <div className="bg-card rounded-2xl border border-border p-4 sm:p-6 hover:border-primary/50 transition-all duration-300">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-2xl border border-[#FFD100]/40 p-4 sm:p-6 hover:border-[#FFD100]/60 transition-all duration-300">
       <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 sm:gap-3 mb-1">

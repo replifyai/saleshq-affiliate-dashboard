@@ -53,7 +53,7 @@ const OrderSummaryCards: React.FC<OrderSummaryCardsProps> = ({ data }) => {
       {cards.map((card, index) => (
         <div
           key={index}
-          className="bg-card/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-border/50 min-w-0"
+          className="bg-gradient-to-br from-[#FFFAE6]/60 to-white backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-[#FFD100]/40 hover:border-[#FFD100]/60 transition-all min-w-0"
         >
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">

@@ -29,9 +29,9 @@ const OrdersSort: React.FC<OrdersSortProps> = ({
         onChange={(e) => onSortChange(e.target.value, sortDirection)}
         className={cn(
           'px-2 py-1.5 text-xs rounded-lg border transition-all',
-          'bg-card text-foreground',
-          'border-border focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30',
-          'hover:border-primary/50'
+          'bg-gradient-to-br from-[#FFFAE6]/50 to-white text-foreground',
+          'border-[#FFD100]/50 focus:border-[#FFD100] focus:outline-none focus:ring-1 focus:ring-[#FFD100]/30',
+          'hover:border-[#FFD100]'
         )}
       >
         {sortFields.map((field) => (
@@ -45,9 +45,9 @@ const OrdersSort: React.FC<OrdersSortProps> = ({
         onClick={() => onSortChange(sortBy, sortDirection === 'asc' ? 'desc' : 'asc')}
         className={cn(
           'px-2 py-1.5 text-xs rounded-lg border transition-all',
-          'bg-card text-foreground border-border',
-          'hover:border-primary hover:bg-primary/5',
-          'focus:outline-none focus:ring-1 focus:ring-primary/30'
+          'bg-gradient-to-br from-[#FFFAE6]/50 to-white text-foreground border-[#FFD100]/50',
+          'hover:border-[#FFD100] hover:bg-[#FFFAE6]',
+          'focus:outline-none focus:ring-1 focus:ring-[#FFD100]/30'
         )}
         title={`Sort ${sortDirection === 'asc' ? 'Descending' : 'Ascending'}`}
       >

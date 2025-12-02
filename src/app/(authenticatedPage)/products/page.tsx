@@ -59,7 +59,7 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
 
   return (
     <div 
-      className="group relative bg-card border border-border/50 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 h-full flex flex-col"
+      className="group relative bg-gradient-to-br from-[#FFFAE6]/50 to-white border border-[#FFD100]/40 rounded-xl overflow-hidden hover:shadow-lg hover:border-[#FFD100]/60 transition-all duration-300 hover:-translate-y-0.5 h-full flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -93,7 +93,7 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
         )}
 
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute inset-0 bg-[#FFD100]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
       <div className="p-2.5 sm:p-3 flex flex-col flex-1">
@@ -109,7 +109,7 @@ const SimpleProductCard: React.FC<SimpleProductCardProps> = ({ product, showShar
         {showShare && (
           <button
             onClick={() => onShare?.(product)}
-            className="w-full flex items-center justify-center gap-1.5 bg-primary text-black py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-transform active:scale-95 hover:bg-primary/90"
+            className="w-full flex items-center justify-center gap-1.5 bg-primary text-[#231F20] py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-transform active:scale-95 hover:bg-primary/90"
           >
             <Share2 size={14} />
             <span>Share</span>
@@ -124,7 +124,7 @@ const SimpleCollectionCard: React.FC<SimpleCollectionCardProps> = ({ collection,
   return (
     <div 
       onClick={onClick}
-      className="group cursor-pointer bg-card border border-border/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-primary/20 relative overflow-hidden"
+      className="group cursor-pointer bg-gradient-to-br from-[#FFFAE6]/60 to-white border border-[#FFD100]/40 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-[#FFD100]/60 relative overflow-hidden"
     >
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
         <Package size={64} />
@@ -682,7 +682,7 @@ const ProductsPage: React.FC = () => {
                     
                     <button
                       onClick={() => handleCollectionShare(selectedCollection)}
-                      className="flex items-center justify-center gap-2 bg-primary text-black py-3 px-6 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90 shadow-lg shadow-primary/20"
+                      className="flex items-center justify-center gap-2 bg-primary text-[#231F20] py-3 px-6 rounded-xl font-medium transition-transform active:scale-95 hover:bg-primary/90 shadow-lg shadow-primary/20"
                     >
                       <Share2 size={20} />
                       <span>Share Collection</span>

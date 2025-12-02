@@ -27,7 +27,7 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-xl border border-[#FFD100]/40 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-foreground">Personal Information</h2>
       </div>
@@ -175,7 +175,7 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
 
       {/* Additional Information - Coming Soon */}
       {isEditing && (
-        <div className="mt-8 p-4 bg-secondary/10 border border-border/50 rounded-lg">
+        <div className="mt-8 p-4 bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg">
           <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

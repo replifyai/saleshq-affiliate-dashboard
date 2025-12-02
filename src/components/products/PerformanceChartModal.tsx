@@ -188,8 +188,8 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-gradient-to-br from-[#FFFAE6]/80 to-white border border-[#FFD100]/40 rounded-xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center space-x-4">
             <div className="text-4xl">{product.image}</div>
@@ -251,7 +251,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
         </div>
 
         {/* Chart */}
-        <div className="bg-background/50 rounded-lg p-6 mb-6">
+        <div className="bg-[#FFFAE6]/40 border border-[#FFD100]/30 rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-foreground">{getMetricLabel()}</h3>
             <div className={`text-sm font-medium ${getMetricColor()}`}>
@@ -270,7 +270,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
 
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/40 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Total {selectedMetric === 'sales' ? 'Sales' : selectedMetric === 'clicks' ? 'Clicks' : 'Conversions'}</div>
             <div className={`text-xl font-bold ${getMetricColor()}`}>
               {selectedMetric === 'sales' 
@@ -280,7 +280,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
             </div>
           </div>
           
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/40 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Average per Day</div>
             <div className={`text-xl font-bold ${getMetricColor()}`}>
               {selectedMetric === 'sales' 
@@ -290,7 +290,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
             </div>
           </div>
           
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/40 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Best Day</div>
             <div className={`text-xl font-bold ${getMetricColor()}`}>
               {selectedMetric === 'sales' 
@@ -303,7 +303,7 @@ const PerformanceChartModal: React.FC<PerformanceChartModalProps> = ({
 
         {/* Conversion Rate */}
         {selectedMetric === 'sales' && (
-          <div className="bg-background/50 rounded-lg p-4">
+          <div className="bg-[#FFFAE6]/40 border border-[#FFD100]/30 rounded-lg p-4">
             <div className="text-sm text-muted-foreground mb-1">Overall Conversion Rate</div>
             <div className="text-xl font-bold text-accent">
               {((data.reduce((sum, d) => sum + d.conversions, 0) / data.reduce((sum, d) => sum + d.clicks, 0)) * 100).toFixed(1)}%

@@ -62,7 +62,7 @@ const StepItem: React.FC<StepItemProps> = ({ step, isCompleted }) => {
         flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300
         ${isCompleted 
           ? 'bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30' 
-          : 'bg-secondary/50 border border-border/50 group-hover:border-primary/30'
+          : 'bg-[#FFFAE6]/50 border border-[#FFD100]/40 group-hover:border-[#FFD100]/60'
         }
       `}>
         {isCompleted ? (
@@ -117,7 +117,7 @@ export default function ProfileCompletionSection() {
   };
 
   return (
-    <div className="relative bg-gradient-to-br from-card/80 via-card/90 to-card backdrop-blur-xl rounded-2xl border border-border/50 shadow-2xl overflow-hidden transition-all duration-300">
+    <div className="relative bg-gradient-to-br from-[#FFFAE6]/80 via-white/90 to-white backdrop-blur-xl rounded-2xl border border-[#FFD100]/40 shadow-2xl overflow-hidden transition-all duration-300">
       {/* Background decorative elements */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -182,7 +182,7 @@ export default function ProfileCompletionSection() {
               <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Link 
                   href="/onboarding"
-                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-purple-600 text-white text-xs sm:text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-primary to-[#FFD100] text-[#231F20] text-xs sm:text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@ export default function ProfileCompletionSection() {
                 </Link>
                 <Link 
                   href="/profile"
-                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-card border border-border text-foreground text-xs sm:text-sm font-medium rounded-xl hover:bg-secondary/20 transition-all duration-300"
+                  className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-white border border-[#FFD100]/40 text-foreground text-xs sm:text-sm font-medium rounded-xl hover:bg-[#FFFAE6] transition-all duration-300"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
