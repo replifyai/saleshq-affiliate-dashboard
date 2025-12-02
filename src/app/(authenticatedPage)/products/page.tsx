@@ -224,9 +224,9 @@ const VirtualizedProductGrid: React.FC<VirtualizedProductGridProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
-  // Responsive columns: 4 on desktop, 2 on mobile
+  // Responsive columns: 5 on desktop, 2 on mobile
   const getColumnCount = useCallback((width: number) => {
-    if (width >= 768) return 4;  // Desktop: 4 cards
+    if (width >= 768) return 5;  // Desktop: 5 cards
     return 2;                     // Mobile: 2 cards
   }, []);
 
@@ -380,8 +380,8 @@ const ProductsPage: React.FC = () => {
   }, [products, searchQuery, productTypeFilter]);
 
   // Generate product share link with referral info
-  // Format: https://myfrido.com/products/{handle}?rfname={name}&dispc={percentage}&discount={code}&tt-cart-mod=true
-  // Or for amount: https://myfrido.com/products/{handle}?rfname={name}&disam={amount}&discount={code}&tt-cart-mod=true
+  // Format: https://myfrido.com/products/{handle}?rfname={name}&dispc={percentage}&discount={code}&ref={referralCode}&tt-cart-mod=true
+  // Or for amount: https://myfrido.com/products/{handle}?rfname={name}&disam={amount}&discount={code}&ref={referralCode}&tt-cart-mod=true
   const generateProductLink = (productHandle: string) => {
     const profile = profileState.profile;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -410,6 +410,11 @@ const ProductsPage: React.FC = () => {
     // Add discount code
     if (coupon?.code) {
       params.set('discount', coupon.code);
+    }
+    
+    // Add referral code
+    if (profile?.uniqueReferralCode) {
+      params.set('ref', profile.uniqueReferralCode);
     }
     
     // Add cart mod flag
@@ -460,6 +465,11 @@ const ProductsPage: React.FC = () => {
     // Add discount code
     if (coupon?.code) {
       params.set('discount', coupon.code);
+    }
+    
+    // Add referral code
+    if (profile?.uniqueReferralCode) {
+      params.set('ref', profile.uniqueReferralCode);
     }
     
     // Add cart mod flag
