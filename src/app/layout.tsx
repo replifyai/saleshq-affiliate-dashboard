@@ -33,7 +33,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                document.documentElement.setAttribute('data-theme', 'dark-premium');
+                document.documentElement.setAttribute('data-theme', 'light');
               })();
             `,
           }}
@@ -42,7 +42,7 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider defaultTheme="dark-premium" storageKey="saleshq-theme">
+        <ThemeProvider defaultTheme="light" storageKey="saleshq-theme">
           <ProfileProvider>
             <SnackbarProvider>
               {children}
