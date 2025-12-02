@@ -17,6 +17,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // Check if we should hide the sidebar (on onboarding route)
   const hideSidebar = pathname?.includes('/onboarding');
 
+  // Get current page title based on pathname
+  const getPageTitle = () => {
+    const pageTitles: Record<string, string> = {
+      '/dashboard': 'Dashboard',
+      '/orders': 'Orders',
+      '/products': 'Marketplace',
+      '/coupons': 'Coupons',
+      '/profile': 'Profile',
+    };
+    return pageTitles[pathname || ''] || 'Dashboard';
+  };
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -116,7 +128,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-sm sm:text-base font-medium text-foreground">Dashboard</h1>
+          <h1 className="text-sm sm:text-base font-medium text-foreground">{getPageTitle()}</h1>
           <div className="w-8" /> {/* Spacer for centering */}
         </div>
 

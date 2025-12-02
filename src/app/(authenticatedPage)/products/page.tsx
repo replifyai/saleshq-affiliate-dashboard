@@ -524,8 +524,8 @@ const ProductsPage: React.FC = () => {
     <div className="h-screen flex flex-col bg-background p-4 sm:p-6 lg:p-10 overflow-hidden">
       <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
         
-        {/* Header Section */}
-        <div className="mb-4 sm:mb-6 md:mb-8">
+        {/* Header Section - hidden on mobile */}
+        <div className="hidden lg:block mb-4 sm:mb-6 md:mb-8">
           <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground mb-1 sm:mb-2">
             Marketplace
           </h1>
