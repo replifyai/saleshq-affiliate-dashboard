@@ -3,9 +3,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import {
-  AffiliateStatsSection,
-  ShareLinkSection,
-  ProfileCompletionSection,
+  DashboardHeader,
+  StatsCards,
+  ShareAndEarn,
+  FeaturedCollections,
+  FeaturedProducts,
 } from '@/components/dashboard';
 import { useSnackbar } from '@/components/snackbar';
 import apiClient from '@/services/apiClient';
@@ -27,9 +29,6 @@ export default function DashboardPage() {
   const showErrorRef = useRef(showError);
   const [dashboardSummary, setDashboardSummary] = useState<CreatorDashboardSummary | null>(null);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
-
-  const showProfileCompletion = !!state.completionScore && state.completionScore.leftCount > 0;
 
   useEffect(() => {
     showErrorRef.current = showError;
@@ -40,7 +39,6 @@ export default function DashboardPage() {
 
     const fetchDashboardSummary = async () => {
       setIsSummaryLoading(true);
-      setSummaryError(null);
 
       try {
         const response = await apiClient.getCreatorDashboardSummary();
@@ -57,9 +55,6 @@ export default function DashboardPage() {
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to load dashboard summary';
-        if (isMounted) {
-          setSummaryError(message);
-        }
         showErrorRef.current?.(message);
       } finally {
         if (isMounted) {
@@ -75,53 +70,45 @@ export default function DashboardPage() {
     };
   }, []);
 
-  const parseNumericValue = (value?: number | string | null): number | undefined => {
-    if (typeof value === 'number') return value;
-    if (typeof value === 'string') {
-      const cleaned = value.replace(/,/g, '').trim();
-      const parsed = parseFloat(cleaned);
-      return Number.isNaN(parsed) ? undefined : parsed;
+  const formatCurrency = (value?: number | string | null): string => {
+    if (value === undefined || value === null) {
+      return isSummaryLoading ? '...' : '₹0';
     }
-    return undefined;
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    if (isNaN(numValue)) return '₹0';
+    return `₹${numValue.toLocaleString('en-IN')}`;
   };
 
-  const formatNumberStat = (value?: number | string): string => {
-    const parsed = parseNumericValue(value);
-    if (parsed === undefined) {
-      return isSummaryLoading ? 'Loading...' : '--';
+  const formatNumber = (value?: number | string | null): string => {
+    if (value === undefined || value === null) {
+      return isSummaryLoading ? '...' : '0';
     }
-    return new Intl.NumberFormat('en-IN').format(parsed);
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    if (isNaN(numValue)) return '0';
+    return numValue.toLocaleString('en-IN');
   };
 
-  const formatCurrencyStat = (value?: number | string): string => {
-    const parsed = parseNumericValue(value);
-    if (parsed === undefined) {
-      return isSummaryLoading ? 'Loading...' : '₹0';
-    }
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(parsed);
-  };
+  // Mock data for missing fields (will come from API later)
+  const mockPayoutsIssued = '₹100';
+  const mockNextPayout = '₹1600';
+  const mockNextPayoutDate = '23 Aug';
 
-  // Show loading state while profile is being fetched or not yet available
+  // Show loading state while profile is being fetched
   if (!state.profile) {
-    // Show error state if profile failed to load
     if (state.error) {
       return (
-        <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] p-4">
           <div className="text-center max-w-md">
-            <div className="text-destructive mb-4">
-              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold mb-2">Failed to Load Dashboard</h2>
-            <p className="text-muted-foreground mb-4">{state.error}</p>
+            <h2 className="text-xl font-semibold text-[#131313] mb-2">Failed to Load Dashboard</h2>
+            <p className="text-[#BCBCBC] mb-4">{state.error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              className="px-6 py-3 bg-[#131313] text-white rounded-full font-medium hover:bg-[#2a2a2a] transition-colors"
             >
               Reload Page
             </button>
@@ -130,45 +117,40 @@ export default function DashboardPage() {
       );
     }
 
-    // Show loading state
     return (
-      <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0]">
         <div className="text-center">
-          <div className="inline-block w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Loading Dashboard...</h2>
+          <div className="inline-block w-12 h-12 border-3 border-[#131313] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-[#BCBCBC]">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-none md:rounded-3xl min-h-[100dvh]">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-8 sm:space-y-12">
-        {/* Profile Completion Section (hidden when all steps completed) */}
-        {showProfileCompletion && <ProfileCompletionSection />}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-          <ShareLinkSection />
-        </div>
+    <div className="min-h-screen bg-[#F0F0F0]">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* Header */}
+        <DashboardHeader />
 
-
-        {/* Affiliate Stats Section */}
-        <AffiliateStatsSection
-          totalOrders={formatNumberStat(dashboardSummary?.totalOrders)}
-          totalCoupons={formatNumberStat(dashboardSummary?.totalCoupons)}
-          totalEarningsTillDate={formatCurrencyStat(
-            dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings
-          )}
-          earningsStatusMap={dashboardSummary?.earningsStatusMap}
-          ordersStatusMap={dashboardSummary?.ordersStatusMap}
+        {/* Stats Cards */}
+        <StatsCards
+          yourSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
+          totalOrders={formatCurrency(dashboardSummary?.totalOrders)}
+          commissionOnSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
+          payoutsIssued={mockPayoutsIssued}
+          nextPayout={mockNextPayout}
+          nextPayoutDate={mockNextPayoutDate}
         />
-        {summaryError && (
-          <p className="text-sm text-destructive">
-            Unable to load the latest dashboard summary. Showing placeholders for now.
-          </p>
-        )}
+
+        {/* Share and Earn */}
+        <ShareAndEarn />
+
+        {/* Featured Collections */}
+        <FeaturedCollections />
 
         {/* Featured Products */}
-        {/* <FeaturedProductsSection /> */}
+        <FeaturedProducts />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 export { default as Sidebar } from './Sidebar';
 export { default as DashboardHeader } from './DashboardHeader';
 export { default as StatsCard } from './StatsCard';
+export { default as StatsCards } from './StatsCards';
 export { default as PremiumBanner } from './PremiumBanner';
 export { default as ChartSection } from './ChartSection';
 export { default as ScheduleSection } from './ScheduleSection';
@@ -8,6 +9,9 @@ export { default as ChannelsSection } from './ChannelsSection';
 export { default as DashboardLayout } from './DashboardLayout';
 export { default as AffiliateStatsSection } from './AffiliateStatsSection';
 export { default as ShareLinkSection } from './ShareLinkSection';
+export { default as ShareAndEarn } from './ShareAndEarn';
 export { default as RecentOrdersSection } from './RecentOrdersSection';
 export { default as FeaturedProductsSection } from './FeaturedProductsSection';
+export { default as FeaturedProducts } from './FeaturedProducts';
+export { default as FeaturedCollections } from './FeaturedCollections';
 export { default as ProfileCompletionSection } from './ProfileCompletionSection';
