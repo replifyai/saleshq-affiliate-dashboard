@@ -17,11 +17,11 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
-  const images = product.images && product.images.length > 0 
-    ? product.images 
+  const images = product.images && product.images.length > 0
+    ? product.images
     : (product.image ? [product.image] : []);
   const currentImage = images[0];
-  
+
   // Mock data for rating and price (replace with actual data when available)
   const rating = 4.7;
   const reviewCount = '786+';
@@ -38,32 +38,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
           <span className="font-medium text-[#131313]">{rating}</span>
           <span className="text-[#BCBCBC]">({reviewCount})</span>
         </div>
-        
+
         {/* Product Image */}
         <div className="aspect-square bg-[#F5F5F5] flex items-center justify-center">
-        {currentImage && currentImage.startsWith('http') ? (
-          <img 
-            src={currentImage} 
-            alt={product.name}
+          {currentImage && currentImage.startsWith('http') ? (
+            <img
+              src={currentImage}
+              alt={product.name}
               className="w-full h-full object-cover"
-          />
-        ) : (
+            />
+          ) : (
             <div className="text-4xl">{currentImage || '📦'}</div>
-        )}
-          </div>
+          )}
+        </div>
       </div>
 
       {/* Product Details */}
       <div className="p-3 sm:p-4">
         <p className="text-xs sm:text-sm text-[#131313] font-medium line-clamp-2 mb-1.5 sm:mb-2 min-h-[32px] sm:min-h-[40px]">
-            {product.name}
+          {product.name}
         </p>
-        
+
         {/* Category Tag */}
         <span className="inline-block px-2 py-0.5 bg-[#FFE887] text-[#131313] text-[10px] font-medium rounded mb-2 sm:mb-3">
           {product.category || 'Footwear'}
         </span>
-        
+
         {/* Price */}
         <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
           <span className="text-sm sm:text-base font-bold text-[#131313]">₹{price.toLocaleString('en-IN')}</span>
@@ -74,12 +74,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
         </div>
 
         {/* Share Button */}
-          <button
+        <button
           onClick={() => onShare(product)}
           className="w-full py-2.5 sm:py-3 bg-[#FFE887] hover:bg-[#FFD54F] text-[#131313] font-semibold text-sm rounded-xl transition-colors"
-          >
+        >
           Share
-          </button>
+        </button>
       </div>
     </div>
   );
@@ -99,7 +99,10 @@ const CollectionCard: React.FC<CollectionCardProps> = ({ collection, onCopy }) =
         <p className="text-sm text-[#BCBCBC]">{collection.productIds.length} products</p>
       </div>
       <button
-        onClick={() => onCopy(collection)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onCopy(collection);
+        }}
         className="ml-3 p-2.5 rounded-xl bg-[#FFE887] hover:bg-[#FFD54F] transition-colors flex-shrink-0"
         aria-label="Copy collection link"
       >
@@ -434,7 +437,7 @@ const ProductsTabs: React.FC<ProductsTabsProps> = ({
 const ProductsPage: React.FC = () => {
   const { state: profileState } = useProfile();
   const { showSuccess, showError } = useSnackbar();
-  
+
   const [activeTab, setActiveTab] = useState<ProductTab>('products');
   const [selectedCollection, setSelectedCollection] = useState<ProductCollection | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -443,7 +446,7 @@ const ProductsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingCollectionProducts, setIsLoadingCollectionProducts] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
-  
+
   // Search, Filter, Sort State
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -460,12 +463,12 @@ const ProductsPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        
+
         const [productsResponse, collectionsResponse] = await Promise.all([
           apiClient.getAllShopifyProducts(),
           apiClient.getAllProductCollections(),
         ]);
-        
+
         if (productsResponse.productCollection.success) {
           const mappedProducts: Product[] = productsResponse.productCollection.data.map((p) => ({
             id: p.id,
@@ -482,14 +485,14 @@ const ProductsPage: React.FC = () => {
             lastUpdated: new Date().toISOString(),
             salesData: [],
           }));
-          
+
           setProducts(mappedProducts);
         }
-        
+
         if (collectionsResponse.productCollections) {
           setCollections(collectionsResponse.productCollections);
         }
-        
+
         setLastRefreshed(new Date());
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -514,7 +517,7 @@ const ProductsPage: React.FC = () => {
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let result = products.filter(product => {
+    const result = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
       return matchesSearch && matchesCategory;
@@ -574,21 +577,21 @@ const ProductsPage: React.FC = () => {
     const profile = profileState.profile;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
-    
+
     const baseUrl = 'https://myfrido.com';
     const productUrl = `${baseUrl}/products/${productHandle}`;
     const params = new URLSearchParams();
-    
+
     if (profile?.name) params.set('rfname', profile.name);
     if (coupon?.value?.type === 'percentage' && coupon.value.percentage) {
-        params.set('dispc', String(coupon.value.percentage));
+      params.set('dispc', String(coupon.value.percentage));
     } else if (coupon?.value?.type === 'amount' && coupon.value.amount) {
-        params.set('disam', String(coupon.value.amount));
-      }
+      params.set('disam', String(coupon.value.amount));
+    }
     if (coupon?.code) params.set('discount', coupon.code);
     if (profile?.uniqueReferralCode) params.set('ref', profile.uniqueReferralCode);
     params.set('tt-cart-mod', 'true');
-    
+
     return `${productUrl}?${params.toString()}`;
   }, [profileState.profile]);
 
@@ -597,21 +600,21 @@ const ProductsPage: React.FC = () => {
     const profile = profileState.profile;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
-    
+
     const baseUrl = 'https://myfrido.com';
     const collectionUrl = `${baseUrl}/collections/${collectionHandle}`;
     const params = new URLSearchParams();
-    
+
     if (profile?.name) params.set('rfname', profile.name);
     if (coupon?.value?.type === 'percentage' && coupon.value.percentage) {
-        params.set('dispc', String(coupon.value.percentage));
+      params.set('dispc', String(coupon.value.percentage));
     } else if (coupon?.value?.type === 'amount' && coupon.value.amount) {
-        params.set('disam', String(coupon.value.amount));
-      }
+      params.set('disam', String(coupon.value.amount));
+    }
     if (coupon?.code) params.set('discount', coupon.code);
     if (profile?.uniqueReferralCode) params.set('ref', profile.uniqueReferralCode);
     params.set('tt-cart-mod', 'true');
-    
+
     return `${collectionUrl}?${params.toString()}`;
   }, [profileState.profile]);
 
@@ -643,13 +646,13 @@ const ProductsPage: React.FC = () => {
   const handleCollectionClick = useCallback(async (collection: ProductCollection) => {
     setSelectedCollection(collection);
     setCollectionProducts([]);
-    
+
     if (collection.productIds.length === 0) return;
-    
+
     try {
       setIsLoadingCollectionProducts(true);
       const response = await apiClient.getShopifyProductsByIds({ ids: collection.productIds });
-      
+
       if (response.products) {
         const mappedProducts: Product[] = response.products.map((p) => ({
           id: p.id,
@@ -700,7 +703,7 @@ const ProductsPage: React.FC = () => {
           activeTab={activeTab}
           onTabChange={(tab) => {
             setActiveTab(tab);
-              setSelectedCollection(null);
+            setSelectedCollection(null);
             setDisplayedCount(20);
           }}
           searchQuery={searchQuery}
@@ -736,7 +739,7 @@ const ProductsPage: React.FC = () => {
                       onShare={handleProductShare}
                     />
                   ))}
-          </div>
+                </div>
 
                 {/* Infinite scroll sentinel */}
                 {hasMoreProducts && (
@@ -747,12 +750,12 @@ const ProductsPage: React.FC = () => {
               </>
             )}
           </>
-          )}
+        )}
 
         {/* Collections Tab Content */}
-          {activeTab === 'collections' && (
-            <>
-              {!selectedCollection ? (
+        {activeTab === 'collections' && (
+          <>
+            {!selectedCollection ? (
               // Collections Grid
               collections.length === 0 ? (
                 <div className="bg-white border border-[#E5E5E5] rounded-2xl p-12 text-center">
@@ -762,14 +765,13 @@ const ProductsPage: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {collections.map((collection) => (
                     <div
-                        key={collection.id} 
+                      key={collection.id}
                       onClick={() => handleCollectionClick(collection)}
                       className="cursor-pointer"
                     >
                       <CollectionCard
                         collection={collection}
-                        onCopy={(e) => {
-                          e.stopPropagation?.();
+                        onCopy={(collection) => {
                           handleCollectionCopy(collection);
                         }}
                       />
@@ -777,27 +779,27 @@ const ProductsPage: React.FC = () => {
                   ))}
                 </div>
               )
-              ) : (
+            ) : (
               // Collection Detail View
               <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <button 
-                        onClick={() => {
-                          setSelectedCollection(null);
-                          setCollectionProducts([]);
-                        }}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => {
+                      setSelectedCollection(null);
+                      setCollectionProducts([]);
+                    }}
                     className="p-2 hover:bg-white rounded-lg transition-colors"
-                      >
+                  >
                     <ArrowLeft className="w-5 h-5 text-[#131313]" />
-                      </button>
-                      <div>
+                  </button>
+                  <div>
                     <h2 className="text-xl font-bold text-[#131313]">{selectedCollection.name}</h2>
                     <p className="text-sm text-[#BCBCBC]">
                       {isLoadingCollectionProducts ? 'Loading...' : `${collectionProducts.length} products`}
-                        </p>
-                      </div>
-                    </div>
-                    
+                    </p>
+                  </div>
+                </div>
+
                 {isLoadingCollectionProducts ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="inline-block w-8 h-8 border-2 border-[#131313] border-t-transparent rounded-full animate-spin"></div>
@@ -805,8 +807,8 @@ const ProductsPage: React.FC = () => {
                 ) : collectionProducts.length === 0 ? (
                   <div className="bg-white border border-[#E5E5E5] rounded-2xl p-12 text-center">
                     <p className="text-[#BCBCBC]">No products in this collection</p>
-                      </div>
-                    ) : (
+                  </div>
+                ) : (
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
                     {collectionProducts.map((product) => (
                       <ProductCard
@@ -817,10 +819,10 @@ const ProductsPage: React.FC = () => {
                     ))}
                   </div>
                 )}
-                </div>
-              )}
-            </>
-          )}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
