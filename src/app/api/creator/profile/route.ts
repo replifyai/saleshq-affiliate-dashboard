@@ -44,10 +44,10 @@ async function callFirebaseFunctionWithAuth(endpoint: string, authToken: string,
       'Authorization': `Bearer ${authToken}`,
     },
   };
-   // Only add body for POST requests
+  // Only add body for POST requests
   if (method === 'POST' && data) {
     options.body = JSON.stringify(data);
-  } 
+  }
 
   const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, options);
 
@@ -62,7 +62,7 @@ async function callFirebaseFunctionWithAuth(endpoint: string, authToken: string,
 export async function POST(request: NextRequest) {
   try {
     const data: CreateCreatorProfileRequest = await request.json();
-    
+
     // Validate required fields
     if (!data.phoneNumber || !data.name) {
       return NextResponse.json(
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await callFirebaseFunction('/createCreatorProfile', data);
-    
+
     return NextResponse.json({ profile: result } as CreateCreatorProfileResponse);
   } catch (error) {
     console.error('Error creating creator profile:', error);
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest) {
   try {
     // Get the Authorization header
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -121,9 +121,9 @@ export async function PUT(request: NextRequest) {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    
+
     const data: UpdateCreatorProfileRequest = await request.json();
-    
+
     // Validate required fields
     if (!data.uid || !data.data) {
       return NextResponse.json(
@@ -137,10 +137,10 @@ export async function PUT(request: NextRequest) {
     }
 
     const result = await callFirebaseFunctionWithAuth('/updateCreatorProfile', token, data);
-    
+
     // Revalidate the cache after updating the profile
-    revalidateTag('creator-profile');
-    
+    revalidateTag('creator-profile', 'max');
+
     // Firebase function already returns { profile: CreatorProfile }, so return it directly
     return NextResponse.json(result as UpdateCreatorProfileResponse);
   } catch (error) {
@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get the Authorization header
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return NextResponse.json(
         {
@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
-    
+
     // Call the external API endpoint with Next.js caching (10 minutes = 600 seconds)
     const response = await fetch(`${FIREBASE_FUNCTION_URL}/getCreatorProfile`, {
       method: 'POST',
@@ -182,7 +182,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: '',
-      next: { 
+      next: {
         revalidate: 600, // Cache for 10 minutes
         tags: ['creator-profile'] // Tag for cache invalidation
       },
@@ -194,7 +194,7 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await response.json();
-    
+
     return NextResponse.json(result as GetCreatorProfileResponse);
   } catch (error) {
     console.error('Error getting creator profile:', error);
