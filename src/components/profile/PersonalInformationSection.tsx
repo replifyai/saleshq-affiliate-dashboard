@@ -27,15 +27,15 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white rounded-xl border border-[#FFD100]/40 p-6 shadow-sm">
+    <div className="bg-white border border-[#E5E5E5] rounded-2xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-foreground">Personal Information</h2>
+        <h2 className="text-xl font-semibold text-[#131313]">Personal Information</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Full Name */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label className="block text-sm font-medium text-[#131313] mb-2">
             Full Name <span className="text-destructive">*</span>
           </label>
           {isEditing ? (
@@ -43,18 +43,18 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
               type="text"
               value={profile.name}
               onChange={(e) => onUpdateProfile('name', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-3 py-2 border border-[#E5E5E5] rounded-md bg-white text-[#131313] focus:ring-2 focus:ring-[#131313] focus:border-transparent transition-all"
               placeholder="Enter your full name"
               required
             />
           ) : (
-            <p className="text-foreground font-medium">{profile.name}</p>
+            <p className="text-[#131313] font-medium">{profile.name}</p>
           )}
         </div>
 
         {/* Email Address */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+          <label className="block text-sm font-medium text-[#131313] mb-2 flex items-center gap-2">
             Email Address
             {profile.email && (
               <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full">
@@ -67,20 +67,20 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
               type="email"
               value={profile.email}
               onChange={(e) => onUpdateProfile('email', e.target.value)}
-              className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              className="w-full px-3 py-2 border border-[#E5E5E5] rounded-md bg-white text-[#131313] focus:ring-2 focus:ring-[#131313] focus:border-transparent transition-all"
               placeholder="your.email@example.com"
             />
           ) : (
-            <p className="text-foreground">{profile.email || <span className="text-muted-foreground italic">Not provided</span>}</p>
+            <p className="text-[#131313]">{profile.email || <span className="text-[#636363] italic">Not provided</span>}</p>
           )}
           {isEditing && !profile.email && (
-            <p className="text-xs text-muted-foreground mt-1">💡 Add your email to improve profile completion</p>
+            <p className="text-xs text-[#636363] mt-1">💡 Add your email to improve profile completion</p>
           )}
         </div>
 
         {/* Phone Number - Read Only (verified via OTP) */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+          <label className="block text-sm font-medium text-[#131313] mb-2 flex items-center gap-2">
             Phone Number
             {phoneVerified && (
               <span className="text-xs bg-green-500/10 text-green-600 dark:text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -96,18 +96,18 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
               type="tel"
               value={profile.phone}
               disabled
-              className="w-full px-3 py-2 border border-border rounded-md bg-secondary/20 text-foreground cursor-not-allowed"
+              className="w-full px-3 py-2 border border-[#E5E5E5] rounded-md bg-[#F9F9F9] text-[#636363] cursor-not-allowed"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#636363]">
               🔒 Verified
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Phone number is verified and cannot be changed</p>
+          <p className="text-xs text-[#636363] mt-1">Phone number is verified and cannot be changed</p>
         </div>
 
         {/* Account Status */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Account Status</label>
+          <label className="block text-sm font-medium text-[#131313] mb-2">Account Status</label>
           <div className="flex items-center gap-2">
             {approved === 'approved' && (
               <span className="px-4 py-2 bg-green-500/10 text-green-600 dark:text-green-400 rounded-lg font-medium flex items-center gap-2">
@@ -135,54 +135,54 @@ const PersonalInformationSection: React.FC<PersonalInformationSectionProps> = ({
             )}
           </div>
           {approved === 'pending' && (
-            <p className="text-xs text-muted-foreground mt-1">Your account is under review. You&apos;ll be notified once approved.</p>
+            <p className="text-xs text-[#636363] mt-1">Your account is under review. You&apos;ll be notified once approved.</p>
           )}
           {approved === 'rejected' && (
-            <p className="text-xs text-muted-foreground mt-1">Your account application was rejected. Please contact support for more information.</p>
+            <p className="text-xs text-[#636363] mt-1">Your account application was rejected. Please contact support for more information.</p>
           )}
         </div>
 
         {/* Joining Date */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Member Since</label>
-          <p className="text-foreground font-medium">
-            {new Date(profile.joiningDate).toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+          <label className="block text-sm font-medium text-[#131313] mb-2">Member Since</label>
+          <p className="text-[#131313] font-medium">
+            {new Date(profile.joiningDate).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </p>
         </div>
 
         {/* Affiliate Code */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">Affiliate Code</label>
+          <label className="block text-sm font-medium text-[#131313] mb-2">Affiliate Code</label>
           <div className="flex items-center gap-2">
-            <code className="px-3 py-2 bg-secondary/30 rounded-md font-mono text-sm font-bold text-primary">
+            <code className="px-3 py-2 bg-[#F9F9F9] border border-[#E5E5E5] rounded-md font-mono text-sm font-bold text-[#131313]">
               {profile.affiliateCode}
             </code>
             <button
               onClick={handleCopyCode}
-              className="px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all hover:scale-105 active:scale-95"
+              className="px-3 py-2 bg-[#131313] text-white hover:bg-[#2a2a2a] rounded-md transition-all hover:scale-105 active:scale-95"
               title="Copy to clipboard"
             >
               📋
             </button>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">Click to copy your unique affiliate code</p>
+          <p className="text-xs text-[#636363] mt-1">Click to copy your unique affiliate code</p>
         </div>
       </div>
 
       {/* Additional Information - Coming Soon */}
       {isEditing && (
-        <div className="mt-8 p-4 bg-[#FFFAE6]/50 border border-[#FFD100]/30 rounded-lg">
-          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+        <div className="mt-8 p-4 bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg">
+          <h3 className="text-sm font-semibold text-[#131313] mb-2 flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Additional Fields Coming Soon
           </h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#636363]">
             More profile fields like bio, location, date of birth, and preferences will be available in future updates.
           </p>
         </div>

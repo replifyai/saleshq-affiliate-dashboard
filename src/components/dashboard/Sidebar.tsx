@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { BarChart3, Package, ShoppingBag, User, LogOut, Tag } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Wallet, Package, User, LogOut } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
 
 interface SidebarProps {
@@ -14,66 +14,52 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
   const pathname = usePathname();
-  const { state, logout } = useProfile();
+  const { logout } = useProfile();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const navItems = [
-    { label: 'DashBoard', icon: BarChart3, path: '/dashboard' },
-    { label: 'Orders', icon: Package, path: '/orders' },
-    { label: 'Products', icon: ShoppingBag, path: '/products' },
-    { label: 'Coupons', icon: Tag, path: '/coupons' },
+    { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { label: 'Orders', icon: ShoppingCart, path: '/orders' },
+    { label: 'Wallet', icon: Wallet, path: '/wallet' },
+    { label: 'Featured Products', icon: Package, path: '/products' },
     { label: 'Profile', icon: User, path: '/profile' },
   ].map(item => ({
     ...item,
     active: pathname === item.path
   }));
 
-  // Get the creator's name from profile, fallback to "there"
-  const creatorName = state.profile?.name || 'there';
-  const isVerified = !!state.completionScore && state.completionScore.leftCount === 0;
-
   return (
     <aside
       className={cn(
-        'bg-gradient-to-b from-[#FFFAE6]/50 to-white flex flex-col h-full max-h-screen z-20 overflow-y-auto border-r border-[#FFD100]/30',
+        'bg-white flex flex-col h-full max-h-screen z-20 overflow-y-auto border-r border-[#E5E5E5]',
         className
       )}
     >
-
-      {/* Profile Section */}
-      <div className="p-6 border-b border-[#FFD100]/30">
-        <div className="flex flex-col items-center space-y-3">
-          <div className="text-left">
-            <h3 className="font-semibold text-foreground text-base text-lg flex items-center gap-2">
-              Hi {creatorName?.split(' ')[0]}!
-              {isVerified && (
+      {/* Logo Section */}
+      <div className="p-6 pb-8">
                 <img
-                  src="/verified.png"
-                  alt="Verified"
-                  className="w-4 h-4 inline-block"
+          src="/Logo.png" 
+          alt="Frido" 
+          className="h-8 w-auto"
                 />
-              )}
-            </h3>
-          </div>
-        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-6">
-        <ul className="space-y-2">
+      <nav className="flex-1 px-4">
+        <ul className="space-y-1">
           {navItems.map((item, index) => (
             <li key={index}>
               <button
                 onClick={() => onNavigate?.(item.label.toLowerCase())}
                 className={cn(
-                  'w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 touch-manipulation',
+                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                   item.active
-                    ? 'bg-primary text-[#231F20] shadow-md border border-[#FFD100]'
-                    : 'text-muted-foreground hover:bg-[#FFFAE6] hover:text-foreground active:bg-[#FFFAE6]/70'
+                    ? 'bg-[#F5F5F5] text-[#131313] font-medium'
+                    : 'text-[#BCBCBC] hover:bg-[#F5F5F5] hover:text-[#131313]'
                 )}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <item.icon className="w-5 h-5 flex-shrink-0" strokeWidth={item.active ? 2 : 1.5} />
+                <span className="whitespace-nowrap text-sm">{item.label}</span>
               </button>
             </li>
           ))}
@@ -81,10 +67,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       </nav>
 
       {/* Logout Section */}
-      <div className="p-6 border-t border-[#FFD100]/30">
+      <div className="p-4 mt-auto">
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-all duration-200 font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-[#BCBCBC] hover:bg-[#F5F5F5] hover:text-[#131313] transition-all duration-200"
         >
           <LogOut className="w-5 h-5" />
           <span>Logout</span>
@@ -94,32 +80,26 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowLogoutConfirm(false)}>
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
           
-          {/* Modal */}
           <div 
-            className="relative bg-card rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-border"
+            className="relative bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-                <LogOut className="w-6 h-6 text-destructive" />
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                <LogOut className="w-6 h-6 text-red-500" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-foreground">Logout Confirmation</h3>
-                <p className="text-sm text-muted-foreground">Are you sure you want to logout?</p>
+                <h3 className="text-lg font-semibold text-[#131313]">Logout</h3>
+                <p className="text-sm text-[#BCBCBC]">Are you sure you want to logout?</p>
               </div>
             </div>
-
-            <p className="text-sm text-muted-foreground">
-              You will need to login again to access your dashboard and track your earnings.
-            </p>
 
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-border text-foreground hover:bg-secondary/20 transition-colors font-medium"
+                className="flex-1 px-4 py-3 rounded-full border border-[#E5E5E5] text-[#131313] hover:bg-[#F5F5F5] transition-colors font-medium"
               >
                 Cancel
               </button>
@@ -128,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onNavigate }) => {
                   setShowLogoutConfirm(false);
                   logout();
                 }}
-                className="flex-1 px-4 py-2.5 rounded-lg bg-destructive text-white hover:bg-destructive/90 transition-colors font-medium"
+                className="flex-1 px-4 py-3 rounded-full bg-[#131313] text-white hover:bg-[#2a2a2a] transition-colors font-medium"
               >
                 Logout
               </button>

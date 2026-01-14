@@ -1,14 +1,28 @@
+'use client';
+
 import React from 'react';
 
-const OrdersHeader: React.FC = () => {
+interface OrdersHeaderProps {
+  lastRefreshed?: Date;
+}
+
+const OrdersHeader: React.FC<OrdersHeaderProps> = ({ lastRefreshed }) => {
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
   return (
-    <div className="hidden lg:block mb-4 sm:mb-6 md:mb-8">
-      <div className="flex items-center space-x-3 mb-2 sm:mb-3 md:mb-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Orders</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Track and monitor your affiliate orders</p>
-        </div>
-      </div>
+    <div className="flex items-center gap-3">
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#131313]">Orders</h1>
+      {lastRefreshed && (
+        <span className="text-sm text-[#BCBCBC]">
+          Last refreshed: {formatTime(lastRefreshed)}
+        </span>
+      )}
     </div>
   );
 };

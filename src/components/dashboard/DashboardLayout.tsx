@@ -14,15 +14,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const router = useRouter();
   
-  // Check if we should hide the sidebar (on onboarding route)
   const hideSidebar = pathname?.includes('/onboarding');
 
-  // Get current page title based on pathname
   const getPageTitle = () => {
     const pageTitles: Record<string, string> = {
       '/dashboard': 'Dashboard',
       '/orders': 'Orders',
-      '/products': 'Marketplace',
+      '/wallet': 'Wallet',
+      '/products': 'Featured Products',
       '/coupons': 'Coupons',
       '/profile': 'Profile',
     };
@@ -41,13 +40,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     const routeMap: Record<string, string> = {
       'dashboard': '/dashboard',
       'orders': '/orders',
+      'wallet': '/wallet',
       'products': '/products',
+      'featured products': '/products',
       'coupons': '/coupons',
       'profile': '/profile',
-      'insights': '/insights',
-      'reports': '/reports',
-      'comments': '/comments',
-      'channels': '/channels',
     };
     
     const route = routeMap[path.toLowerCase()];
@@ -57,7 +54,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
-  // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
     if (isSidebarOpen) {
       document.body.style.overflow = 'hidden';
@@ -70,15 +66,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     };
   }, [isSidebarOpen]);
 
-  // If sidebar should be hidden, render children without sidebar
   if (hideSidebar) {
     return <>{children}</>;
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-white overflow-hidden">
       {/* Desktop Sidebar */}
-      <div className="hidden lg:block w-64 flex-shrink-0">
+      <div className="hidden lg:block w-56 flex-shrink-0">
         <Sidebar onNavigate={handleNavigate} />
       </div>
 
@@ -88,26 +83,23 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           className="fixed inset-0 z-[60] lg:hidden"
           onClick={closeSidebar}
         >
-          {/* Backdrop */}
-          <div className="absolute inset-0 bg-[#231F20]/30 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
           
-          {/* Drawer */}
           <div
             className={cn(
-              'absolute top-0 left-0 w-80 h-full bg-card shadow-xl transform transition-transform duration-300 ease-in-out',
+              'absolute top-0 left-0 w-72 h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out',
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             )}
             onClick={(e) => e.stopPropagation()}
           >
             <Sidebar onNavigate={handleNavigate} />
             
-            {/* Close Button */}
             <button
               onClick={closeSidebar}
-              className="absolute top-4 right-4 p-2 rounded-lg bg-background border border-border hover:bg-secondary/20 transition-colors z-10 shadow-sm"
+              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
               aria-label="Close sidebar"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#131313]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -116,20 +108,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col bg-white">
-        {/* Mobile Header with Hamburger Menu */}
-        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-[#FFD100]/30 bg-white">
+      <div className="flex-1 flex flex-col bg-[#F0F0F0] overflow-hidden">
+        {/* Mobile Header */}
+        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5] bg-[#F0F0F0]">
           <button
             onClick={toggleSidebar}
-            className="p-1.5 rounded-lg hover:bg-secondary/20 transition-colors"
+            className="p-2 -ml-2 rounded-lg hover:bg-[#F5F5F5] transition-colors"
             aria-label="Open sidebar"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-[#131313]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <h1 className="text-sm sm:text-base font-medium text-foreground">{getPageTitle()}</h1>
-          <div className="w-8" /> {/* Spacer for centering */}
+          <h1 className="text-base font-semibold text-[#131313]">{getPageTitle()}</h1>
+          <div className="w-9" />
         </div>
 
         {/* Scrollable content area */}

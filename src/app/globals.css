@@ -1,50 +1,60 @@
 @import "tailwindcss";
 @import "react-datepicker/dist/react-datepicker.css";
-/* SalesHQ Light Theme */
+
+/* SalesHQ New Design Theme */
 :root,
 [data-theme="light"] {
+  /* Core Colors from Design */
+  --color-black: #131313;
+  --color-gray: #BCBCBCBB;
+  --color-yellow: #FFE887;
+  --color-white: #FFFFFF;
+  --color-light-gray-bg: #F5F5F5;
+  --color-blue-link: #3B82F6;
+
   /* Core */
-  --bg: #FFFFFF;              /* pure white background */
-  --text: rgba(35, 31, 32, 1);            /* dark text for readability */
-  --primary: #ffda34;         /* brand yellow */
-  --brand: rgba(255, 209, 0, 1);          /* brand yellow accent */
-  --secondary: #FFFAE6;       /* light yellow secondary */
-  --accent: #FFD100;          /* golden yellow accent */
+  --bg: #FFFFFF;
+  --text: #131313;
+  --primary: #131313;         /* Black primary for buttons */
+  --brand: #FFE887;           /* Yellow brand accent */
+  --secondary: #F5F5F5;       /* Light gray secondary */
+  --accent: #FFE887;          /* Yellow accent */
 
   /* Mapped variables used across UI */
   --background: var(--bg);
   --foreground: var(--text);
-  --muted: rgba(35, 31, 32, 0.50);        /* subtle muted text */
-  --muted-foreground: rgba(35, 31, 32, 0.65);
-  --popover: #FFFFFF;                     /* white popover */
+  --muted: #BCBCBC;
+  --muted-foreground: #BCBCBCBB;
+  --popover: #FFFFFF;
   --popover-foreground: var(--text);
-  --card: #FFFFFF;                        /* white card background */
+  --card: #FFFFFF;
   --card-foreground: var(--text);
-  --border: rgba(255, 209, 0, 0.5);       /* visible yellow border */
-  --input: rgba(255, 218, 52, 0.12);      /* light yellow input background */
-  --ring: rgba(255, 209, 0, 0.50);        /* yellow focus ring */
+  --border: #E5E5E5;
+  --input: #FFFFFF;
+  --ring: rgba(19, 19, 19, 0.20);
   
   /* Section backgrounds */
-  --section-gradient: linear-gradient(135deg, rgba(255, 209, 0, 0.15) 0%, rgba(255, 250, 230, 0.4) 100%);
-  --card-gradient: linear-gradient(135deg, rgba(255, 209, 0, 0.08) 0%, rgba(255, 250, 230, 0.2) 100%);
+  --section-gradient: linear-gradient(180deg, #FFE887 0%, #FFF4C4 100%);
+  --card-gradient: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
+  --yellow-panel: #FFE887;
 
   /* Status colors (kept semantic) */
   --destructive: #EF4444;
   --destructive-foreground: #ffffff;
-  --success: #10B981;                     /* green success */
+  --success: #10B981;
   --success-foreground: #ffffff;
-  --warning: var(--primary);
-  --warning-foreground: rgba(35, 31, 32, 1);  /* dark text on yellow warning */
+  --warning: #FFE887;
+  --warning-foreground: #131313;
 
   /* Hovers / interactions */
-  --primary-hover: #e6c400;               /* slightly darker yellow for hover */
-  --secondary-hover: #FFF5CC;
-  --accent-hover: #e6bc00;
+  --primary-hover: #2a2a2a;
+  --secondary-hover: #EBEBEB;
+  --accent-hover: #FFD54F;
 
   /* Gradients */
-  --primary-gradient: linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%);
-  --secondary-gradient: linear-gradient(135deg, #FFFAE6 0%, #FFF5CC 100%);
-  --accent-gradient: linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%);
+  --primary-gradient: #131313;
+  --secondary-gradient: linear-gradient(135deg, #F5F5F5 0%, #EBEBEB 100%);
+  --accent-gradient: linear-gradient(180deg, #FFE887 0%, #FFF4C4 100%);
 }
 
 @theme inline {
@@ -68,7 +78,7 @@
   --color-success-foreground: var(--success-foreground);
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
-  --font-sans: var(--font-plus-jakarta-sans), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-outfit), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
@@ -107,7 +117,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-plus-jakarta-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', system-ui, sans-serif;
+  font-weight: 400;
+  font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

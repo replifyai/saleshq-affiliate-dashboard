@@ -11,21 +11,21 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', children, className, disabled, ...props }, ref) => {
-    const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses = 'inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed';
     
     const variants = {
-      primary: 'bg-primary-gradient text-[#231F20] hover:translate-y-[-2px] hover:shadow-lg focus:ring-primary',
-      secondary: 'bg-secondary-gradient text-[#231F20] border border-[#FFD100] hover:translate-y-[-2px] hover:shadow-lg focus:ring-secondary',
-      accent: 'bg-accent-gradient text-[#231F20] hover:translate-y-[-2px] hover:shadow-lg focus:ring-accent',
-      outline: 'border-2 border-[#FFD100] text-[#231F20] bg-transparent hover:bg-[#FFFAE6] focus:ring-primary',
-      ghost: 'text-muted-foreground bg-transparent hover:bg-[#FFFAE6] hover:text-foreground focus:ring-muted'
+      primary: 'bg-[#131313] text-white hover:bg-[#2a2a2a]',
+      secondary: 'bg-[#F5F5F5] text-[#131313] border border-[#E5E5E5] hover:bg-[#EBEBEB]',
+      accent: 'bg-[#FFE887] text-[#131313] hover:bg-[#FFD54F]',
+      outline: 'border-2 border-[#E5E5E5] text-[#131313] bg-transparent hover:bg-[#F5F5F5]',
+      ghost: 'text-[#BCBCBC] bg-transparent hover:bg-[#F5F5F5] hover:text-[#131313]'
     };
 
     const sizes = {
-      sm: 'px-4 py-2 text-sm rounded-lg',
-      md: 'px-6 py-3 text-base rounded-xl',
-      lg: 'px-8 py-4 text-lg rounded-xl',
-      xl: 'px-10 py-5 text-xl rounded-xl'
+      sm: 'px-4 py-2 text-sm rounded-full',
+      md: 'px-6 py-3 text-base rounded-full',
+      lg: 'px-8 py-4 text-base rounded-full',
+      xl: 'px-10 py-5 text-lg rounded-full'
     };
 
     return (

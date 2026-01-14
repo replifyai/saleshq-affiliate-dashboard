@@ -8,12 +8,12 @@ import {
   OrdersHeader,
   OrderSummaryCards,
   OrdersTable,
-  OrdersFilters,
-  OrdersSort,
+  OrdersTabs,
   OrdersEmptyState,
   OrderDetailsModal,
   Order,
 } from '@/components/orders';
+import { OrderTab } from '@/components/orders/OrdersTabs';
 
 // Helper function to map API order to display order
 const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
@@ -22,7 +22,6 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
   const commissionRateValue = parseFloat(apiOrder.commissionRateValue) || 0;
   const discountAmount = parseFloat(apiOrder.discountsTotal) || 0;
   
-  // Extract product name from line items
   let productName = 'Multiple Items';
   if (apiOrder.lineItems && apiOrder.lineItems.length > 0) {
     const firstItem = apiOrder.lineItems[0];
@@ -32,7 +31,6 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     }
   }
 
-  // Map attribution type to channel
   const channelMap: Record<string, Order['channel']> = {
     coupon: 'coupon',
     facebook: 'facebook',
@@ -43,10 +41,9 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
                   channelMap[apiOrder.commissionSource?.toLowerCase()] || 
                   'coupon';
 
-  // Infer status from payment status and other fields
   let status: Order['status'] = 'processing';
   if (apiOrder.paymentStatus === 'paid') {
-    status = 'delivered'; // Default for paid orders
+    status = 'delivered';
   } else if (apiOrder.paymentStatus === 'refunded') {
     status = 'refunded';
   } else if (apiOrder.paymentStatus === 'failed') {
@@ -55,7 +52,6 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     status = 'pending';
   }
 
-  // Extract customer name and location from rawEvent where available
   const rawCustomer = apiOrder.rawEvent?.customer;
   const shippingAddress = apiOrder.rawEvent?.shipping_address;
 
@@ -69,7 +65,6 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
   const customerCity = shippingAddress?.city || undefined;
   const customerCountry = shippingAddress?.country || undefined;
 
-  // Coupon code shown to creator – prefer attributed coupon, then applied coupons
   const couponCode =
     apiOrder.attributedCouponCode ||
     (Array.isArray(apiOrder.appliedCoupons) && apiOrder.appliedCoupons.length > 0
@@ -104,8 +99,12 @@ export default function OrdersPage() {
   const [itemsPerPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   
-  // Filter state
+  // Tab and filter state
+  const [activeTab, setActiveTab] = useState<OrderTab>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [orderNumberFilter, setOrderNumberFilter] = useState('');
   const [debouncedOrderNumber, setDebouncedOrderNumber] = useState('');
@@ -118,12 +117,19 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<CreatorOrder | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // Debounce order number filter
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedOrderNumber(orderNumberFilter);
-    }, 500); // 500ms delay
-
+    }, 500);
     return () => clearTimeout(timer);
   }, [orderNumberFilter]);
 
@@ -131,11 +137,21 @@ export default function OrdersPage() {
     setIsLoading(true);
     try {
       const filters: { paymentStatus?: string; orderNumber?: string } = {};
-      if (paymentStatusFilter) {
+      
+      // Apply tab filter (overrides payment status filter)
+      if (activeTab === 'payout_pending') {
+        filters.paymentStatus = 'pending';
+      } else if (activeTab === 'payout_done') {
+        filters.paymentStatus = 'paid';
+      } else if (paymentStatusFilter) {
         filters.paymentStatus = paymentStatusFilter;
       }
+      
+      // Use order number filter from filter drawer, or search query from search bar
       if (debouncedOrderNumber) {
         filters.orderNumber = debouncedOrderNumber;
+      } else if (debouncedSearch) {
+        filters.orderNumber = debouncedSearch;
       }
 
       const response = await apiClient.getCreatorOrders({
@@ -148,13 +164,13 @@ export default function OrdersPage() {
         },
       });
 
-      // Handle cases where orders might not be an array
       const ordersArray = Array.isArray(response.orders) ? response.orders : [];
       const mappedOrders = ordersArray.map(mapApiOrderToOrder);
       setOrders(mappedOrders);
       setRawOrders(ordersArray);
       setTotalPages(response.pagination?.totalPages || 1);
       setTotalItems(response.pagination?.total || 0);
+      setLastRefreshed(new Date());
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to fetch orders');
       setOrders([]);
@@ -168,10 +184,9 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, paymentStatusFilter, debouncedOrderNumber, sortBy, sortDirection]);
+  }, [currentPage, activeTab, debouncedSearch, debouncedOrderNumber, paymentStatusFilter, sortBy, sortDirection]);
 
   const handleSort = (field: keyof Order) => {
-    // Map display fields to API sort fields
     const sortFieldMap: Record<string, string> = {
       date: 'createdAt',
       orderValue: 'totalAmount',
@@ -187,19 +202,12 @@ export default function OrdersPage() {
       setSortBy(apiSortField);
       setSortDirection('desc');
     }
-    setCurrentPage(1); // Reset to first page on sort change
+    setCurrentPage(1);
   };
 
   const handleSortChange = (by: string, direction: 'asc' | 'desc') => {
     setSortBy(by);
     setSortDirection(direction);
-    setCurrentPage(1); // Reset to first page on sort change
-  };
-
-  const handleClearFilters = () => {
-    setPaymentStatusFilter('');
-    setOrderNumberFilter('');
-    setDebouncedOrderNumber('');
     setCurrentPage(1);
   };
 
@@ -211,7 +219,20 @@ export default function OrdersPage() {
     }
   };
 
-  // Calculate summary data from all orders
+  const handleTabChange = (tab: OrderTab) => {
+    setActiveTab(tab);
+    setPaymentStatusFilter(''); // Reset payment filter when changing tabs
+    setCurrentPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setPaymentStatusFilter('');
+    setOrderNumberFilter('');
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
+  // Calculate summary data
   const summaryData = useMemo(() => {
     if (orders.length === 0) {
       return {
@@ -233,20 +254,6 @@ export default function OrdersPage() {
     };
   }, [orders, totalItems]);
 
-  if (isLoading) {
-    return (
-      <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto scrollbar-hide-mobile">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 flex items-center justify-center min-h-[60vh]">
-          <div className="text-center space-y-2">
-            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-primary mx-auto mb-2 sm:mb-4"></div>
-            <h2 className="text-base sm:text-xl font-semibold text-foreground">Loading orders...</h2>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Map sortBy back to display field for table
   const sortFieldMap: Record<string, keyof Order> = {
     createdAt: 'date',
     totalAmount: 'orderValue',
@@ -255,34 +262,45 @@ export default function OrdersPage() {
   };
   const displaySortField = sortFieldMap[sortBy] || 'date';
 
+  if (isLoading && orders.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#F0F0F0] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block w-10 h-10 border-3 border-[#131313] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-[#BCBCBC]">Loading orders...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-gradient-to-br from-background via-background to-secondary/5 rounded-3xl h-[100dvh] overflow-y-auto scrollbar-hide-mobile">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-12 space-y-6 sm:space-y-8">
-        <OrdersHeader />
+    <div className="min-h-screen bg-[#F0F0F0]">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        {/* Header */}
+        <OrdersHeader lastRefreshed={lastRefreshed} />
+
+        {/* Summary Cards */}
         <OrderSummaryCards data={summaryData} />
+
+        {/* Tabs and Filters */}
+        <OrdersTabs
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          paymentStatus={paymentStatusFilter}
+          onPaymentStatusChange={setPaymentStatusFilter}
+          orderNumberFilter={orderNumberFilter}
+          onOrderNumberFilterChange={setOrderNumberFilter}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSortChange={handleSortChange}
+          onClearFilters={handleClearFilters}
+        />
         
         {totalItems === 0 ? (
-          // Show empty state when no orders
           <OrdersEmptyState />
         ) : (
-          <>
-            {/* Filters & Sort - Single Line */}
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <OrdersFilters
-                paymentStatus={paymentStatusFilter}
-                orderNumber={orderNumberFilter}
-                onPaymentStatusChange={setPaymentStatusFilter}
-                onOrderNumberChange={setOrderNumberFilter}
-                onClearFilters={handleClearFilters}
-              />
-              <OrdersSort
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                onSortChange={handleSortChange}
-              />
-            </div>
-
-            {/* Orders Table */}
             <OrdersTable
               orders={orders}
               currentPage={currentPage}
@@ -295,7 +313,6 @@ export default function OrdersPage() {
               onPageChange={setCurrentPage}
               onViewDetails={handleViewDetails}
             />
-          </>
         )}
 
         <OrderDetailsModal
