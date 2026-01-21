@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
+import { OTPInput } from 'input-otp';
 import { cn } from '@/lib/utils';
 import { getContentConfig } from '@/lib/constants';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
@@ -17,8 +18,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   const [countdown, setCountdown] = useState(0);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
-  
+
   const contentConfig = getContentConfig();
   const { sendOtp, verifyOtp } = useProfileOperations();
   const { showSnackbar } = useSnackbar();
@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
   const handleSendOtp = async () => {
     if (mobileNumber.length === 10) {
       if (isSendingOtp) return;
-      
+
       setIsSendingOtp(true);
       try {
         const phoneNumber = `+91${mobileNumber}`;
@@ -68,46 +68,6 @@ const Login: React.FC<LoginProps> = ({ className }) => {
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
-    const otpArray = otp.split('');
-
-    if (digit) {
-      otpArray[index] = digit;
-    } else {
-      otpArray[index] = '';
-    }
-
-    const newOtp = otpArray.join('').slice(0, OTP_LENGTH);
-    setOtp(newOtp);
-
-    // Auto-focus next input after entering a digit
-    if (digit && index < OTP_LENGTH - 1) {
-      setTimeout(() => {
-      otpInputsRef.current[index + 1]?.focus();
-      }, 0);
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      setTimeout(() => {
-      otpInputsRef.current[index - 1]?.focus();
-      }, 0);
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
-    if (pastedData) {
-      setOtp(pastedData);
-      const lastIndex = Math.min(pastedData.length, OTP_LENGTH) - 1;
-      setTimeout(() => {
-        otpInputsRef.current[lastIndex]?.focus();
-      }, 0);
-    }
-  };
 
   const handleResendOtp = async () => {
     if (countdown === 0 && !isSendingOtp) {
@@ -127,14 +87,14 @@ const Login: React.FC<LoginProps> = ({ className }) => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (otp.length !== OTP_LENGTH) {
       showSnackbar('Please enter a valid OTP', 'error');
       return;
     }
-    
+
     if (isVerifying) return;
-    
+
     setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
@@ -199,7 +159,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     <label className="block text-sm font-medium text-[#131313]">
                       Mobile Number <span className="text-[#BCBCBC]">*</span>
                     </label>
-                    
+
                     {/* Input with country code */}
                     <div className="flex items-center border border-[#E5E5E5] rounded-xl overflow-hidden bg-white">
                       <div className="flex items-center gap-2 px-4 py-4 border-r border-[#E5E5E5] bg-white cursor-pointer hover:bg-gray-50">
@@ -217,8 +177,8 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                         onChange={(e) => handleMobileChange(e.target.value)}
                         className="flex-1 px-4 py-4 text-[#131313] placeholder:text-[#BCBCBC] focus:outline-none bg-white"
                       />
-        </div>
-      </div>
+                    </div>
+                  </div>
 
                   {/* Continue Button */}
                   <button
@@ -262,7 +222,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   <label className="block text-sm font-medium text-[#131313]">
                     Mobile Number <span className="text-[#BCBCBC]">*</span>
                   </label>
-                  
+
                   {/* Input with country code */}
                   <div className="flex items-center border border-[#E5E5E5] rounded-xl overflow-hidden bg-white">
                     <div className="flex items-center gap-2 px-3 py-4 border-r border-[#E5E5E5] bg-white">
@@ -273,10 +233,10 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                       </svg>
                     </div>
                     <input
-                  type="tel"
+                      type="tel"
                       inputMode="numeric"
                       placeholder="Enter 10 digit mobile number"
-                  value={mobileNumber}
+                      value={mobileNumber}
                       onChange={(e) => handleMobileChange(e.target.value)}
                       className="flex-1 px-3 py-4 text-[#131313] placeholder:text-[#BCBCBC] text-sm focus:outline-none bg-white"
                     />
@@ -320,50 +280,49 @@ const Login: React.FC<LoginProps> = ({ className }) => {
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-[#131313]">
                   Enter verification code
-                  </h2>
+                </h2>
                 <p className="text-sm text-[#BCBCBC]">
                   We have sent a verification code to
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-[#131313]">
-                      +91 {mobileNumber}
-                    </span>
-                    <button
-                      type="button"
+                    +91 {mobileNumber}
+                  </span>
+                  <button
+                    type="button"
                     onClick={() => {
                       setIsOtpSent(false);
                       setOtp('');
                     }}
                     className="text-sm font-medium text-blue-500 hover:text-blue-600"
-                    >
-                      Edit
-                    </button>
+                  >
+                    Edit
+                  </button>
                 </div>
-                </div>
+              </div>
 
               {/* OTP Input Boxes */}
-              <div className="flex justify-start gap-3">
-                {Array.from({ length: OTP_LENGTH }).map((_, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={otp[index] || ''}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    onPaste={handleOtpPaste}
-                      ref={(el: HTMLInputElement | null) => {
-                        otpInputsRef.current[index] = el;
-                      }}
-                    className={cn(
-                      "w-12 h-14 rounded-xl border-2 text-center text-xl font-semibold transition-all duration-200",
-                      "focus:outline-none focus:border-[#131313]",
-                      otp[index] ? "border-[#131313] bg-white" : "border-[#E5E5E5] bg-white"
-                    )}
-                    />
-                  ))}
-                </div>
+              <OTPInput
+                maxLength={OTP_LENGTH}
+                value={otp}
+                onChange={setOtp}
+                containerClassName="flex justify-start gap-3"
+                render={({ slots }) => (
+                  <>
+                    {slots.map((slot, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-12 h-14 rounded-xl border-2 text-center text-xl font-semibold transition-all duration-200 flex items-center justify-center bg-white",
+                          slot.isActive ? "border-[#131313]" : slot.char ? "border-[#131313]" : "border-[#E5E5E5]"
+                        )}
+                      >
+                        {slot.char ?? (slot.isActive && <span className="animate-pulse">|</span>)}
+                      </div>
+                    ))}
+                  </>
+                )}
+              />
 
               {/* Timer */}
               <div className="flex items-center gap-2 text-sm text-[#BCBCBC]">
@@ -371,7 +330,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   <circle cx="12" cy="12" r="10" strokeWidth={2} />
                   <path strokeLinecap="round" strokeWidth={2} d="M12 6v6l4 2" />
                 </svg>
-                    <span>00:{countdown.toString().padStart(2, '0')}</span>
+                <span>00:{countdown.toString().padStart(2, '0')}</span>
                 {countdown === 0 && (
                   <button
                     type="button"
@@ -382,11 +341,11 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     {isSendingOtp ? 'Sending...' : 'Resend'}
                   </button>
                 )}
-                </div>
+              </div>
 
               {/* Verify Button */}
               <button
-                  type="submit"
+                type="submit"
                 disabled={otp.length !== OTP_LENGTH || isVerifying}
                 className={cn(
                   "w-full py-4 rounded-full font-semibold text-base transition-all duration-200",
@@ -394,7 +353,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     ? "bg-[#131313] text-white hover:bg-[#2a2a2a]"
                     : "bg-[#D1D1D1] text-white cursor-not-allowed"
                 )}
-                >
+              >
                 {isVerifying ? 'Verifying...' : 'Verify'}
               </button>
             </div>
@@ -457,31 +416,30 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                     Edit
                   </button>
                 </div>
-            </div>
+              </div>
 
               {/* OTP Input Boxes */}
-              <div className="flex justify-start gap-2">
-                {Array.from({ length: OTP_LENGTH }).map((_, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={otp[index] || ''}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                    onPaste={handleOtpPaste}
-                    ref={(el: HTMLInputElement | null) => {
-                      otpInputsRef.current[index] = el;
-                    }}
-                    className={cn(
-                      "w-11 h-12 rounded-xl border-2 text-center text-lg font-semibold transition-all duration-200",
-                      "focus:outline-none focus:border-[#131313]",
-                      otp[index] ? "border-[#131313] bg-white" : "border-[#E5E5E5] bg-white"
-                    )}
-                  />
-                ))}
-              </div>
+              <OTPInput
+                maxLength={OTP_LENGTH}
+                value={otp}
+                onChange={setOtp}
+                containerClassName="flex justify-start gap-2"
+                render={({ slots }) => (
+                  <>
+                    {slots.map((slot, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-11 h-12 rounded-xl border-2 text-center text-lg font-semibold transition-all duration-200 flex items-center justify-center bg-white",
+                          slot.isActive ? "border-[#131313]" : slot.char ? "border-[#131313]" : "border-[#E5E5E5]"
+                        )}
+                      >
+                        {slot.char ?? (slot.isActive && <span className="animate-pulse">|</span>)}
+                      </div>
+                    ))}
+                  </>
+                )}
+              />
 
               {/* Timer */}
               <div className="flex items-center gap-2 text-sm text-[#BCBCBC]">
