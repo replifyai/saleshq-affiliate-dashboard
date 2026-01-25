@@ -216,6 +216,8 @@ export default function OrdersPage() {
     if (fullOrder) {
       setSelectedOrder(fullOrder);
       setIsDetailsOpen(true);
+    } else {
+      console.warn(`Order with id ${orderId} not found in rawOrders`);
     }
   };
 

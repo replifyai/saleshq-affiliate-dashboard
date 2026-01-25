@@ -80,7 +80,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                 <tr
                   key={order.id}
                   className="border-b border-[#E5E5E5] last:border-b-0 hover:bg-[#F5F5F5]/50 cursor-pointer transition-colors"
-                        onClick={() => onViewDetails?.(order.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onViewDetails?.(order.id);
+                  }}
                 >
                   <td className="px-6 py-4 text-sm text-[#131313]">{formatDate(order.date)}</td>
                   <td className="px-6 py-4 text-sm text-[#131313]">{order.orderNumber}</td>
@@ -105,7 +108,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
             <div
               key={order.id}
               className="p-4 hover:bg-[#F5F5F5]/50 cursor-pointer transition-colors"
-              onClick={() => onViewDetails?.(order.id)}
+              onClick={(e) => {
+                e.preventDefault();
+                onViewDetails?.(order.id);
+              }}
             >
               {/* Header with ID and Status */}
               <div className="flex items-center justify-between mb-3">

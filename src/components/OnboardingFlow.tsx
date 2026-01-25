@@ -104,6 +104,9 @@ const OnboardingFlow: React.FC = () => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
+    // Store approval status before update (approval status won't change from profile update)
+    const isPending = state.profile?.approved === 'pending';
+    
     try {
       // Convert social handles to API format
       const socialMediaHandles: SocialMediaHandle[] = data.socialHandles
@@ -120,12 +123,15 @@ const OnboardingFlow: React.FC = () => {
         socialMediaHandles: socialMediaHandles.length > 0 ? socialMediaHandles : undefined
       });
 
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Redirect based on approval status
+      // If pending, redirect to profile so they can see their details and update if needed
+      // If approved, redirect to dashboard
+      router.push(isPending ? '/profile' : '/dashboard');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       // Still redirect on error to avoid blocking the user
-      router.push('/dashboard');
+      // Redirect to profile if pending, otherwise dashboard
+      router.push(isPending ? '/profile' : '/dashboard');
     } finally {
       setIsSubmitting(false);
     }

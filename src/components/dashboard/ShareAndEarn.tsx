@@ -14,12 +14,20 @@ const ShareAndEarn: React.FC<ShareAndEarnProps> = ({ className }) => {
   const { showSuccess } = useSnackbar();
   const { state } = useProfile();
 
-  const couponCode = state.profile?.uniqueReferralCode?.toUpperCase() || 'AROMAL';
+  // Extract coupon data from profile coupons
+  // The coupons object is included in the API response but not in the type definition
+  const coupons = (state.profile as any)?.coupons;
+  const couponCode = coupons?.code || state.profile?.uniqueReferralCode?.toUpperCase() || 'N/A';
   const referralLink = `https://myfrido.com?ref=${state.profile?.uniqueReferralCode || 'affiliatedisco'}`;
   
-  // Mock data for discount and commission (will come from API later)
-  const yourDiscount = '10%';
-  const yourCommission = '10%';
+  const discountPercentage = coupons?.value?.percentage;
+  const commissionValue = coupons?.commissionValue;
+  
+  // Format discount: show percentage if available, otherwise show "N/A"
+  const yourDiscount = discountPercentage !== undefined ? `${discountPercentage}%` : 'N/A';
+  
+  // Format commission: show percentage if available, otherwise show "N/A"
+  const yourCommission = commissionValue !== undefined ? `${commissionValue}%` : 'N/A';
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);

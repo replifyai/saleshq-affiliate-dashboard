@@ -1,12 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Clock, ShieldCheck, Sparkles } from 'lucide-react';
+import { Clock, ShieldCheck, Sparkles, User, Mail, Phone, Globe } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Button from './common/Button';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
 
 const PendingApproval: React.FC = () => {
   const { profile, logout } = useProfileOperations();
+  const router = useRouter();
 
   const firstName =
     (profile?.name || '')
@@ -18,6 +20,14 @@ const PendingApproval: React.FC = () => {
     if (typeof window !== 'undefined') {
       window.location.reload();
     }
+  };
+
+  const handleUpdateProfile = () => {
+    router.push('/profile');
+  };
+
+  const handleCompleteOnboarding = () => {
+    router.push('/onboarding');
   };
 
   return (
@@ -97,32 +107,132 @@ const PendingApproval: React.FC = () => {
             </div>
           </div>
 
+          {/* Profile Details Section */}
+          <div className="space-y-3 sm:space-y-4 pt-2 border-t border-[#FFD100]/30">
+            <h2 className="text-sm sm:text-base font-semibold text-foreground">
+              Your Profile Details
+            </h2>
+            <div className="space-y-3">
+              {/* Name */}
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <User className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Name</p>
+                  <p className="mt-1 text-sm sm:text-base font-medium text-foreground break-words">
+                    {profile?.name || 'Not provided'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Email */}
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</p>
+                  <p className="mt-1 text-sm sm:text-base font-medium text-foreground break-words">
+                    {profile?.email || 'Not provided'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-sm sm:text-base font-medium text-foreground break-words">
+                      {profile?.phoneNumber || 'Not provided'}
+                    </p>
+                    {profile?.phoneNumberVerified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media Handles */}
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <Globe className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Social Media</p>
+                  {profile?.socialMediaHandles && profile.socialMediaHandles.length > 0 ? (
+                    <div className="mt-2 space-y-2">
+                      {profile.socialMediaHandles.map((handle, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium capitalize">
+                            {handle.platform}
+                          </span>
+                          <span className="text-sm text-foreground break-words">{handle.handle}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-sm sm:text-base text-muted-foreground">No social media handles added</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <h2 className="text-xs sm:text-sm font-semibold text-foreground">
               While you wait
             </h2>
             <ul className="space-y-1 text-xs sm:text-sm text-muted-foreground list-disc list-inside">
+              <li>You can update your profile details at any time before approval.</li>
               <li>Keep an eye on your SMS/WhatsApp and email for the approval update.</li>
               <li>Have any questions? Reply to our onboarding email and we&apos;ll be happy to help.</li>
             </ul>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-4">
-            <Button
-              onClick={handleRefresh}
-              size="lg"
-              className="flex-1 bg-primary-gradient font-semibold text-sm sm:text-base"
-            >
-              Check status again
-            </Button>
-            <Button
-              onClick={logout}
-              variant="outline"
-              size="lg"
-              className="flex-1 text-sm sm:text-base"
-            >
-              Log out
-            </Button>
+          <div className="flex flex-col gap-2 sm:gap-3 pt-2 sm:pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button
+                onClick={handleUpdateProfile}
+                size="lg"
+                className="flex-1 bg-primary-gradient font-semibold text-sm sm:text-base"
+              >
+                Update Profile
+              </Button>
+              <Button
+                onClick={handleCompleteOnboarding}
+                variant="outline"
+                size="lg"
+                className="flex-1 text-sm sm:text-base"
+              >
+                Complete Onboarding
+              </Button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="lg"
+                className="flex-1 text-sm sm:text-base"
+              >
+                Check status again
+              </Button>
+              <Button
+                onClick={logout}
+                variant="outline"
+                size="lg"
+                className="flex-1 text-sm sm:text-base"
+              >
+                Log out
+              </Button>
+            </div>
           </div>
         </div>
       </div>

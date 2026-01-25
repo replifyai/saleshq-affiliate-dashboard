@@ -147,7 +147,8 @@ export interface CreatorOrder {
   id: string;
   orderId: string;
   orderNumber: string;
-  pixelEventId: string;
+  checkoutToken?: string | null;
+  pixelEventId?: string | null;
   customerId: string;
   customerEmail: string;
   currencyCode: string;
@@ -157,7 +158,7 @@ export interface CreatorOrder {
   totalAmount: string;
   discountsTotal: string;
   lineItems: OrderLineItem[];
-  referralCode: string;
+  referralCode?: string | null;
   appliedCoupons: string[];
   attributedCreatorId: string;
   attributionType: string;
@@ -170,8 +171,8 @@ export interface CreatorOrder {
   commissionSource: string;
   paymentStatus: 'paid' | 'pending' | 'failed' | 'refunded';
   paymentMethod: string;
-  refundedAmount: string;
-  refundReason: string;
+  refundedAmount?: string | null;
+  refundReason?: string | null;
   rawEvent: { [key: string]: any };
   createdAt: number;
   updatedAt: number;
