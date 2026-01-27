@@ -136,7 +136,7 @@ export default function DashboardPage() {
         {/* Stats Cards */}
         <StatsCards
           yourSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
-          totalOrders={formatCurrency(dashboardSummary?.totalOrders)}
+          totalOrders={formatNumber(dashboardSummary?.totalOrders)}
           commissionOnSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
           payoutsIssued={mockPayoutsIssued}
           nextPayout={mockNextPayout}

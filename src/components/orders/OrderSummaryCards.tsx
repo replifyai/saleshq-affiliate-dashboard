@@ -15,10 +15,18 @@ const OrderSummaryCards: React.FC<OrderSummaryCardsProps> = ({ data }) => {
   const formatCurrency = (amount: number) => {
     return `₹${amount.toLocaleString('en-IN')}`;
   };
+  const formatNumber = (value?: number | string | null): string => {
+    if (value === undefined || value === null) {
+      return '0';
+    }
+    const numValue = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+    if (isNaN(numValue)) return '0';
+    return numValue.toLocaleString('en-IN');
+  };
 
   const cards = [
     { label: 'Your sales', value: formatCurrency(data.totalRevenue) },
-    { label: 'Total Orders', value: formatCurrency(data.totalOrders) },
+    { label: 'Total Orders', value: formatNumber(data.totalOrders) },
     { label: 'Commission on sales', value: formatCurrency(data.totalCommission) },
     { label: 'Avg. Order value', value: formatCurrency(data.averageOrderValue) },
   ];

@@ -195,6 +195,19 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                   </button>
                 </div>
 
+                {/* Sign Up Link */}
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-[#131313]">
+                    Don&apos;t have an account?{' '}
+                    <a 
+                      href="/signup" 
+                      className="text-[#131313] font-semibold underline underline-offset-2 hover:no-underline"
+                    >
+                      Sign Up
+                    </a>
+                  </p>
+                </div>
+
                 {renderFooter()}
               </form>
             </div>
@@ -256,6 +269,19 @@ const Login: React.FC<LoginProps> = ({ className }) => {
                 >
                   {isSendingOtp ? 'Sending...' : 'Continue'}
                 </button>
+              </div>
+
+              {/* Sign Up Link */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-[#131313]">
+                  Don&apos;t have an account?{' '}
+                  <a 
+                    href="/signup" 
+                    className="text-[#131313] font-semibold underline underline-offset-2 hover:no-underline"
+                  >
+                    Sign Up
+                  </a>
+                </p>
               </div>
 
               {renderFooter()}

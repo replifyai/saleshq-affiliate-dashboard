@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import Button from './common/Button';
-import TextField from './common/TextField';
+import React, { useState } from 'react';
+import { OTPInput } from 'input-otp';
 import { cn } from '@/lib/utils';
-import { getFeatureConfig } from '@/lib/constants';
+import { getContentConfig, getFeatureConfig } from '@/lib/constants';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
 
@@ -21,14 +20,13 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
-  
-  // Get configuration
+
+  const contentConfig = getContentConfig();
   const featureConfig = getFeatureConfig();
-  
-  // Profile operations and snackbar
   const { createProfile, sendOtp, verifyOtp } = useProfileOperations();
   const { showSnackbar } = useSnackbar();
+
+  const OTP_LENGTH = 6;
 
   const startCountdown = () => {
     setCountdown(30);
@@ -80,29 +78,6 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    const digit = value.replace(/\D/g, '').slice(-1);
-    const otpArray = otp.split('');
-
-    if (digit) {
-      otpArray[index] = digit;
-    } else {
-      otpArray[index] = '';
-    }
-
-    const newOtp = otpArray.join('').slice(0, featureConfig.auth.otpLength);
-    setOtp(newOtp);
-
-    if (digit && index < featureConfig.auth.otpLength - 1) {
-      otpInputsRef.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpInputsRef.current[index - 1]?.focus();
-    }
-  };
 
   const handleResendOtp = async () => {
     if (countdown === 0 && !isSendingOtp) {
@@ -123,199 +98,447 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (otp.length !== featureConfig.auth.otpLength) {
+    if (otp.length !== OTP_LENGTH) {
       showSnackbar('Please enter a valid OTP', 'error');
       return;
     }
     
-    if (isVerifying) return; // Prevent double clicks
+    if (isVerifying) return;
     
     setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      await verifyOtp(phoneNumber, parseInt(otp)); // Pass OTP as number
+      await verifyOtp(phoneNumber, parseInt(otp));
       showSnackbar('Signup successful!', 'success');
-      // Redirect to onboarding flow
       window.location.href = '/onboarding';
     } catch (error) {
       showSnackbar(error instanceof Error ? error.message : 'Signup failed', 'error');
-      setIsVerifying(false); // Only reset on error; success redirects anyway
+      setIsVerifying(false);
     }
   };
 
-  return (
-    <div className={cn('flex min-h-screen', className)}>
-      {/* Left Panel - Background Image & Branding */}
-      <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden" style={{ background: 'linear-gradient(93.59deg, #FFD100 6.88%, #FFFAE6 142.58%)' }}>
-        {/* Decorative pattern overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 600'%3E%3Cpath fill='%23231F20' fill-opacity='0.1' d='M0 100c50 0 100 50 100 100s50 100 100 100 100-50 100-100 50-100 100-100 100 50 100 100s50 100 100 100v400H0V200z'/%3E%3C/svg%3E")`,
-          }}
-        />
-        
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-start px-8 xl:px-12 text-[#231F20]">
-          <div className="space-y-3">
-            <h2 className="text-xs sm:text-sm font-medium uppercase tracking-wider opacity-75">
-              JOIN THE PROGRAM
-            </h2>
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-snug">
-              AFFILIATE PROGRAM
-            </h3>
-            <p className="text-sm sm:text-base opacity-80 mt-3 sm:mt-4 max-w-md">
-              Start your journey as a creator and earn with us
-            </p>
-          </div>
-        </div>
-      </div>
+  // Footer Component
+  const renderFooter = () => (
+    <div className="space-y-4 pt-6">
+      <div className="border-t border-[#E5E5E5]" />
+      <p className="text-center text-sm text-[#BCBCBC]">
+        By continuing, you agree to our{' '}
+        <a href="/terms" className="text-[#131313] underline underline-offset-2 hover:no-underline">
+          Terms of service
+        </a>
+        {' '}&{' '}
+        <a href="/privacy" className="text-[#131313] underline underline-offset-2 hover:no-underline">
+          Privacy policy
+        </a>
+      </p>
+    </div>
+  );
 
-      {/* Right Panel - Signup Form */}
-      <div className="flex-1 lg:w-3/5 bg-card flex flex-col justify-center items-center px-6 sm:px-8 py-8 sm:py-12">
-        <div className="w-full max-w-md space-y-6 sm:space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-3 sm:space-y-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Join Our Program
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Create your account and start earning
-            </p>
+  // Powered By Footer
+  const renderPoweredBy = () => (
+    <p className="text-center text-sm text-[#BCBCBC] mt-8">
+      Powered by SalesHQ
+    </p>
+  );
+
+  // ============ SIGNUP SCREEN (Name & Mobile Number Input) ============
+  if (!isOtpSent) {
+    return (
+      <div className={cn('min-h-screen', className)}>
+        {/* Desktop Layout */}
+        <div className="hidden lg:flex min-h-screen">
+          {/* Left Yellow Panel */}
+          <div className="w-[45%] bg-[#FFE887] rounded-r-[40px] flex items-center justify-center">
+            <span className="text-[#C4B87A] text-xl font-medium">Image</span>
           </div>
 
-          {/* Signup Form */}
-          <form onSubmit={handleSignup} className="space-y-5 sm:space-y-6">
-            {!isOtpSent ? (
-              <>
-                <TextField
-                  label="Full Name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={name}
-                  onChange={(value) => setName(value)}
-                  required
-                  className="w-full"
-                />
+          {/* Right White Panel */}
+          <div className="flex-1 bg-white flex flex-col justify-center items-center px-12">
+            <div className="w-full max-w-md">
+              {/* Header */}
+              <div className="mb-8">
+                <p className="text-[#BCBCBC] text-base mb-2">Let&apos;s get started</p>
+                <h1 className="text-3xl font-bold text-[#131313]">Sign up</h1>
+              </div>
 
-                <TextField
-                  label="Mobile Number"
-                  type="tel"
-                  placeholder="Enter your mobile number"
-                  value={mobileNumber}
-                  onChange={handleMobileChange}
-                  required
-                  className="w-full"
-                />
-                {mobileNumber && mobileNumber.length === 10 && (
-                  <p className="text-xs text-secondary -mt-2">
-                    We&apos;ll send OTP to +91 {mobileNumber}
-                  </p>
-                )}
-
-                <Button
-                  type="button"
-                  onClick={handleSendOtp}
-                  size="lg"
-                  className="w-full bg-primary-gradient font-bold text-base sm:text-lg py-3.5 sm:py-4"
-                  disabled={mobileNumber.length !== 10 || !name.trim() || isCreatingProfile}
-                >
-                  {isCreatingProfile ? 'Creating Profile...' : 'Create Profile & Send OTP'}
-                </Button>
-              </>
-            ) : (
-              <>
-                <div className="space-y-2 text-center">
-                  <h2 className="text-xl sm:text-2xl font-semibold text-foreground">
-                    Enter Verification Code
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    We have sent a verification code to{' '}
-                    <span className="font-medium text-foreground">
-                      +91 {mobileNumber}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsOtpSent(false)}
-                      className="ml-2 text-primary font-semibold hover:underline"
-                    >
-                      Edit
-                    </button>
-                  </p>
-                </div>
-
-                <div className="flex justify-center gap-2 sm:gap-3 mt-4 sm:mt-6">
-                  {Array.from({ length: featureConfig.auth.otpLength }).map((_, index) => (
+              {/* Form */}
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div className="space-y-6">
+                  {/* Name Field */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-[#131313]">
+                      Full Name <span className="text-[#BCBCBC]">*</span>
+                    </label>
                     <input
-                      key={index}
                       type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={otp[index] || ''}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      ref={(el: HTMLInputElement | null) => {
-                        otpInputsRef.current[index] = el;
-                      }}
-                      className="w-10 h-12 sm:w-12 sm:h-14 rounded-xl border-2 border-[#FFD100] bg-[#FFFAE6] text-foreground text-center text-lg sm:text-xl font-semibold tracking-widest focus:outline-none focus:ring-2 focus:ring-[#FFD100]/50"
+                      placeholder="Enter your full name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-4 border border-[#E5E5E5] rounded-xl text-[#131313] placeholder:text-[#BCBCBC] focus:outline-none focus:border-[#131313] bg-white"
                     />
-                  ))}
-                </div>
-
-                <div className="flex items-center justify-between mt-3 sm:mt-4 text-[11px] sm:text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <span>⏱</span>
-                    <span>00:{countdown.toString().padStart(2, '0')}</span>
                   </div>
 
+                  {/* Mobile Number Field */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-[#131313]">
+                      Mobile Number <span className="text-[#BCBCBC]">*</span>
+                    </label>
+
+                    {/* Input with country code */}
+                    <div className="flex items-center border border-[#E5E5E5] rounded-xl overflow-hidden bg-white">
+                      <div className="flex items-center gap-2 px-4 py-4 border-r border-[#E5E5E5] bg-white cursor-pointer hover:bg-gray-50">
+                        <span className="text-lg">🇮🇳</span>
+                        <span className="text-[#131313] font-medium">+91</span>
+                        <svg className="w-4 h-4 text-[#BCBCBC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="Enter 10 digit mobile number"
+                        value={mobileNumber}
+                        onChange={(e) => handleMobileChange(e.target.value)}
+                        className="flex-1 px-4 py-4 text-[#131313] placeholder:text-[#BCBCBC] focus:outline-none bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Continue Button */}
                   <button
                     type="button"
-                    onClick={handleResendOtp}
-                    disabled={countdown > 0 || isSendingOtp}
+                    onClick={handleSendOtp}
+                    disabled={mobileNumber.length !== 10 || !name.trim() || isCreatingProfile}
                     className={cn(
-                      'font-medium',
-                      countdown > 0 || isSendingOtp
-                        ? 'text-muted-foreground cursor-not-allowed'
-                        : 'text-primary hover:text-primary-hover'
+                      "w-full py-4 rounded-full font-semibold text-base transition-all duration-200",
+                      "bg-[#131313] text-white hover:bg-[#2a2a2a]",
+                      (mobileNumber.length !== 10 || !name.trim() || isCreatingProfile) && "opacity-90"
                     )}
                   >
-                    {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+                    {isCreatingProfile ? 'Creating Profile...' : 'Continue'}
                   </button>
                 </div>
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="mt-4 w-full bg-primary-gradient text-black font-bold text-base sm:text-lg py-3.5 sm:py-4"
-                  disabled={otp.length !== featureConfig.auth.otpLength || isVerifying}
-                >
-                  {isVerifying ? 'Verifying...' : 'Verify & Continue'}
-                </Button>
-              </>
-            )}
-          </form>
+                {/* Sign In Link */}
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-[#131313]">
+                    Already have an account?{' '}
+                    <a 
+                      href="/login" 
+                      className="text-[#131313] font-semibold underline underline-offset-2 hover:no-underline"
+                    >
+                      Sign In
+                    </a>
+                  </p>
+                </div>
 
-          {/* Login Link */}
-          <div className="text-center space-y-6">
-            <p className="text-foreground">
-              Already have an account?{' '}
-              <a 
-                href="/login" 
-                className="text-primary hover:text-primary-hover font-semibold underline decoration-2 underline-offset-4 transition-colors"
-              >
-                Sign In
-              </a>
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-border pt-6 mt-8">
-            <div className="text-center text-muted-foreground text-sm">
-              <p className="mb-2">
-                By signing up, you agree to our Terms of Service and Privacy Policy
-              </p>
+                {renderFooter()}
+              </form>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Layout */}
+        <div className="lg:hidden min-h-screen flex flex-col">
+          {/* Top Yellow Section */}
+          <div className="flex-1 min-h-[40vh] bg-[#FFE887]" />
+
+          {/* Bottom White Card */}
+          <div className="bg-white rounded-t-[32px] -mt-8 flex flex-col px-6 py-8">
+            {/* Header */}
+            <div className="mb-8">
+              <p className="text-[#BCBCBC] text-base mb-2">Let&apos;s get started</p>
+              <h1 className="text-2xl font-bold text-[#131313]">Sign up</h1>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={(e) => e.preventDefault()}>
+              <div className="space-y-6">
+                {/* Name Field */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-[#131313]">
+                    Full Name <span className="text-[#BCBCBC]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-4 border border-[#E5E5E5] rounded-xl text-[#131313] placeholder:text-[#BCBCBC] text-sm focus:outline-none focus:border-[#131313] bg-white"
+                  />
+                </div>
+
+                {/* Mobile Number Field */}
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-[#131313]">
+                    Mobile Number <span className="text-[#BCBCBC]">*</span>
+                  </label>
+
+                  {/* Input with country code */}
+                  <div className="flex items-center border border-[#E5E5E5] rounded-xl overflow-hidden bg-white">
+                    <div className="flex items-center gap-2 px-3 py-4 border-r border-[#E5E5E5] bg-white">
+                      <span className="text-base">🇮🇳</span>
+                      <span className="text-[#131313] font-medium text-sm">+91</span>
+                      <svg className="w-3 h-3 text-[#BCBCBC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="Enter 10 digit mobile number"
+                      value={mobileNumber}
+                      onChange={(e) => handleMobileChange(e.target.value)}
+                      className="flex-1 px-3 py-4 text-[#131313] placeholder:text-[#BCBCBC] text-sm focus:outline-none bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Continue Button */}
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={mobileNumber.length !== 10 || !name.trim() || isCreatingProfile}
+                  className={cn(
+                    "w-full py-4 rounded-full font-semibold text-base transition-all duration-200",
+                    "bg-[#131313] text-white hover:bg-[#2a2a2a]",
+                    (mobileNumber.length !== 10 || !name.trim() || isCreatingProfile) && "opacity-90"
+                  )}
+                >
+                  {isCreatingProfile ? 'Creating Profile...' : 'Continue'}
+                </button>
+              </div>
+
+              {/* Sign In Link */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-[#131313]">
+                  Already have an account?{' '}
+                  <a 
+                    href="/login" 
+                    className="text-[#131313] font-semibold underline underline-offset-2 hover:no-underline"
+                  >
+                    Sign In
+                  </a>
+                </p>
+              </div>
+
+              {renderFooter()}
+            </form>
+
+            {renderPoweredBy()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============ OTP VERIFICATION SCREEN ============
+  return (
+    <div className={cn('min-h-screen', className)}>
+      {/* Desktop Layout - Centered Card on Gray Background */}
+      <div className="hidden lg:flex min-h-screen bg-[#F5F5F5] items-center justify-center p-8">
+        <div className="bg-white rounded-3xl shadow-lg p-12 w-full max-w-lg">
+          <form onSubmit={handleSignup}>
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-[#131313]">
+                  Enter verification code
+                </h2>
+                <p className="text-sm text-[#BCBCBC]">
+                  We have sent a verification code to
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-[#131313]">
+                    +91 {mobileNumber}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOtpSent(false);
+                      setOtp('');
+                    }}
+                    className="text-sm font-medium text-blue-500 hover:text-blue-600"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+
+              {/* OTP Input Boxes */}
+              <OTPInput
+                maxLength={OTP_LENGTH}
+                value={otp}
+                onChange={setOtp}
+                containerClassName="flex justify-start gap-3"
+                render={({ slots }) => (
+                  <>
+                    {slots.map((slot, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-12 h-14 rounded-xl border-2 text-center text-xl font-semibold transition-all duration-200 flex items-center justify-center bg-white",
+                          slot.isActive ? "border-[#131313]" : slot.char ? "border-[#131313]" : "border-[#E5E5E5]"
+                        )}
+                      >
+                        {slot.char ?? (slot.isActive && <span className="animate-pulse">|</span>)}
+                      </div>
+                    ))}
+                  </>
+                )}
+              />
+
+              {/* Timer */}
+              <div className="flex items-center gap-2 text-sm text-[#BCBCBC]">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                  <path strokeLinecap="round" strokeWidth={2} d="M12 6v6l4 2" />
+                </svg>
+                <span>00:{countdown.toString().padStart(2, '0')}</span>
+                {countdown === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={isSendingOtp}
+                    className="ml-2 text-blue-500 hover:text-blue-600 font-medium"
+                  >
+                    {isSendingOtp ? 'Sending...' : 'Resend'}
+                  </button>
+                )}
+              </div>
+
+              {/* Verify Button */}
+              <button
+                type="submit"
+                disabled={otp.length !== OTP_LENGTH || isVerifying}
+                className={cn(
+                  "w-full py-4 rounded-full font-semibold text-base transition-all duration-200",
+                  otp.length === OTP_LENGTH && !isVerifying
+                    ? "bg-[#131313] text-white hover:bg-[#2a2a2a]"
+                    : "bg-[#D1D1D1] text-white cursor-not-allowed"
+                )}
+              >
+                {isVerifying ? 'Verifying...' : 'Verify'}
+              </button>
+            </div>
+
+            {renderFooter()}
+          </form>
+
+          {renderPoweredBy()}
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden min-h-screen flex flex-col bg-white">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-[#F5F5F5]">
+          <button
+            type="button"
+            onClick={() => {
+              setIsOtpSent(false);
+              setOtp('');
+            }}
+            className="p-2 -ml-2"
+          >
+            <svg className="w-6 h-6 text-[#131313]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="text-sm font-medium text-[#131313] px-3 py-1 rounded-full border border-[#E5E5E5]"
+          >
+            Skip
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 px-6 py-6">
+          <form onSubmit={handleSignup}>
+            <div className="space-y-6">
+              {/* Header */}
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-[#131313]">
+                  Enter verification code
+                </h2>
+                <p className="text-sm text-[#BCBCBC]">
+                  We have sent a verification code to
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-[#131313]">
+                    +91 {mobileNumber}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsOtpSent(false);
+                      setOtp('');
+                    }}
+                    className="text-sm font-medium text-blue-500 hover:text-blue-600"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+
+              {/* OTP Input Boxes */}
+              <OTPInput
+                maxLength={OTP_LENGTH}
+                value={otp}
+                onChange={setOtp}
+                containerClassName="flex justify-start gap-2"
+                render={({ slots }) => (
+                  <>
+                    {slots.map((slot, index) => (
+                      <div
+                        key={index}
+                        className={cn(
+                          "w-11 h-12 rounded-xl border-2 text-center text-lg font-semibold transition-all duration-200 flex items-center justify-center bg-white",
+                          slot.isActive ? "border-[#131313]" : slot.char ? "border-[#131313]" : "border-[#E5E5E5]"
+                        )}
+                      >
+                        {slot.char ?? (slot.isActive && <span className="animate-pulse">|</span>)}
+                      </div>
+                    ))}
+                  </>
+                )}
+              />
+
+              {/* Timer */}
+              <div className="flex items-center gap-2 text-sm text-[#BCBCBC]">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                  <path strokeLinecap="round" strokeWidth={2} d="M12 6v6l4 2" />
+                </svg>
+                <span>00:{countdown.toString().padStart(2, '0')}</span>
+                {countdown === 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={isSendingOtp}
+                    className="ml-2 text-blue-500 hover:text-blue-600 font-medium"
+                  >
+                    {isSendingOtp ? 'Sending...' : 'Resend'}
+                  </button>
+                )}
+              </div>
+
+              {/* Verify Button */}
+              <button
+                type="submit"
+                disabled={otp.length !== OTP_LENGTH || isVerifying}
+                className={cn(
+                  "w-full py-4 rounded-full font-semibold text-base transition-all duration-200",
+                  otp.length === OTP_LENGTH && !isVerifying
+                    ? "bg-[#131313] text-white hover:bg-[#2a2a2a]"
+                    : "bg-[#D1D1D1] text-white cursor-not-allowed"
+                )}
+              >
+                {isVerifying ? 'Verifying...' : 'Verify'}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
