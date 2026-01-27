@@ -27,7 +27,7 @@ const OrderSummaryCards: React.FC<OrderSummaryCardsProps> = ({ data }) => {
   const cards = [
     { label: 'Your sales', value: formatCurrency(data.totalRevenue) },
     { label: 'Total Orders', value: formatNumber(data.totalOrders) },
-    { label: 'Commission on sales', value: formatCurrency(data.totalCommission) },
+    { label: 'Your commission', value: formatCurrency(data.totalCommission) },
     { label: 'Avg. Order value', value: formatCurrency(data.averageOrderValue) },
   ];
 

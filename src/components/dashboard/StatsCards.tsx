@@ -46,7 +46,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({
     <div className={cn('grid grid-cols-2 lg:grid-cols-3 gap-4', className)}>
       <StatCard label="Your sales" value={yourSales} />
       <StatCard label="Total Orders" value={totalOrders} />
-      <StatCard label="Commission on sales" value={commissionOnSales} />
+      <StatCard label="Your Commission" value={commissionOnSales} />
       <StatCard label="Payouts issued" value={payoutsIssued} />
       <StatCard label="Next Payout" value={nextPayout} />
       <StatCard label="Next payout date" value={nextPayoutDate} />
