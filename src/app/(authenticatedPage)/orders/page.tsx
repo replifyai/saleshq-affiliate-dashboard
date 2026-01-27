@@ -21,7 +21,7 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
   const commissionAmount = parseFloat(apiOrder.commissionAmount) || 0;
   const commissionRateValue = parseFloat(apiOrder.commissionRateValue) || 0;
   const discountAmount = parseFloat(apiOrder.discountsTotal) || 0;
-  
+
   let productName = 'Multiple Items';
   if (apiOrder.lineItems && apiOrder.lineItems.length > 0) {
     const firstItem = apiOrder.lineItems[0];
@@ -37,9 +37,9 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     instagram: 'instagram',
     youtube: 'youtube',
   };
-  const channel = channelMap[apiOrder.attributionType?.toLowerCase()] || 
-                  channelMap[apiOrder.commissionSource?.toLowerCase()] || 
-                  'coupon';
+  const channel = channelMap[apiOrder.attributionType?.toLowerCase()] ||
+    channelMap[apiOrder.commissionSource?.toLowerCase()] ||
+    'coupon';
 
   let status: Order['status'] = 'processing';
   if (apiOrder.paymentStatus === 'paid') {
@@ -83,7 +83,7 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     couponCode,
     commission: commissionAmount,
     commissionRate: commissionRateValue,
-    date: new Date(apiOrder.createdAt).toISOString().split('T')[0],
+    createdAt: apiOrder.createdAt,
     status,
     paymentStatus: apiOrder.paymentStatus,
     channel,
@@ -100,7 +100,7 @@ export default function OrdersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
-  
+
   // Tab and filter state
   const [activeTab, setActiveTab] = useState<OrderTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +108,7 @@ export default function OrdersPage() {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [orderNumberFilter, setOrderNumberFilter] = useState('');
   const [debouncedOrderNumber, setDebouncedOrderNumber] = useState('');
-  
+
   // Sort state
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -137,7 +137,7 @@ export default function OrdersPage() {
     setIsLoading(true);
     try {
       const filters: { paymentStatus?: string; orderNumber?: string } = {};
-      
+
       // Apply tab filter (overrides payment status filter)
       if (activeTab === 'payout_pending') {
         filters.paymentStatus = 'pending';
@@ -146,7 +146,7 @@ export default function OrdersPage() {
       } else if (paymentStatusFilter) {
         filters.paymentStatus = paymentStatusFilter;
       }
-      
+
       // Use order number filter from filter drawer, or search query from search bar
       if (debouncedOrderNumber) {
         filters.orderNumber = debouncedOrderNumber;
@@ -193,9 +193,9 @@ export default function OrdersPage() {
       commission: 'commissionAmount',
       orderNumber: 'orderNumber',
     };
-    
+
     const apiSortField = sortFieldMap[field] || 'createdAt';
-    
+
     if (sortBy === apiSortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -247,7 +247,7 @@ export default function OrdersPage() {
 
     const totalRevenue = orders.reduce((sum, order) => sum + order.orderValue, 0);
     const totalCommission = orders.reduce((sum, order) => sum + order.commission, 0);
-    
+
     return {
       totalOrders: totalItems,
       totalRevenue,
@@ -257,7 +257,7 @@ export default function OrdersPage() {
   }, [orders, totalItems]);
 
   const sortFieldMap: Record<string, keyof Order> = {
-    createdAt: 'date',
+    createdAt: 'createdAt',
     totalAmount: 'orderValue',
     commissionAmount: 'commission',
     orderNumber: 'orderNumber',
@@ -299,22 +299,22 @@ export default function OrdersPage() {
           onSortChange={handleSortChange}
           onClearFilters={handleClearFilters}
         />
-        
+
         {totalItems === 0 ? (
           <OrdersEmptyState />
         ) : (
-            <OrdersTable
-              orders={orders}
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              sortField={displaySortField}
-              sortDirection={sortDirection}
-              onSort={handleSort}
-              onPageChange={setCurrentPage}
-              onViewDetails={handleViewDetails}
-            />
+          <OrdersTable
+            orders={orders}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            sortField={displaySortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            onPageChange={setCurrentPage}
+            onViewDetails={handleViewDetails}
+          />
         )}
 
         <OrderDetailsModal

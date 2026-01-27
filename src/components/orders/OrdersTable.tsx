@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import moment from 'moment';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Order } from './types';
 import RewardStatusBadge, { RewardStatus } from './RewardStatusBadge';
@@ -30,12 +31,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
+  const formatDate = (timestamp: number) => {
+    return moment(timestamp).format('DD MMM YYYY');
   };
 
   // Mock function to determine reward status - replace with actual logic
@@ -71,8 +68,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               <th className="px-6 py-4 text-left text-sm font-medium text-[#BCBCBC]">Total Amount</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#BCBCBC]">Reward</th>
               <th className="px-6 py-4 text-left text-sm font-medium text-[#BCBCBC]">Reward Status</th>
-                </tr>
-              </thead>
+            </tr>
+          </thead>
           <tbody>
             {orders.map((order) => {
               const rewardInfo = getRewardStatus(order);
@@ -85,20 +82,20 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                     onViewDetails?.(order.id);
                   }}
                 >
-                  <td className="px-6 py-4 text-sm text-[#131313]">{formatDate(order.date)}</td>
+                  <td className="px-6 py-4 text-sm text-[#131313]">{formatDate(order.createdAt)}</td>
                   <td className="px-6 py-4 text-sm text-[#131313]">{order.orderNumber}</td>
                   <td className="px-6 py-4 text-sm text-[#131313]">{order.customerName}</td>
                   <td className="px-6 py-4 text-sm text-[#131313]">{formatCurrency(order.orderValue)}</td>
                   <td className="px-6 py-4 text-sm text-[#131313]">{formatCurrency(order.commission)}</td>
                   <td className="px-6 py-4">
                     <RewardStatusBadge status={rewardInfo.status} daysLeft={rewardInfo.daysLeft} />
-                    </td>
-                  </tr>
+                  </td>
+                </tr>
               );
             })}
-              </tbody>
-            </table>
-        </div>
+          </tbody>
+        </table>
+      </div>
 
       {/* Mobile Cards */}
       <div className="md:hidden divide-y divide-[#E5E5E5]">
@@ -126,7 +123,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-[#BCBCBC] text-xs mb-1">Ordered on</p>
-                  <p className="text-[#131313]">{formatDate(order.date).split(' ').slice(0, 2).join(' ')}</p>
+                  <p className="text-[#131313]">{formatDate(order.createdAt).split(' ').slice(0, 2).join(' ')}</p>
                 </div>
                 <div>
                   <p className="text-[#BCBCBC] text-xs mb-1">Total Amount</p>
@@ -140,9 +137,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
             </div>
           );
         })}
-        </div>
+      </div>
 
-        {/* Pagination */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#E5E5E5]">
           <button

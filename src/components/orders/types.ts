@@ -10,7 +10,7 @@ export interface Order {
   couponCode?: string;
   commission: number;
   commissionRate: number;
-  date: string;
+  createdAt: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   channel: 'facebook' | 'instagram' | 'youtube' | 'coupon';

@@ -13,16 +13,6 @@ import { useSnackbar } from '@/components/snackbar';
 import apiClient from '@/services/apiClient';
 import { CreatorDashboardSummary } from '@/types/api';
 
-const isCreatorDashboardSummary = (payload: unknown): payload is CreatorDashboardSummary => {
-  if (!payload || typeof payload !== 'object') {
-    return false;
-  }
-
-  return ['totalOrders', 'totalCoupons', 'totalEarningsTillDate', 'averageOrderValue', 'averageEarningPerOrder'].some(
-    (key) => key in payload
-  );
-};
-
 export default function DashboardPage() {
   const { state } = useProfile();
   const { showError } = useSnackbar();
@@ -42,16 +32,8 @@ export default function DashboardPage() {
 
       try {
         const response = await apiClient.getCreatorDashboardSummary();
-        const fallback = isCreatorDashboardSummary(response) ? response : null;
-        const normalized =
-          response.summary ??
-          response.dashboardSummary ??
-          response.data ??
-          response.result ??
-          fallback;
-
         if (isMounted) {
-          setDashboardSummary(normalized || null);
+          setDashboardSummary(response.summary);
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to load dashboard summary';
@@ -88,16 +70,11 @@ export default function DashboardPage() {
     return numValue.toLocaleString('en-IN');
   };
 
-  // Mock data for missing fields (will come from API later)
-  const mockPayoutsIssued = '₹100';
-  const mockNextPayout = '₹1600';
-  const mockNextPayoutDate = '23 Aug';
-
   // Show loading state while profile is being fetched
   if (!state.profile) {
     if (state.error) {
       return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] p-4">
+        <div className="min-h-screen flex items-center justify-center bg-[#F0F0F0] p-4">
           <div className="text-center max-w-md">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,12 +112,14 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <StatsCards
-          yourSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
+          yourSales={formatCurrency(dashboardSummary?.totalSales)}
           totalOrders={formatNumber(dashboardSummary?.totalOrders)}
-          commissionOnSales={formatCurrency(dashboardSummary?.totalEarningsTillDate ?? dashboardSummary?.totalEarnings)}
-          payoutsIssued={mockPayoutsIssued}
-          nextPayout={mockNextPayout}
-          nextPayoutDate={mockNextPayoutDate}
+          commissionOnSales={formatCurrency(dashboardSummary?.totalCommission)}
+          payoutsIssued={formatCurrency(dashboardSummary?.paidEarnings)}
+          nextPayout={formatCurrency(dashboardSummary?.pendingEarnings)}
+          nextPayoutDate={dashboardSummary?.earningsStatusMap?.upcoming_payment ?
+            `${dashboardSummary.earningsStatusMap.upcoming_payment.count} pending` :
+            'N/A'}
         />
 
         {/* Share and Earn */}

@@ -209,24 +209,52 @@ export interface StatusMapEntry {
   amount?: number;
 }
 
+export interface SocialChannelData {
+  orders: number;
+  revenue: number;
+}
+
+export interface ActiveCoupon {
+  code: string;
+  title: string;
+  discountType: 'percentage' | 'amount';
+  discountValue: number;
+  commissionType: 'percentage' | 'amount';
+  commissionValue: string;
+  commissionBasis: string;
+}
+
+export interface ReferralLink {
+  referralCode: string;
+  commissionType: 'percentage' | 'amount';
+  commissionValue: string;
+  commissionBasis: string;
+  active: boolean;
+}
+
 export interface CreatorDashboardSummary {
-  totalOrders?: number | string;
-  totalCoupons?: number | string;
+  totalCoupons: number;
+  totalOrders: number;
+  totalSales: number;
+  totalCommission: number;
+  totalDiscountsGiven: number;
+  averageOrderValue: number;
+  totalEarnings: number;
+  pendingEarnings: number;
+  paidEarnings: number;
+  earningsStatusMap: Record<string, StatusMapEntry>;
+  ordersStatusMap: Record<string, { count: number }>;
+  salesBySocialChannel: Record<string, SocialChannelData>;
+  activeCoupon: ActiveCoupon | null;
+  referralLink: ReferralLink | null;
+  // Legacy fields for backward compatibility
   totalEarningsTillDate?: number | string;
-  totalEarnings?: number | string; // From API
-  earningsStatusMap?: Record<string, StatusMapEntry>;
-  ordersStatusMap?: Record<string, StatusMapEntry>;
-  averageOrderValue?: number | string;
   averageEarningPerOrder?: number | string;
   [key: string]: unknown;
 }
 
 export interface GetCreatorDashboardSummaryResponse {
-  summary?: CreatorDashboardSummary;
-  dashboardSummary?: CreatorDashboardSummary;
-  data?: CreatorDashboardSummary;
-  result?: CreatorDashboardSummary;
-  [key: string]: unknown;
+  summary: CreatorDashboardSummary;
 }
 
 // Shopify Products Types
