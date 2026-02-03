@@ -5,29 +5,62 @@ import { cn } from '@/lib/utils';
 import { useSnackbar } from '@/components/snackbar';
 import { Copy } from 'lucide-react';
 import { useProfile } from '@/contexts/ProfileContext';
+import { ActiveCoupon, ReferralLink } from '@/types/api';
 
-interface ShareAndEarnProps {
+export interface ShareAndEarnProps {
+  activeCoupon?: ActiveCoupon | null;
+  referralLink?: ReferralLink | null;
   className?: string;
 }
 
-const ShareAndEarn: React.FC<ShareAndEarnProps> = ({ className }) => {
+const ShareAndEarn: React.FC<ShareAndEarnProps> = ({ activeCoupon, referralLink: referralLinkData, className }) => {
   const { showSuccess } = useSnackbar();
   const { state } = useProfile();
 
-  // Extract coupon data from profile coupons
-  // The coupons object is included in the API response but not in the type definition
-  const coupons = (state.profile as any)?.coupons;
-  const couponCode = coupons?.code || state.profile?.uniqueReferralCode?.toUpperCase() || 'N/A';
-  const referralLink = `https://myfrido.com?ref=${state.profile?.uniqueReferralCode || 'affiliatedisco'}`;
+  const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+
+  // Use activeCoupon from dashboard summary if available, fallback to profile data
+  const couponCode = activeCoupon?.code || state.profile?.uniqueReferralCode?.toUpperCase() || 'N/A';
   
-  const discountPercentage = coupons?.value?.percentage;
-  const commissionValue = coupons?.commissionValue;
-  
-  // Format discount: show percentage if available, otherwise show "N/A"
-  const yourDiscount = discountPercentage !== undefined ? `${discountPercentage}%` : 'N/A';
-  
-  // Format commission: show percentage if available, otherwise show "N/A"
-  const yourCommission = commissionValue !== undefined ? `${commissionValue}%` : 'N/A';
+  // Use referralLink from dashboard summary if available
+  const referralCode = referralLinkData?.referralCode || state.profile?.uniqueReferralCode || 'affiliatedisco';
+  const referralLink = `${storeHost}?ref=${referralCode}`;
+
+  // Format discount from activeCoupon
+  const formatDiscount = (): string => {
+    if (!activeCoupon) return 'N/A';
+    if (activeCoupon.discountType === 'percentage') {
+      return `${activeCoupon.discountValue}%`;
+    }
+    return `₹${activeCoupon.discountValue}`;
+  };
+
+  // Format commission - prefer activeCoupon, fallback to referralLink
+  const formatCommission = (): string => {
+    if (activeCoupon) {
+      if (activeCoupon.commissionType === 'percentage') {
+        return `${activeCoupon.commissionValue}%`;
+      }
+      return `₹${activeCoupon.commissionValue}`;
+    }
+    if (referralLinkData) {
+      if (referralLinkData.commissionType === 'percentage') {
+        return `${referralLinkData.commissionValue}%`;
+      }
+      return `₹${referralLinkData.commissionValue}`;
+    }
+    return 'N/A';
+  };
+
+  const yourDiscount = formatDiscount();
+  const yourCommission = formatCommission();
+
+  // Get commission basis for tooltip
+  const getCommissionBasis = (): string => {
+    const basis = activeCoupon?.commissionBasis || referralLinkData?.commissionBasis;
+    if (!basis) return '';
+    return basis.replace(/_/g, ' ');
+  };
 
   const handleCopy = (text: string, message: string) => {
     navigator.clipboard.writeText(text);
@@ -85,7 +118,15 @@ const ShareAndEarn: React.FC<ShareAndEarnProps> = ({ className }) => {
         </p>
         <p className="text-[#BCBCBC]">
           <span className="text-[#131313]">*</span> Your Commission: <span className="font-semibold text-[#131313]">{yourCommission}</span>
+          {getCommissionBasis() && (
+            <span className="text-[#BCBCBC] text-xs ml-1">({getCommissionBasis()})</span>
+          )}
         </p>
+        {referralLinkData && !referralLinkData.active && (
+          <p className="text-red-500 text-xs">
+            Referral link is currently inactive
+          </p>
+        )}
       </div>
     </div>
   );

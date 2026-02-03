@@ -31,20 +31,21 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
   const referralCodeDisplay = hasReferralCode
     ? state.profile?.uniqueReferralCode || (propReferralCode as string)
     : isPendingApproval
-    ? 'Pending approval'
-    : 'Loading...';
+      ? 'Pending approval'
+      : 'Loading...';
 
   // Actual share URL (only valid when we have a real referral code)
+  const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
   const shareUrl = hasReferralCode
-    ? propShareUrl || `https://myfrido.com?ref=${state.profile?.uniqueReferralCode || propReferralCode}`
+    ? propShareUrl || `${storeHost}?ref=${state.profile?.uniqueReferralCode || propReferralCode}`
     : '';
 
   // What we show in the referral link field
   const shareUrlDisplay = hasReferralCode
     ? shareUrl
     : isPendingApproval
-    ? 'Your referral link will be available once your profile is approved.'
-    : 'Loading...';
+      ? 'Your referral link will be available once your profile is approved.'
+      : 'Loading...';
 
   const completion = state.completionScore;
   const totalSteps = (completion?.completedCount || 0) + (completion?.leftCount || 0);

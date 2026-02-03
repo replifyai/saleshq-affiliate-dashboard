@@ -242,6 +242,13 @@ export interface CreatorDashboardSummary {
   totalEarnings: number;
   pendingEarnings: number;
   paidEarnings: number;
+  // New fields for enhanced insights
+  netSales: number;
+  voidedEarnings: number;
+  totalDeducted: number;
+  totalRefundedAmount: number;
+  totalRefundedOrders: number;
+  // Status maps
   earningsStatusMap: Record<string, StatusMapEntry>;
   ordersStatusMap: Record<string, { count: number }>;
   salesBySocialChannel: Record<string, SocialChannelData>;

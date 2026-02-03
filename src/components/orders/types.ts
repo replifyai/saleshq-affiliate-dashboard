@@ -13,7 +13,7 @@ export interface Order {
   createdAt: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
-  channel: 'facebook' | 'instagram' | 'youtube' | 'coupon';
+  channel: 'facebook' | 'instagram' | 'youtube' | 'coupon' | 'referral';
 }
 
 export interface PaginationProps {

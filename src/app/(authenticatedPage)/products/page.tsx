@@ -578,7 +578,7 @@ const ProductsPage: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
 
-    const baseUrl = 'https://myfrido.com';
+    const baseUrl = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
     const productUrl = `${baseUrl}/products/${productHandle}`;
     const params = new URLSearchParams();
 
@@ -601,7 +601,7 @@ const ProductsPage: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
 
-    const baseUrl = 'https://myfrido.com';
+    const baseUrl = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
     const collectionUrl = `${baseUrl}/collections/${collectionHandle}`;
     const params = new URLSearchParams();
 

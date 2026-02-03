@@ -41,6 +41,8 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({ order, isOpen, on
 
   const channelMap: Record<string, React.ComponentProps<typeof ChannelBadge>['channel']> = {
     coupon: 'coupon',
+    referral: 'referral',
+    referral_link: 'referral',
     facebook: 'facebook',
     instagram: 'instagram',
     youtube: 'youtube',

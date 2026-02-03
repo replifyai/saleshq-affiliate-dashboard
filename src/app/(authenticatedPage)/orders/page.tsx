@@ -33,6 +33,8 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
 
   const channelMap: Record<string, Order['channel']> = {
     coupon: 'coupon',
+    referral: 'referral',
+    referral_link: 'referral',
     facebook: 'facebook',
     instagram: 'instagram',
     youtube: 'youtube',

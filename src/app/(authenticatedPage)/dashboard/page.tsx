@@ -70,6 +70,25 @@ export default function DashboardPage() {
     return numValue.toLocaleString('en-IN');
   };
 
+  // Calculate Order Return Ratio
+  const calculateReturnRatio = (): string => {
+    if (!dashboardSummary || isSummaryLoading) {
+      return isSummaryLoading ? '...' : '0%';
+    }
+    const totalOrders = dashboardSummary.totalOrders || 0;
+    const refundedOrders = dashboardSummary.totalRefundedOrders || 0;
+    if (totalOrders === 0) return '0%';
+    return ((refundedOrders / totalOrders) * 100).toFixed(1) + '%';
+  };
+
+  // Get paid orders count from ordersStatusMap
+  const getPaidOrdersCount = (): string => {
+    if (!dashboardSummary || isSummaryLoading) {
+      return isSummaryLoading ? '...' : '0';
+    }
+    return formatNumber(dashboardSummary.ordersStatusMap?.paid?.count);
+  };
+
   // Show loading state while profile is being fetched
   if (!state.profile) {
     if (state.error) {
@@ -112,18 +131,26 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <StatsCards
-          yourSales={formatCurrency(dashboardSummary?.totalSales)}
+          // Earnings metrics
+          totalEarnings={formatCurrency(dashboardSummary?.totalEarnings)}
+          pendingEarnings={formatCurrency(dashboardSummary?.pendingEarnings)}
+          paidEarnings={formatCurrency(dashboardSummary?.paidEarnings)}
+          voidedEarnings={formatCurrency(dashboardSummary?.voidedEarnings)}
+          // Sales metrics
+          netSales={formatCurrency(dashboardSummary?.netSales)}
           totalOrders={formatNumber(dashboardSummary?.totalOrders)}
-          commissionOnSales={formatCurrency(dashboardSummary?.totalCommission)}
-          payoutsIssued={formatCurrency(dashboardSummary?.paidEarnings)}
-          nextPayout={formatCurrency(dashboardSummary?.pendingEarnings)}
-          nextPayoutDate={dashboardSummary?.earningsStatusMap?.upcoming_payment ?
-            `${dashboardSummary.earningsStatusMap.upcoming_payment.count} pending` :
-            'N/A'}
+          averageOrderValue={formatCurrency(dashboardSummary?.averageOrderValue)}
+          // Order health metrics
+          paidOrders={getPaidOrdersCount()}
+          refundedOrders={formatNumber(dashboardSummary?.totalRefundedOrders)}
+          returnRatio={calculateReturnRatio()}
         />
 
         {/* Share and Earn */}
-        <ShareAndEarn />
+        <ShareAndEarn 
+          activeCoupon={dashboardSummary?.activeCoupon}
+          referralLink={dashboardSummary?.referralLink}
+        />
 
         {/* Featured Collections */}
         <FeaturedCollections />

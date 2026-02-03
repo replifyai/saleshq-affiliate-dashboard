@@ -25,6 +25,7 @@ interface FeaturedProductsProps {
 }
 
 // Mock data for products
+const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
 const mockProducts: Product[] = [
   {
     id: '1',
@@ -36,7 +37,7 @@ const mockProducts: Product[] = [
     price: 2599,
     originalPrice: 2999,
     discount: '48% OFF',
-    shareLink: 'https://myfrido.com/product/1',
+    shareLink: `${storeHost}/product/1`,
   },
   {
     id: '2',
@@ -48,7 +49,7 @@ const mockProducts: Product[] = [
     price: 2599,
     originalPrice: 2999,
     discount: '48% OFF',
-    shareLink: 'https://myfrido.com/product/2',
+    shareLink: `${storeHost}/product/2`,
   },
   {
     id: '3',
@@ -60,7 +61,7 @@ const mockProducts: Product[] = [
     price: 2599,
     originalPrice: 2999,
     discount: '48% OFF',
-    shareLink: 'https://myfrido.com/product/3',
+    shareLink: `${storeHost}/product/3`,
   },
   {
     id: '4',
@@ -72,7 +73,7 @@ const mockProducts: Product[] = [
     price: 2599,
     originalPrice: 2999,
     discount: '48% OFF',
-    shareLink: 'https://myfrido.com/product/4',
+    shareLink: `${storeHost}/product/4`,
   },
 ];
 
@@ -86,11 +87,11 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
           <span className="font-medium text-[#131313]">{product.rating}</span>
           <span className="text-[#BCBCBC]">({product.reviewCount})</span>
         </div>
-        
+
         {/* Product Image */}
         <div className="aspect-square bg-[#F5F5F5] flex items-center justify-center">
-          <img 
-            src={product.image} 
+          <img
+            src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"
           />
@@ -102,12 +103,12 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
         <p className="text-xs sm:text-sm text-[#131313] font-medium line-clamp-2 mb-1.5 sm:mb-2 min-h-[32px] sm:min-h-[40px]">
           {product.name}
         </p>
-        
+
         {/* Category Tag */}
         <span className="inline-block px-1.5 sm:px-2 py-0.5 bg-[#FFE887] text-[#131313] text-[9px] sm:text-[10px] font-medium rounded mb-1.5 sm:mb-3">
           {product.category}
         </span>
-        
+
         {/* Price - Stack on mobile, inline on larger screens */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 mb-2 sm:mb-4">
           <div className="flex items-center gap-1 sm:gap-2">
@@ -118,7 +119,7 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
             {product.discount}
           </span>
         </div>
-        
+
         {/* Share Button */}
         <button
           onClick={() => onShare(product.shareLink)}
@@ -131,9 +132,9 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
   );
 };
 
-const FeaturedProducts: React.FC<FeaturedProductsProps> = ({ 
+const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   products = mockProducts,
-  className 
+  className
 }) => {
   const { showSuccess } = useSnackbar();
 
@@ -147,12 +148,12 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
       <span className="inline-block px-[6px] py-[6px] border border-[#EAEAEA] rounded-full text-[14px] text-[#636363] mb-4 sm:mb-5">
         Featured Products
       </span>
-      
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {products.map((product) => (
-          <ProductCard 
-            key={product.id} 
-            product={product} 
+          <ProductCard
+            key={product.id}
+            product={product}
             onShare={handleShare}
           />
         ))}
