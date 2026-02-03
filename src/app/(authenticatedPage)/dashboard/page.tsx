@@ -70,23 +70,16 @@ export default function DashboardPage() {
     return numValue.toLocaleString('en-IN');
   };
 
-  // Calculate Order Return Ratio
-  const calculateReturnRatio = (): string => {
+  // Get next payout date info
+  const getNextPayoutDate = (): string => {
     if (!dashboardSummary || isSummaryLoading) {
-      return isSummaryLoading ? '...' : '0%';
+      return isSummaryLoading ? '...' : 'N/A';
     }
-    const totalOrders = dashboardSummary.totalOrders || 0;
-    const refundedOrders = dashboardSummary.totalRefundedOrders || 0;
-    if (totalOrders === 0) return '0%';
-    return ((refundedOrders / totalOrders) * 100).toFixed(1) + '%';
-  };
-
-  // Get paid orders count from ordersStatusMap
-  const getPaidOrdersCount = (): string => {
-    if (!dashboardSummary || isSummaryLoading) {
-      return isSummaryLoading ? '...' : '0';
+    const upcomingPayment = dashboardSummary.earningsStatusMap?.upcoming_payment;
+    if (upcomingPayment && upcomingPayment.count > 0) {
+      return `${upcomingPayment.count} pending`;
     }
-    return formatNumber(dashboardSummary.ordersStatusMap?.paid?.count);
+    return 'N/A';
   };
 
   // Show loading state while profile is being fetched
@@ -131,19 +124,16 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <StatsCards
-          // Earnings metrics
-          totalEarnings={formatCurrency(dashboardSummary?.totalEarnings)}
-          pendingEarnings={formatCurrency(dashboardSummary?.pendingEarnings)}
-          paidEarnings={formatCurrency(dashboardSummary?.paidEarnings)}
-          voidedEarnings={formatCurrency(dashboardSummary?.voidedEarnings)}
-          // Sales metrics
-          netSales={formatCurrency(dashboardSummary?.netSales)}
+          yourSales={formatCurrency(dashboardSummary?.totalSales)}
           totalOrders={formatNumber(dashboardSummary?.totalOrders)}
-          averageOrderValue={formatCurrency(dashboardSummary?.averageOrderValue)}
-          // Order health metrics
-          paidOrders={getPaidOrdersCount()}
-          refundedOrders={formatNumber(dashboardSummary?.totalRefundedOrders)}
-          returnRatio={calculateReturnRatio()}
+          commissionOnSales={formatCurrency(dashboardSummary?.totalCommission)}
+          payoutsIssued={formatCurrency(dashboardSummary?.paidEarnings)}
+          nextPayout={formatCurrency(dashboardSummary?.pendingEarnings)}
+          nextPayoutDate={getNextPayoutDate()}
+          // Sub values shown inside the first 3 cards
+          refundedAmount={formatCurrency(dashboardSummary?.totalRefundedAmount)}
+          returnedOrders={formatNumber(dashboardSummary?.totalRefundedOrders)}
+          commissionLoss={formatCurrency(dashboardSummary?.voidedEarnings)}
         />
 
         {/* Share and Earn */}
