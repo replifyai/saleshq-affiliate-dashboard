@@ -17,7 +17,8 @@ const ShareAndEarn: React.FC<ShareAndEarnProps> = ({ activeCoupon, referralLink:
   const { showSuccess } = useSnackbar();
   const { state } = useProfile();
 
-  const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+  // Use shopDomain from profile, fallback to env variable
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
 
   // Use activeCoupon from dashboard summary if available, fallback to profile data
   const couponCode = activeCoupon?.code || state.profile?.uniqueReferralCode?.toUpperCase() || 'N/A';

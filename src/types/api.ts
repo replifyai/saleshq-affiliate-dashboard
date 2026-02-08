@@ -16,6 +16,7 @@ export interface CreatorProfile {
   socialMediaHandles?: SocialMediaHandle[] | null;
   phoneNumberVerified: boolean;
   uniqueReferralCode?: string;
+  shopDomain?: string;
 }
 
 export interface CompletionScore {
@@ -265,6 +266,17 @@ export interface GetCreatorDashboardSummaryResponse {
 }
 
 // Shopify Products Types
+export interface ShopifyPriceRange {
+  minVariantPrice: {
+    amount: string;
+    currencyCode: string;
+  };
+  maxVariantPrice: {
+    amount: string;
+    currencyCode: string;
+  };
+}
+
 export interface ShopifyProduct {
   id: string;
   title: string;
@@ -272,6 +284,10 @@ export interface ShopifyProduct {
   status: string;
   productType: string;
   images?: string[];
+  priceRangeV2?: ShopifyPriceRange;
+  minPrice?: string;
+  maxPrice?: string;
+  currencyCode?: string;
 }
 
 export interface GetShopifyProductsResponse {

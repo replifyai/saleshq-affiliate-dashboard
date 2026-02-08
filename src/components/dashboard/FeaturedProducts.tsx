@@ -1,10 +1,11 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Star } from 'lucide-react';
 import { useSnackbar } from '@/components/snackbar';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface Product {
   id: string;
@@ -24,9 +25,8 @@ interface FeaturedProductsProps {
   className?: string;
 }
 
-// Mock data for products
-const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
-const mockProducts: Product[] = [
+// Function to generate mock products with dynamic store host
+const generateMockProducts = (storeHost: string): Product[] => [
   {
     id: '1',
     name: 'Frido Product Name Goes here, Frido Pro...',
@@ -133,10 +133,18 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
 };
 
 const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
-  products = mockProducts,
+  products: propProducts,
   className
 }) => {
   const { showSuccess } = useSnackbar();
+  const { state } = useProfile();
+
+  // Use shopDomain from profile, fallback to env variable
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+
+  // Generate mock products with dynamic store host
+  const mockProducts = useMemo(() => generateMockProducts(storeHost), [storeHost]);
+  const products = propProducts || mockProducts;
 
   const handleShare = (link: string) => {
     navigator.clipboard.writeText(link);

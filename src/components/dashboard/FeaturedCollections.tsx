@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Copy } from 'lucide-react';
 import { useSnackbar } from '@/components/snackbar';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface Collection {
   id: string;
@@ -17,19 +18,26 @@ interface FeaturedCollectionsProps {
   className?: string;
 }
 
-// Mock data for collections
-const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
-const mockCollections: Collection[] = [
+// Function to generate mock collections with dynamic store host
+const generateMockCollections = (storeHost: string): Collection[] => [
   { id: '1', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort` },
   { id: '2', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort-2` },
   { id: '3', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort-3` },
 ];
 
 const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
-  collections = mockCollections,
+  collections: propCollections,
   className
 }) => {
   const { showSuccess } = useSnackbar();
+  const { state } = useProfile();
+
+  // Use shopDomain from profile, fallback to env variable
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+
+  // Generate mock collections with dynamic store host
+  const mockCollections = useMemo(() => generateMockCollections(storeHost), [storeHost]);
+  const collections = propCollections || mockCollections;
 
   const handleCopy = (link: string) => {
     navigator.clipboard.writeText(link);

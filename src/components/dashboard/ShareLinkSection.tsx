@@ -35,7 +35,8 @@ const ShareLinkSection: React.FC<ShareLinkSectionProps> = ({
       : 'Loading...';
 
   // Actual share URL (only valid when we have a real referral code)
-  const storeHost = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+  // Use shopDomain from profile, fallback to env variable
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
   const shareUrl = hasReferralCode
     ? propShareUrl || `${storeHost}?ref=${state.profile?.uniqueReferralCode || propReferralCode}`
     : '';

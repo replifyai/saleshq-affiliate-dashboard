@@ -1,12 +1,13 @@
 'use client';
 /* eslint-disable @next/next/no-img-element */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { cn } from '@/lib/utils';
 import { useSnackbar } from '@/components/snackbar';
 import Button from '@/components/common/Button';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface Product {
   id: string;
@@ -106,35 +107,46 @@ interface FeaturedProductsSectionProps {
   className?: string;
 }
 
+// Function to generate default products with dynamic store host
+const generateDefaultProducts = (storeHost: string): Product[] => [
+  {
+    id: '1',
+    name: 'Frido Ultimate Wedge Plus Cushion',
+    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=600&fit=crop',
+    price: '₹1,499',
+    shareUrl: `${storeHost}/products/wedge-cushion`,
+  },
+  {
+    id: '2',
+    name: 'Frido Ultimate Lap Desk Pillow',
+    image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=600&fit=crop',
+    price: '₹2,299',
+    shareUrl: `${storeHost}/products/lap-desk`,
+  },
+  {
+    id: '3',
+    name: 'Frido Car Neck Rest Pillow',
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=600&fit=crop',
+    price: '₹999',
+    shareUrl: `${storeHost}/products/neck-rest`,
+  },
+];
+
 const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = ({
-  products = [
-    {
-      id: '1',
-      name: 'Frido Ultimate Wedge Plus Cushion',
-      image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=600&fit=crop',
-      price: '₹1,499',
-      shareUrl: `${process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com'}/products/wedge-cushion`,
-    },
-    {
-      id: '2',
-      name: 'Frido Ultimate Lap Desk Pillow',
-      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&h=600&fit=crop',
-      price: '₹2,299',
-      shareUrl: `${process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com'}/products/lap-desk`,
-    },
-    {
-      id: '3',
-      name: 'Frido Car Neck Rest Pillow',
-      image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&h=600&fit=crop',
-      price: '₹999',
-      shareUrl: `${process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com'}/products/neck-rest`,
-    },
-  ],
+  products: propProducts,
   className,
 }) => {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { showSuccess } = useSnackbar();
+  const { state } = useProfile();
+
+  // Use shopDomain from profile, fallback to env variable
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+
+  // Generate default products with dynamic store host
+  const defaultProducts = useMemo(() => generateDefaultProducts(storeHost), [storeHost]);
+  const products = propProducts || defaultProducts;
 
   // Carousel configuration
   const responsive = {

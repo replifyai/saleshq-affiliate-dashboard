@@ -24,6 +24,10 @@ export interface Product {
   salesGrowth?: number;
   affiliateLink?: string;
   salesData?: SalesDataPoint[];
+  // Price fields
+  minPrice?: string;
+  maxPrice?: string;
+  currencyCode?: string;
 }
 
 export interface Category {

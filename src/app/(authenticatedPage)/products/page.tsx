@@ -4,11 +4,12 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useSnackbar } from '@/components/snackbar/use-snackbar';
-import { Search, SlidersHorizontal, ArrowUpDown, Copy, Star, ArrowLeft, X, ChevronDown } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpDown, Copy, ArrowLeft, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import apiClient from '@/services/apiClient';
 import { Product } from '@/components/products/types';
 import { ProductCollection } from '@/types/api';
+import ShareModal from '@/components/common/ShareModal';
 
 // --- Product Card Component ---
 interface ProductCardProps {
@@ -22,23 +23,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
     : (product.image ? [product.image] : []);
   const currentImage = images[0];
 
-  // Mock data for rating and price (replace with actual data when available)
-  const rating = 4.7;
-  const reviewCount = '786+';
-  const price = 2599;
-  const originalPrice = 2999;
-  const discount = '48% OFF';
+  // Format price with currency symbol
+  const formatPrice = (price?: string, currencyCode?: string) => {
+    if (!price) return null;
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return null;
+    
+    // Currency symbol mapping
+    const currencySymbols: Record<string, string> = {
+      INR: '₹',
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+    };
+    const symbol = currencySymbols[currencyCode || 'INR'] || '₹';
+    return `${symbol}${numPrice.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
+
+  // Check if there's a price range (min !== max)
+  const hasRange = product.minPrice && product.maxPrice && product.minPrice !== product.maxPrice;
+  const displayPrice = formatPrice(product.minPrice, product.currencyCode);
+  const maxDisplayPrice = hasRange ? formatPrice(product.maxPrice, product.currencyCode) : null;
 
   return (
     <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
-      {/* Rating Badge */}
+      {/* Product Image */}
       <div className="relative">
-        <div className="absolute top-2 left-2 flex items-center gap-0.5 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[10px] z-10">
-          <Star className="w-2.5 h-2.5 fill-[#FFE887] text-[#FFE887]" />
-          <span className="font-medium text-[#131313]">{rating}</span>
-          <span className="text-[#BCBCBC]">({reviewCount})</span>
-        </div>
-
         {/* Product Image */}
         <div className="aspect-square bg-[#F5F5F5] flex items-center justify-center">
           {currentImage && currentImage.startsWith('http') ? (
@@ -60,18 +70,23 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
         </p>
 
         {/* Category Tag */}
-        <span className="inline-block px-2 py-0.5 bg-[#FFE887] text-[#131313] text-[10px] font-medium rounded mb-2 sm:mb-3">
-          {product.category || 'Footwear'}
-        </span>
+        {product.category && (
+          <span className="inline-block px-2 py-0.5 bg-[#FFE887] text-[#131313] text-[10px] font-medium rounded mb-2 sm:mb-3">
+            {product.category}
+          </span>
+        )}
 
         {/* Price */}
-        <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
-          <span className="text-sm sm:text-base font-bold text-[#131313]">₹{price.toLocaleString('en-IN')}</span>
-          <span className="text-xs text-[#BCBCBC] line-through">₹{originalPrice.toLocaleString('en-IN')}</span>
-          <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-1 py-0.5 rounded">
-            {discount}
-          </span>
-        </div>
+        {displayPrice && (
+          <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
+            <span className="text-sm sm:text-base font-bold text-[#131313]">
+              {displayPrice}
+              {maxDisplayPrice && (
+                <span className="text-xs font-normal text-[#636363]"> - {maxDisplayPrice}</span>
+              )}
+            </span>
+          </div>
+        )}
 
         {/* Share Button */}
         <button
@@ -447,6 +462,10 @@ const ProductsPage: React.FC = () => {
   const [isLoadingCollectionProducts, setIsLoadingCollectionProducts] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
+  // Share modal state
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareProduct, setShareProduct] = useState<Product | null>(null);
+
   // Search, Filter, Sort State
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -484,6 +503,10 @@ const ProductsPage: React.FC = () => {
             description: '',
             lastUpdated: new Date().toISOString(),
             salesData: [],
+            // Price fields from API
+            minPrice: p.minPrice,
+            maxPrice: p.maxPrice,
+            currencyCode: p.currencyCode,
           }));
 
           setProducts(mappedProducts);
@@ -573,12 +596,13 @@ const ProductsPage: React.FC = () => {
   }, [hasMoreProducts, filteredProducts.length, itemsPerLoad]);
 
   // Generate product share link
-  const generateProductLink = useCallback((productHandle: string) => {
+  const generateProductLink = useCallback((productHandle: string, smchannel?: string) => {
     const profile = profileState.profile;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
 
-    const baseUrl = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+    // Use shopDomain from profile, fallback to env variable
+    const baseUrl = profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
     const productUrl = `${baseUrl}/products/${productHandle}`;
     const params = new URLSearchParams();
 
@@ -591,6 +615,7 @@ const ProductsPage: React.FC = () => {
     if (coupon?.code) params.set('discount', coupon.code);
     if (profile?.uniqueReferralCode) params.set('ref', profile.uniqueReferralCode);
     params.set('tt-cart-mod', 'true');
+    if (smchannel) params.set('smchannel', smchannel);
 
     return `${productUrl}?${params.toString()}`;
   }, [profileState.profile]);
@@ -601,7 +626,8 @@ const ProductsPage: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const coupon = (profile as any)?.coupons;
 
-    const baseUrl = process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+    // Use shopDomain from profile, fallback to env variable
+    const baseUrl = profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
     const collectionUrl = `${baseUrl}/collections/${collectionHandle}`;
     const params = new URLSearchParams();
 
@@ -618,14 +644,35 @@ const ProductsPage: React.FC = () => {
     return `${collectionUrl}?${params.toString()}`;
   }, [profileState.profile]);
 
+  // Open share modal for a product
   const handleProductShare = useCallback((product: Product) => {
-    const link = generateProductLink(product.handle);
+    setShareProduct(product);
+    setShareModalOpen(true);
+  }, []);
+
+  // Handle social media share (copy link with smchannel param)
+  const handleSocialShare = useCallback((platform: string) => {
+    if (!shareProduct) return;
+    const link = generateProductLink(shareProduct.handle, platform);
     navigator.clipboard.writeText(link).then(() => {
-      showSuccess('Product link copied!');
+      showSuccess(`Link copied for ${platform}!`);
+      setShareModalOpen(false);
     }).catch(() => {
       showError('Failed to copy link');
     });
-  }, [generateProductLink, showSuccess, showError]);
+  }, [shareProduct, generateProductLink, showSuccess, showError]);
+
+  // Handle copy link without social tracking
+  const handleCopyLink = useCallback(() => {
+    if (!shareProduct) return;
+    const link = generateProductLink(shareProduct.handle);
+    navigator.clipboard.writeText(link).then(() => {
+      showSuccess('Product link copied!');
+      setShareModalOpen(false);
+    }).catch(() => {
+      showError('Failed to copy link');
+    });
+  }, [shareProduct, generateProductLink, showSuccess, showError]);
 
   const handleCollectionCopy = useCallback((collection: ProductCollection) => {
     const link = generateCollectionLink(collection.handle);
@@ -668,6 +715,10 @@ const ProductsPage: React.FC = () => {
           description: '',
           lastUpdated: new Date().toISOString(),
           salesData: [],
+          // Price fields from API
+          minPrice: p.minPrice,
+          maxPrice: p.maxPrice,
+          currencyCode: p.currencyCode,
         }));
         setCollectionProducts(mappedProducts);
       }
@@ -824,6 +875,16 @@ const ProductsPage: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        productName={shareProduct?.name || ''}
+        shareUrl={shareProduct ? generateProductLink(shareProduct.handle) : ''}
+        onShare={handleSocialShare}
+        onCopyLink={handleCopyLink}
+      />
     </div>
   );
 };
