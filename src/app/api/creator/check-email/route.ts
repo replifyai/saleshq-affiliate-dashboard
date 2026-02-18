@@ -3,14 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://dashboardapi-dkhjjaxofq-el.a.run.app';
 
-async function callFirebaseFunction(endpoint: string, data: any) {
-    const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, {
-        method: 'POST',
+async function callFirebaseFunctionWithAuth(endpoint: string, authToken: string, data?: any, method: 'GET' | 'POST' = 'POST') {
+    const options: RequestInit = {
+        method,
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
         },
-        body: JSON.stringify(data),
-    });
+    };
+    if (method === 'POST' && data) {
+        options.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, options);
 
     if (!response.ok) {
         const errorData = await response.json();
@@ -22,6 +27,22 @@ async function callFirebaseFunction(endpoint: string, data: any) {
 
 export async function POST(request: NextRequest) {
     try {
+        // Get token from Authorization header or idToken cookie
+        const authHeader = request.headers.get('Authorization');
+        const cookieToken = request.cookies.get('idToken')?.value;
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : cookieToken;
+
+        if (!token) {
+            return NextResponse.json(
+                {
+                    error: 'Authentication Error',
+                    message: 'Authorization token is required',
+                    success: false,
+                },
+                { status: 401 }
+            );
+        }
+
         const { email } = await request.json();
 
         // Validate required fields
@@ -49,7 +70,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const result = await callFirebaseFunction('/admin/checkCreatorEmail', { email });
+        const result = await callFirebaseFunctionWithAuth('/checkCreatorEmail', token, { email }, 'POST');
 
         return NextResponse.json(result);
     } catch (error) {
