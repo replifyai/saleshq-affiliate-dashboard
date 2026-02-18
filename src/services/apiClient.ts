@@ -19,6 +19,14 @@ import {
   GetProductCollectionsResponse,
   GetShopifyProductsByIdsRequest,
   GetShopifyProductsByIdsResponse,
+  GetAvailablePayoutResponse,
+  GetEarningsLedgerResponse,
+  GetPayoutHistoryResponse,
+  RequestPayoutRequest,
+  RequestPayoutResponse,
+  AddBankDetailsRequest,
+  AddUpiDetailsRequest,
+  PaymentMethodsResponse,
 } from '@/types/api';
 import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
 import config from '@/lib/config';
@@ -109,7 +117,7 @@ class ApiClient {
     requireAuth: boolean = false
   ): Promise<T> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
-    
+
     const defaultHeaders: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -153,7 +161,7 @@ class ApiClient {
         try {
           const errorData: ErrorResponse = await response.json();
           errorMessage = errorData.message || errorMessage;
-        } catch {}
+        } catch { }
         throw new Error(errorMessage);
       }
 
@@ -254,6 +262,60 @@ class ApiClient {
         ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
       },
       body: JSON.stringify(data),
+    }, true);
+  }
+
+  // Email check API method
+  async checkCreatorEmail(email: string): Promise<{ exists: boolean; creator: { id: string; name: string; email: string; approved: string } | null }> {
+    return this.request<{ exists: boolean; creator: { id: string; name: string; email: string; approved: string } | null }>('/creator/check-email', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  // Payout API methods
+  async getAvailablePayout(): Promise<GetAvailablePayoutResponse> {
+    return this.request<GetAvailablePayoutResponse>('/creator/payout/available', {
+      method: 'GET',
+    }, true);
+  }
+
+  async getEarningsLedger(): Promise<GetEarningsLedgerResponse> {
+    return this.request<GetEarningsLedgerResponse>('/creator/payout/ledger', {
+      method: 'GET',
+    }, true);
+  }
+
+  async getPayoutHistory(): Promise<GetPayoutHistoryResponse> {
+    return this.request<GetPayoutHistoryResponse>('/creator/payout/history', {
+      method: 'GET',
+    }, true);
+  }
+
+  async requestPayout(data?: RequestPayoutRequest): Promise<RequestPayoutResponse> {
+    return this.request<RequestPayoutResponse>('/creator/payout/request', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    }, true);
+  }
+
+  async addBankDetails(data: AddBankDetailsRequest): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>('/creator/payout/bank-details', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  async addUpiDetails(data: AddUpiDetailsRequest): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>('/creator/payout/upi-details', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  async getPaymentMethods(): Promise<PaymentMethodsResponse> {
+    return this.request<PaymentMethodsResponse>('/creator/payout/payment-methods', {
+      method: 'GET',
     }, true);
   }
 }

@@ -12,7 +12,7 @@ export interface Order {
   commissionRate: number;
   createdAt: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded';
   channel: 'facebook' | 'instagram' | 'youtube' | 'coupon' | 'referral';
 }
 

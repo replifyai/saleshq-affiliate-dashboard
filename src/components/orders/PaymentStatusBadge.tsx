@@ -12,10 +12,11 @@ const PaymentStatusBadge: React.FC<PaymentStatusBadgeProps> = ({ status }) => {
     paid: { label: 'Paid', color: 'bg-green-500/20 text-green-600 border-green-500/30' },
     failed: { label: 'Failed', color: 'bg-red-500/20 text-red-600 border-red-500/30' },
     refunded: { label: 'Refunded', color: 'bg-gray-500/20 text-gray-600 border-gray-500/30' },
+    partially_refunded: { label: 'Partially Refunded', color: 'bg-orange-500/20 text-orange-600 border-orange-500/30' },
   };
 
   const config = statusConfig[status];
-  
+
   return (
     <span className={cn(
       'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border',

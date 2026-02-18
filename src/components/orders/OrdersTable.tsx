@@ -37,7 +37,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 
   // Mock function to determine reward status - replace with actual logic
   const getRewardStatus = (order: Order): { status: RewardStatus; daysLeft?: number } => {
-    if (order.paymentStatus === 'refunded' || order.status === 'cancelled') {
+    if (order.paymentStatus === 'refunded' || order.paymentStatus === 'partially_refunded' || order.status === 'cancelled') {
       return { status: 'cancelled' };
     }
     if (order.paymentStatus === 'paid') {

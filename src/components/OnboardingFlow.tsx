@@ -7,6 +7,7 @@ import Button from './common/Button';
 import TextField from './common/TextField';
 import { useProfile } from '@/contexts/ProfileContext';
 import { SocialMediaHandle } from '@/types/api';
+import apiClient from '@/services/apiClient';
 
 interface OnboardingData {
   creatorName: string;
@@ -50,7 +51,7 @@ const OnboardingFlow: React.FC = () => {
   useEffect(() => {
     // Animate container entrance
     if (containerRef.current) {
-      gsap.fromTo(containerRef.current, 
+      gsap.fromTo(containerRef.current,
         { opacity: 0, y: 50 },
         { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
       );
@@ -102,11 +103,11 @@ const OnboardingFlow: React.FC = () => {
 
   const handleComplete = async () => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
     // Store approval status before update (approval status won't change from profile update)
     const isPending = state.profile?.approved === 'pending';
-    
+
     try {
       // Convert social handles to API format
       const socialMediaHandles: SocialMediaHandle[] = data.socialHandles
@@ -193,8 +194,8 @@ const OnboardingFlow: React.FC = () => {
                 {currentStep === 1
                   ? 'Tell us about you'
                   : currentStep === 2
-                  ? 'Add your email'
-                  : 'Connect your socials'}
+                    ? 'Add your email'
+                    : 'Connect your socials'}
               </h1>
               <span className="text-xs text-muted-foreground">
                 Step {currentStep} of {totalSteps}
@@ -206,9 +207,8 @@ const OnboardingFlow: React.FC = () => {
               {Array.from({ length: totalSteps }).map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 flex-1 rounded-full transition-colors ${
-                    index < currentStep ? 'bg-primary' : 'bg-muted'
-                  }`}
+                  className={`h-1 flex-1 rounded-full transition-colors ${index < currentStep ? 'bg-primary' : 'bg-muted'
+                    }`}
                 />
               ))}
             </div>
@@ -300,6 +300,8 @@ const EmailStep: React.FC<{
   onSkip: () => void;
 }> = ({ data, setData, onNext, onPrev, onSkip }) => {
   const stepRef = useRef<HTMLDivElement>(null);
+  const [emailError, setEmailError] = useState<string>('');
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     if (stepRef.current) {
@@ -314,8 +316,47 @@ const EmailStep: React.FC<{
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleNext = () => {
-    if (data.email && isValidEmail(data.email)) {
+  const handleEmailChange = (value: string) => {
+    setData(prev => ({ ...prev, email: value }));
+    // Clear error when user starts typing again
+    if (emailError) {
+      setEmailError('');
+    }
+  };
+
+  const handleNext = async () => {
+    // Step 1: Validate email is provided
+    if (!data.email.trim()) {
+      setEmailError('Please enter your email address.');
+      return;
+    }
+
+    // Step 2: Validate email syntax
+    if (!isValidEmail(data.email)) {
+      setEmailError('Please enter a valid email address (e.g., name@example.com).');
+      return;
+    }
+
+    // Step 3: Check if email already exists via API
+    setIsChecking(true);
+    setEmailError('');
+
+    try {
+      const result = await apiClient.checkCreatorEmail(data.email.trim());
+
+      if (result.exists) {
+        setEmailError('This email is already registered with another creator account. Please use a different email.');
+        setIsChecking(false);
+        return;
+      }
+
+      // Email is valid and not taken — proceed
+      setIsChecking(false);
+      onNext();
+    } catch (error) {
+      console.error('Error checking email:', error);
+      // On API error, still allow proceeding to avoid blocking the user
+      setIsChecking(false);
       onNext();
     }
   };
@@ -334,9 +375,10 @@ const EmailStep: React.FC<{
           label="Email Address"
           placeholder="your.email@example.com"
           value={data.email}
-          onChange={(value) => setData(prev => ({ ...prev, email: value }))}
+          onChange={handleEmailChange}
           className="w-full text-lg"
           type="email"
+          error={emailError}
         />
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
@@ -345,6 +387,7 @@ const EmailStep: React.FC<{
             variant="outline"
             size="lg"
             className="flex-1"
+            disabled={isChecking}
           >
             Back
           </Button>
@@ -353,6 +396,7 @@ const EmailStep: React.FC<{
             variant="outline"
             size="lg"
             className="flex-1"
+            disabled={isChecking}
           >
             Skip for now
           </Button>
@@ -360,9 +404,9 @@ const EmailStep: React.FC<{
             onClick={handleNext}
             size="lg"
             className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-            disabled={!data.email || !isValidEmail(data.email)}
+            disabled={!data.email || !isValidEmail(data.email) || isChecking}
           >
-            Continue
+            {isChecking ? 'Checking...' : 'Continue'}
           </Button>
         </div>
       </div>
@@ -423,7 +467,7 @@ const SocialHandlesStep: React.FC<{
         {/* Add New Handle Form */}
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">
           <h3 className="text-lg font-semibold text-foreground">Add Social Media Handle</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Platform</label>

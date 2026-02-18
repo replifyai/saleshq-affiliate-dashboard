@@ -170,7 +170,7 @@ export interface CreatorOrder {
   commissionAmount: string;
   commissionCurrency: string;
   commissionSource: string;
-  paymentStatus: 'paid' | 'pending' | 'failed' | 'refunded';
+  paymentStatus: 'paid' | 'pending' | 'failed' | 'refunded' | 'partially_refunded';
   paymentMethod: string;
   refundedAmount?: string | null;
   refundReason?: string | null;
@@ -320,4 +320,103 @@ export interface GetShopifyProductsByIdsRequest {
 
 export interface GetShopifyProductsByIdsResponse {
   products: ShopifyProduct[];
+}
+
+// ============================================================================
+// Payout Types
+// ============================================================================
+
+export interface AvailablePayoutData {
+  creatorId: string;
+  available: {
+    amount: string;
+    currency: string;
+    eligibleCommissions: number;
+    deductions: string;
+    carryForwardDeduction: string;
+  };
+  pending: {
+    amount: string;
+    commissionsWithinWindow: number;
+  };
+  canPayout: boolean;
+  hasPaymentMethod: boolean;
+  reason: string | null;
+  nextPayoutDate: string | null;
+}
+
+export interface GetAvailablePayoutResponse {
+  payout: AvailablePayoutData;
+}
+
+export interface LedgerEntry {
+  id: string;
+  orderInternalId: string;
+  orderNumber: string;
+  basisAmount: string;
+  commissionAmount: string;
+  deductedAmount?: string;
+  status: 'pending_payment' | 'paid';
+  entryType: string;
+  createdAt: number;
+  orderCreatedAt: number;
+  isEligible: boolean;
+  eligibleAt: number | null;
+}
+
+export interface GetEarningsLedgerResponse {
+  ledger: LedgerEntry[];
+}
+
+export interface PayoutHistoryEntry {
+  id: string;
+  amount: string;
+  currency: string;
+  commissionsCount: number;
+  deductionsAmount: string;
+  status: 'approved' | 'processing' | 'processed' | 'completed' | 'failed' | 'reversed';
+  initiatedByType: string;
+  initiatedById: string;
+  processedAt: number | null;
+  createdAt: number;
+}
+
+export interface GetPayoutHistoryResponse {
+  history: PayoutHistoryEntry[];
+}
+
+export interface RequestPayoutRequest {
+  amount?: string;
+}
+
+export interface RequestPayoutResponse {
+  payout: {
+    success: boolean;
+    payoutId: string;
+    amount: string;
+    commissionsIncluded: number;
+  };
+}
+
+export interface AddBankDetailsRequest {
+  accountNumber: string;
+  ifscCode: string;
+  accountName: string;
+}
+
+export interface AddUpiDetailsRequest {
+  upiId: string;
+}
+
+export interface PaymentMethodsResponse {
+  methods: {
+    hasBank: boolean;
+    hasUpi: boolean;
+    bankDetails?: {
+      accountNumber: string;
+      ifscCode: string;
+      accountName: string;
+    } | null;
+    preference: 'bank' | 'upi';
+  };
 }

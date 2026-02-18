@@ -8,6 +8,7 @@ import {
   PersonalInformationSection,
   SocialMediaSection,
   AccountStatisticsSection,
+  PaymentMethodSection,
 } from '@/components/profile';
 import { AffiliateProfile, SocialMediaHandle } from '@/components/profile/types';
 import { SocialMediaHandle as ApiSocialMediaHandle } from '@/types/api';
@@ -252,6 +253,9 @@ export default function ProfilePage() {
           commissionRate={profile.commissionRate}
           joiningDate={profile.joiningDate}
         />
+
+        {/* Payment Methods */}
+        <PaymentMethodSection />
       </div>
     </div>
   );

@@ -40,10 +40,10 @@ const OrdersTabs: React.FC<OrdersTabsProps> = ({
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  
+
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
-  
+
   // Draft state for filters (apply on button click)
   const [draftPaymentStatus, setDraftPaymentStatus] = useState(paymentStatus);
   const [draftOrderNumber, setDraftOrderNumber] = useState(orderNumberFilter);
@@ -79,7 +79,7 @@ const OrdersTabs: React.FC<OrdersTabsProps> = ({
   ];
 
   const hasActiveFilters = paymentStatus !== '' || orderNumberFilter !== '';
-  
+
   const handleApplyFilters = () => {
     onPaymentStatusChange(draftPaymentStatus);
     onOrderNumberFilterChange(draftOrderNumber);
@@ -184,6 +184,7 @@ const OrdersTabs: React.FC<OrdersTabsProps> = ({
                         <option value="pending">Pending</option>
                         <option value="failed">Failed</option>
                         <option value="refunded">Refunded</option>
+                        <option value="partially_refunded">Partially Refunded</option>
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#BCBCBC] pointer-events-none" />
                     </div>
@@ -380,6 +381,7 @@ const OrdersTabs: React.FC<OrdersTabsProps> = ({
                     <option value="pending">Pending</option>
                     <option value="failed">Failed</option>
                     <option value="refunded">Refunded</option>
+                    <option value="partially_refunded">Partially Refunded</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#BCBCBC] pointer-events-none" />
                 </div>

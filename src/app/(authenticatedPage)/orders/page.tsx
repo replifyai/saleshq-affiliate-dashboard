@@ -44,10 +44,10 @@ const mapApiOrderToOrder = (apiOrder: CreatorOrder): Order => {
     'coupon';
 
   let status: Order['status'] = 'processing';
-  if (apiOrder.paymentStatus === 'paid') {
+  if (apiOrder.paymentStatus === 'refunded' || apiOrder.paymentStatus === 'partially_refunded') {
+    status = 'cancelled';
+  } else if (apiOrder.paymentStatus === 'paid') {
     status = 'delivered';
-  } else if (apiOrder.paymentStatus === 'refunded') {
-    status = 'refunded';
   } else if (apiOrder.paymentStatus === 'failed') {
     status = 'cancelled';
   } else {
