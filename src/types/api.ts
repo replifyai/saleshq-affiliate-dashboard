@@ -336,13 +336,23 @@ export interface AvailablePayoutData {
     carryForwardDeduction: string;
   };
   pending: {
-    amount: string;
-    commissionsWithinWindow: number;
+    totalAmount: string;
+    unfulfilled: {
+      amount: string;
+      count: number;
+    };
+    inWindow: {
+      amount: string;
+      count: number;
+    };
+    inCycle: {
+      amount: string;
+      count: number;
+    };
   };
   canPayout: boolean;
   hasPaymentMethod: boolean;
-  reason: string | null;
-  nextPayoutDate: string | null;
+  reason?: string | null;
 }
 
 export interface GetAvailablePayoutResponse {

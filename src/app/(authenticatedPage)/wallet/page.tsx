@@ -25,6 +25,7 @@ import {
   History,
   Info,
   RefreshCw,
+  HelpCircle,
 } from 'lucide-react';
 
 // ============================================================================
@@ -137,7 +138,6 @@ const WalletHeader: React.FC<{ lastRefreshed: Date; onRefresh: () => void; isRef
   );
 };
 
-// --- Balance Card ---
 const BalanceCard: React.FC<{
   payout: AvailablePayoutData;
   onWithdraw: () => void;
@@ -146,13 +146,28 @@ const BalanceCard: React.FC<{
 }> = ({ payout, onWithdraw, isWithdrawing, hasPaymentMethod }) => {
   const router = useRouter();
   const availableAmount = parseFloat(payout.available.amount) || 0;
-  const pendingAmount = parseFloat(payout.pending.amount) || 0;
+  const pendingTotal = parseFloat(payout.pending.totalAmount) || 0;
 
-  const formatNextPayoutDate = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
+  const pendingBuckets = [
+    {
+      label: 'Not Shipped',
+      amount: parseFloat(payout.pending.unfulfilled.amount) || 0,
+      count: payout.pending.unfulfilled.count,
+      description: 'Orders placed but not yet shipped/delivered by the brand.'
+    },
+    {
+      label: 'Return Window',
+      amount: parseFloat(payout.pending.inWindow.amount) || 0,
+      count: payout.pending.inWindow.count,
+      description: 'Orders delivered but still in the 7-day return/refund window.'
+    },
+    {
+      label: 'Awaiting Cycle',
+      amount: parseFloat(payout.pending.inCycle.amount) || 0,
+      count: payout.pending.inCycle.count,
+      description: 'Money is safe! Waiting for the platform\'s official Payout Day to be available.'
+    },
+  ].filter(b => b.amount > 0 || b.count > 0);
 
   return (
     <div className="relative bg-gradient-to-br from-[#FFE887] via-[#FFD54F] to-[#FFC107] rounded-2xl sm:rounded-3xl p-5 sm:p-8 overflow-hidden">
@@ -162,16 +177,6 @@ const BalanceCard: React.FC<{
         <img src="/Vector.svg" alt="" className="absolute bottom-0 right-0 w-[500px] sm:w-[640px] opacity-100" />
       </div>
 
-      {/* Next Payout Badge — Desktop */}
-      {payout.nextPayoutDate && (
-        <div className="hidden sm:flex absolute top-6 right-6 bg-white rounded-xl px-4 py-2 items-center gap-4 shadow-sm z-10">
-          <span className="text-sm text-[#636363]">Next Payout</span>
-          <span className="text-sm font-semibold text-green-600">
-            {formatNextPayoutDate(payout.nextPayoutDate)}
-          </span>
-        </div>
-      )}
-
       <div className="relative z-10">
         {/* Available Balance */}
         <p className="text-sm sm:text-base text-[#636363] mb-1 sm:mb-2">Available to Withdraw</p>
@@ -179,17 +184,37 @@ const BalanceCard: React.FC<{
           ₹{availableAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
         </h2>
 
-        {/* Pending Row */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4">
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#636363]" />
-            <span className="text-sm text-[#636363]">
-              Upcoming: <span className="font-semibold text-[#131313]">₹{pendingAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-            </span>
-          </div>
-          {payout.pending.commissionsWithinWindow > 0 && (
-            <span className="text-xs text-[#636363] bg-white/60 px-2 py-1 rounded-full">
-              {payout.pending.commissionsWithinWindow} order{payout.pending.commissionsWithinWindow !== 1 ? 's' : ''} in processing
+        {/* Pending Breakdown */}
+        <div className="flex flex-col gap-2 mt-4">
+          {pendingBuckets.length > 0 ? (
+            <>
+              <span className="text-sm font-medium text-[#636363]">Pending processing:</span>
+              <div className="flex flex-wrap gap-2">
+                {pendingBuckets.map((bucket) => (
+                  <div
+                    key={bucket.label}
+                    className="group relative inline-flex items-center justify-center gap-1.5 text-xs bg-white/60 px-2.5 py-1.5 rounded-full border border-white/40"
+                  >
+                    <span className="text-[#636363] leading-none">{bucket.label}:</span>
+                    <span className="font-semibold text-[#131313] leading-none">
+                      ₹{bucket.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </span>
+                    {bucket.count > 0 && <span className="text-[#8C8C8C] shrink-0 leading-none">({bucket.count})</span>}
+                    <HelpCircle className="w-3.5 h-3.5 text-[#8C8C8C] cursor-help transition-colors group-hover:text-[#131313] shrink-0 self-center" />
+
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-[#131313] text-white text-[11px] leading-relaxed rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none text-center shadow-lg">
+                      {bucket.description}
+                      {/* Tooltip Arrow */}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#131313]"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <span className="text-sm font-medium text-[#636363]">
+              Pending processing: <span className="font-semibold text-[#131313]">₹0.00</span>
             </span>
           )}
         </div>
@@ -238,14 +263,6 @@ const BalanceCard: React.FC<{
           )}
         </div>
       </div>
-
-      {/* Mobile: Next Payout + Pending */}
-      {payout.nextPayoutDate && (
-        <div className="sm:hidden mt-6 flex items-center justify-between text-sm relative z-10">
-          <span className="text-[#636363]">Next Payout</span>
-          <span className="font-semibold text-green-600">{formatNextPayoutDate(payout.nextPayoutDate)}</span>
-        </div>
-      )}
     </div>
   );
 };
