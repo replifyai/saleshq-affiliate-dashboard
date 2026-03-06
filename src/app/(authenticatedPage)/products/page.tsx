@@ -28,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onShare }) => {
     if (!price) return null;
     const numPrice = parseFloat(price);
     if (isNaN(numPrice)) return null;
-    
+
     // Currency symbol mapping
     const currencySymbols: Record<string, string> = {
       INR: '₹',
@@ -483,13 +483,44 @@ const ProductsPage: React.FC = () => {
       try {
         setIsLoading(true);
 
-        const [productsResponse, collectionsResponse] = await Promise.all([
-          apiClient.getAllShopifyProducts(),
-          apiClient.getAllProductCollections(),
-        ]);
+        // Fetch collections first to get the unified list of product IDs
+        const collectionsResponse = await apiClient.getAllProductCollections();
 
-        if (productsResponse.productCollection.success) {
-          const mappedProducts: Product[] = productsResponse.productCollection.data.map((p) => ({
+        let allResolvedShopifyProducts: any[] = [];
+
+        if (collectionsResponse.productCollections) {
+          setCollections(collectionsResponse.productCollections);
+
+          // Fetch resolved products for all collections in parallel
+          const resolvedPromises = collectionsResponse.productCollections.map(col =>
+            apiClient.getResolvedProducts(col.id).catch(err => {
+              console.error(`Failed resolving products for collection ${col.id}:`, err);
+              return { success: false, data: [] };
+            })
+          );
+
+          const resolvedResults = await Promise.all(resolvedPromises);
+
+          // Aggregate all returned products
+          resolvedResults.forEach(res => {
+            if (res.success && res.data) {
+              allResolvedShopifyProducts = [...allResolvedShopifyProducts, ...res.data];
+            }
+          });
+        }
+
+        // Deduplicate products by id
+        const uniqueProductsMap = new Map();
+        allResolvedShopifyProducts.forEach(p => {
+          if (!uniqueProductsMap.has(p.id)) {
+            uniqueProductsMap.set(p.id, p);
+          }
+        });
+
+        const uniqueShopifyProducts = Array.from(uniqueProductsMap.values());
+
+        if (uniqueShopifyProducts.length > 0) {
+          const mappedProducts: Product[] = uniqueShopifyProducts.map((p) => ({
             id: p.id,
             name: p.title,
             handle: p.handle,
@@ -503,17 +534,14 @@ const ProductsPage: React.FC = () => {
             description: '',
             lastUpdated: new Date().toISOString(),
             salesData: [],
-            // Price fields from API
             minPrice: p.minPrice,
             maxPrice: p.maxPrice,
             currencyCode: p.currencyCode,
           }));
 
           setProducts(mappedProducts);
-        }
-
-        if (collectionsResponse.productCollections) {
-          setCollections(collectionsResponse.productCollections);
+        } else {
+          setProducts([]);
         }
 
         setLastRefreshed(new Date());
@@ -698,10 +726,10 @@ const ProductsPage: React.FC = () => {
 
     try {
       setIsLoadingCollectionProducts(true);
-      const response = await apiClient.getShopifyProductsByIds({ ids: collection.productIds });
+      const response = await apiClient.getResolvedProducts(collection.id);
 
-      if (response.products) {
-        const mappedProducts: Product[] = response.products.map((p) => ({
+      if (response.success && response.data) {
+        const mappedProducts: Product[] = response.data.map((p: any) => ({
           id: p.id,
           name: p.title,
           handle: p.handle,

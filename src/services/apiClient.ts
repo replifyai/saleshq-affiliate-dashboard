@@ -35,8 +35,27 @@ class ApiClient {
   private baseUrl: string;
   private refreshingPromise: Promise<string | null> | null = null;
 
+  // Custom Cache implementation for 30-minutes retention
+  private cache: Record<string, { data: any, timestamp: number }> = {};
+  private CACHE_DURATION = 30 * 60 * 1000;
+
   constructor() {
     this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+  }
+
+  private getCachedData<T>(key: string): T | null {
+    const cached = this.cache[key];
+    if (cached && (Date.now() - cached.timestamp < this.CACHE_DURATION)) {
+      return cached.data as T;
+    }
+    return null;
+  }
+
+  private setCachedData(key: string, data: any) {
+    this.cache[key] = {
+      data,
+      timestamp: Date.now()
+    };
   }
 
   private decodeJwt(token: string): { exp?: number } | null {
@@ -247,12 +266,19 @@ class ApiClient {
   }
 
   async getAllProductCollections(): Promise<GetProductCollectionsResponse> {
-    return this.request<GetProductCollectionsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllProductCollectionsForCreator', {
+    const cacheKey = 'getAllProductCollections';
+    const cached = this.getCachedData<GetProductCollectionsResponse>(cacheKey);
+    if (cached) return cached;
+
+    const result = await this.request<GetProductCollectionsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllProductCollectionsForCreator', {
       method: 'GET',
       headers: {
         ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
       },
     }, true);
+
+    this.setCachedData(cacheKey, result);
+    return result;
   }
 
   async getShopifyProductsByIds(data: GetShopifyProductsByIdsRequest): Promise<GetShopifyProductsByIdsResponse> {
@@ -263,6 +289,21 @@ class ApiClient {
       },
       body: JSON.stringify(data),
     }, true);
+  }
+
+  // Uses the newly created proxy wrapper endpoint for personalized product resolution
+  async getResolvedProducts(collectionId: string): Promise<{ success: boolean; data: any[] }> {
+    const cacheKey = `getResolvedProducts_${collectionId}`;
+    const cached = this.getCachedData<{ success: boolean; data: any[] }>(cacheKey);
+    if (cached) return cached;
+
+    const result = await this.request<{ success: boolean; data: any[] }>('/dashboard/creator/getResolvedProducts', {
+      method: 'POST',
+      body: JSON.stringify({ collectionId }),
+    }, true);
+
+    this.setCachedData(cacheKey, result);
+    return result;
   }
 
   // Email check API method

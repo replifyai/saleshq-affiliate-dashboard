@@ -22,60 +22,24 @@ interface Product {
 
 interface FeaturedProductsProps {
   products?: Product[];
+  isLoading?: boolean;
   className?: string;
 }
 
-// Function to generate mock products with dynamic store host
-const generateMockProducts = (storeHost: string): Product[] => [
-  {
-    id: '1',
-    name: 'Frido Product Name Goes here, Frido Pro...',
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
-    rating: 4.7,
-    reviewCount: '786+',
-    category: 'Footwear',
-    price: 2599,
-    originalPrice: 2999,
-    discount: '48% OFF',
-    shareLink: `${storeHost}/product/1`,
-  },
-  {
-    id: '2',
-    name: 'Frido Product Name Goes here, Frido Pro...',
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
-    rating: 4.7,
-    reviewCount: '786+',
-    category: 'Footwear',
-    price: 2599,
-    originalPrice: 2999,
-    discount: '48% OFF',
-    shareLink: `${storeHost}/product/2`,
-  },
-  {
-    id: '3',
-    name: 'Frido Product Name Goes here, Frido Pro...',
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
-    rating: 4.7,
-    reviewCount: '786+',
-    category: 'Footwear',
-    price: 2599,
-    originalPrice: 2999,
-    discount: '48% OFF',
-    shareLink: `${storeHost}/product/3`,
-  },
-  {
-    id: '4',
-    name: 'Frido Product Name Goes here, Frido Pro...',
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
-    rating: 4.7,
-    reviewCount: '786+',
-    category: 'Footwear',
-    price: 2599,
-    originalPrice: 2999,
-    discount: '48% OFF',
-    shareLink: `${storeHost}/product/4`,
-  },
-];
+const ProductSkeleton = () => (
+  <div className="bg-white border border-[#E5E5E5] rounded-2xl overflow-hidden animate-pulse">
+    <div className="aspect-square bg-gray-200"></div>
+    <div className="p-3 sm:p-4">
+      <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
+      <div className="h-3 bg-gray-200 rounded w-1/4 mb-4"></div>
+      <div className="flex gap-2 mb-4">
+        <div className="h-5 bg-gray-200 rounded w-1/3"></div>
+        <div className="h-5 bg-gray-200 rounded w-1/4"></div>
+      </div>
+      <div className="h-10 bg-gray-200 rounded-xl w-full"></div>
+    </div>
+  </div>
+);
 
 const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void }> = ({ product, onShare }) => {
   return (
@@ -134,17 +98,12 @@ const ProductCard: React.FC<{ product: Product; onShare: (link: string) => void 
 
 const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
   products: propProducts,
+  isLoading = false,
   className
 }) => {
   const { showSuccess } = useSnackbar();
-  const { state } = useProfile();
 
-  // Use shopDomain from profile, fallback to env variable
-  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
-
-  // Generate mock products with dynamic store host
-  const mockProducts = useMemo(() => generateMockProducts(storeHost), [storeHost]);
-  const products = propProducts || mockProducts;
+  const products = propProducts || [];
 
   const handleShare = (link: string) => {
     navigator.clipboard.writeText(link);
@@ -158,13 +117,21 @@ const FeaturedProducts: React.FC<FeaturedProductsProps> = ({
       </span>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onShare={handleShare}
-          />
-        ))}
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => <ProductSkeleton key={i} />)
+        ) : products.length === 0 ? (
+          <div className="col-span-full py-8 text-center text-gray-400 text-sm">
+            No products available
+          </div>
+        ) : (
+          products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onShare={handleShare}
+            />
+          ))
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ import {
   DashboardHeader,
   StatsCards,
   ShareAndEarn,
-  FeaturedCollections,
   FeaturedProducts,
 } from '@/components/dashboard';
 import { useSnackbar } from '@/components/snackbar';
@@ -19,6 +18,8 @@ export default function DashboardPage() {
   const showErrorRef = useRef(showError);
   const [dashboardSummary, setDashboardSummary] = useState<CreatorDashboardSummary | null>(null);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [resolvedProducts, setResolvedProducts] = useState<any[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
 
   useEffect(() => {
     showErrorRef.current = showError;
@@ -45,7 +46,71 @@ export default function DashboardPage() {
       }
     };
 
+    const fetchResolvedProducts = async () => {
+      setIsProductsLoading(true);
+      try {
+        // Fetch collections first to get the unified list of product IDs
+        const collectionsResponse = await apiClient.getAllProductCollections();
+        let allResolvedShopifyProducts: any[] = [];
+
+        if (collectionsResponse.productCollections) {
+          // Fetch resolved products for all collections in parallel
+          const resolvedPromises = collectionsResponse.productCollections.map(col =>
+            apiClient.getResolvedProducts(col.id).catch(err => {
+              console.error(`Failed resolving products for collection ${col.id}:`, err);
+              return { success: false, data: [] };
+            })
+          );
+
+          const resolvedResults = await Promise.all(resolvedPromises);
+
+          // Aggregate all returned products
+          resolvedResults.forEach(res => {
+            if (res.success && res.data) {
+              allResolvedShopifyProducts = [...allResolvedShopifyProducts, ...res.data];
+            }
+          });
+        }
+
+        // Deduplicate products by id
+        const uniqueProductsMap = new Map();
+        allResolvedShopifyProducts.forEach(p => {
+          if (!uniqueProductsMap.has(p.id)) {
+            uniqueProductsMap.set(p.id, p);
+          }
+        });
+
+        const uniqueShopifyProducts = Array.from(uniqueProductsMap.values());
+
+        if (uniqueShopifyProducts.length > 0) {
+          const mappedProducts = uniqueShopifyProducts.map((p) => ({
+            id: p.id,
+            name: p.title,
+            category: p.productType || 'Uncategorized',
+            image: p.images?.[0] || 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
+            // Mock these specific display values since Shopify doesn't natively return 'rating', etc.
+            rating: 4.7,
+            reviewCount: '786+',
+            price: parseFloat(p.minPrice || '0'),
+            originalPrice: parseFloat(p.maxPrice || p.minPrice || '0') * 1.2, // mock original price 20% higher
+            discount: '20% OFF',
+            shareLink: `https://myfrido.com/products/${p.handle}`,
+          }));
+
+          if (isMounted) {
+            // limit to top 5 products for dashboard homepage visually
+            setResolvedProducts(mappedProducts.slice(0, 5));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load resolved products globally:', error);
+      } finally {
+        if (isMounted) setIsProductsLoading(false);
+      }
+    };
+
     fetchDashboardSummary();
+    fetchResolvedProducts();
 
     return () => {
       isMounted = false;
@@ -137,16 +202,16 @@ export default function DashboardPage() {
         />
 
         {/* Share and Earn */}
-        <ShareAndEarn 
+        <ShareAndEarn
           activeCoupon={dashboardSummary?.activeCoupon}
           referralLink={dashboardSummary?.referralLink}
         />
 
-        {/* Featured Collections */}
-        <FeaturedCollections />
-
         {/* Featured Products */}
-        <FeaturedProducts />
+        <FeaturedProducts
+          products={resolvedProducts}
+          isLoading={isProductsLoading}
+        />
       </div>
     </div>
   );
