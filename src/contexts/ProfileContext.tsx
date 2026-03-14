@@ -147,7 +147,10 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      await apiClient.sendOtp({ phoneNumber });
+      const response = await apiClient.sendOtp({ phoneNumber });
+      if (response && response.success === false) {
+        throw new Error(response.message || 'Failed to send OTP');
+      }
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to send OTP';

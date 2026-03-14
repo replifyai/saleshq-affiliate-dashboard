@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { OTPInput } from 'input-otp';
 import { cn } from '@/lib/utils';
 import { getContentConfig, getFeatureConfig } from '@/lib/constants';
@@ -14,6 +14,14 @@ export interface SignupProps {
 const Signup: React.FC<SignupProps> = ({ className }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [name, setName] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mobile = params.get('mobile');
+    if (mobile) {
+      setMobileNumber(mobile);
+    }
+  }, []);
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [countdown, setCountdown] = useState(0);

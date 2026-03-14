@@ -58,8 +58,18 @@ const Login: React.FC<LoginProps> = ({ className }) => {
         setIsOtpSent(true);
         startCountdown();
         showSnackbar('OTP sent successfully!', 'success');
-      } catch (error) {
-        showSnackbar(error instanceof Error ? error.message : 'Failed to send OTP', 'error');
+      } catch (error: any) {
+        console.error("sendOtp error:", error);
+        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Failed to send OTP');
+        
+        if (errorMessage.includes('User is not created') || errorMessage.includes('not registered')) {
+          showSnackbar('User not found. Redirecting to sign up...', 'info');
+          setTimeout(() => {
+            window.location.href = `/signup?mobile=${mobileNumber}`;
+          }, 1500);
+        } else {
+          showSnackbar(errorMessage, 'error');
+        }
       } finally {
         setIsSendingOtp(false);
       }
