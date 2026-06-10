@@ -257,11 +257,8 @@ class ApiClient {
   }
 
   async getAllShopifyProducts(): Promise<GetShopifyProductsResponse> {
-    return this.request<GetShopifyProductsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllShopifyProducts', {
+    return this.request<GetShopifyProductsResponse>('/products', {
       method: 'GET',
-      headers: {
-        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
-      },
     }, true);
   }
 
@@ -270,11 +267,8 @@ class ApiClient {
     const cached = this.getCachedData<GetProductCollectionsResponse>(cacheKey);
     if (cached) return cached;
 
-    const result = await this.request<GetProductCollectionsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getAllProductCollectionsForCreator', {
+    const result = await this.request<GetProductCollectionsResponse>('/collections/for-creator', {
       method: 'GET',
-      headers: {
-        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
-      },
     }, true);
 
     this.setCachedData(cacheKey, result);
@@ -282,11 +276,8 @@ class ApiClient {
   }
 
   async getShopifyProductsByIds(data: GetShopifyProductsByIdsRequest): Promise<GetShopifyProductsByIdsResponse> {
-    return this.request<GetShopifyProductsByIdsResponse>('https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi/getShopifyProductsByIds', {
+    return this.request<GetShopifyProductsByIdsResponse>('/products/by-ids', {
       method: 'POST',
-      headers: {
-        ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
-      },
       body: JSON.stringify(data),
     }, true);
   }

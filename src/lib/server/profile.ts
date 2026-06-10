@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { GetCreatorProfileResponse } from '@/types/api';
 
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://dashboardapi-dkhjjaxofq-el.a.run.app';
+const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi';
 
 interface TokenRefreshResponse {
   idToken: string;

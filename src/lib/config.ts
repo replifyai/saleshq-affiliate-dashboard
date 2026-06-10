@@ -3,7 +3,7 @@ export const config = {
   // API Configuration
   api: {
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || '/api',
-    firebaseFunctionUrl: process.env.FIREBASE_FUNCTION_URL || 'https://dashboardapi-dkhjjaxofq-el.a.run.app',
+    firebaseFunctionUrl: process.env.FIREBASE_FUNCTION_URL || 'https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi',
   },
   
   // App Configuration

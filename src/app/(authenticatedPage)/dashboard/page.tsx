@@ -83,18 +83,15 @@ export default function DashboardPage() {
         const uniqueShopifyProducts = Array.from(uniqueProductsMap.values());
 
         if (uniqueShopifyProducts.length > 0) {
-          const mappedProducts = uniqueShopifyProducts.map((p) => ({
+          const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || '';
+          const mappedProducts = uniqueShopifyProducts.map((p: any) => ({
             id: p.id,
             name: p.title,
             category: p.productType || 'Uncategorized',
-            image: p.images?.[0] || 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=300&fit=crop',
-            // Mock these specific display values since Shopify doesn't natively return 'rating', etc.
-            rating: 4.7,
-            reviewCount: '786+',
-            price: parseFloat(p.minPrice || '0'),
-            originalPrice: parseFloat(p.maxPrice || p.minPrice || '0') * 1.2, // mock original price 20% higher
-            discount: '20% OFF',
-            shareLink: `https://myfrido.com/products/${p.handle}`,
+            image: p.images?.[0] || '',
+            price: p.minPrice ? parseFloat(p.minPrice) : null,
+            originalPrice: p.maxPrice ? parseFloat(p.maxPrice) : null,
+            shareLink: storeHost ? `${storeHost}/products/${p.handle}` : `/products/${p.handle}`,
           }));
 
           if (isMounted) {

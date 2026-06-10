@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Copy } from 'lucide-react';
 import { useSnackbar } from '@/components/snackbar';
 import { useProfile } from '@/contexts/ProfileContext';
+import apiClient from '@/services/apiClient';
 
 interface Collection {
   id: string;
@@ -18,31 +19,68 @@ interface FeaturedCollectionsProps {
   className?: string;
 }
 
-// Function to generate mock collections with dynamic store host
-const generateMockCollections = (storeHost: string): Collection[] => [
-  { id: '1', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort` },
-  { id: '2', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort-2` },
-  { id: '3', name: 'Car comfort collections', productCount: 7, link: `${storeHost}/collections/car-comfort-3` },
-];
-
 const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
   collections: propCollections,
   className
 }) => {
   const { showSuccess } = useSnackbar();
   const { state } = useProfile();
+  const [fetchedCollections, setFetchedCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState(!propCollections);
 
-  // Use shopDomain from profile, fallback to env variable
-  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || 'https://myfrido.com';
+  const storeHost = state.profile?.shopDomain || process.env.NEXT_PUBLIC_STORE_HOST || '';
 
-  // Generate mock collections with dynamic store host
-  const mockCollections = useMemo(() => generateMockCollections(storeHost), [storeHost]);
-  const collections = propCollections || mockCollections;
+  useEffect(() => {
+    if (propCollections) return;
+
+    let isMounted = true;
+    setLoading(true);
+
+    apiClient.getAllProductCollections()
+      .then((res) => {
+        if (!isMounted) return;
+        const mapped: Collection[] = (res.productCollections || []).map((col: any) => ({
+          id: col.id,
+          name: col.name,
+          productCount: col.productIds?.length ?? 0,
+          link: storeHost ? `${storeHost}/collections/${col.slug || col.id}` : `/collections/${col.slug || col.id}`,
+        }));
+        setFetchedCollections(mapped);
+      })
+      .catch(() => {})
+      .finally(() => { if (isMounted) setLoading(false); });
+
+    return () => { isMounted = false; };
+  }, [propCollections, storeHost]);
+
+  const collections = propCollections ?? fetchedCollections;
 
   const handleCopy = (link: string) => {
     navigator.clipboard.writeText(link);
     showSuccess('Collection link copied!');
   };
+
+  if (loading) {
+    return (
+      <div className={cn('bg-white border border-[#E5E5E5] rounded-2xl p-5 sm:p-6', className)}>
+        <span className="inline-block px-[6px] py-[6px] border border-[#EAEAEA] rounded-full text-[14px] text-[#636363] mb-5">
+          Featured Collections
+        </span>
+        <div className="text-sm text-[#BCBCBC]">Loading collections...</div>
+      </div>
+    );
+  }
+
+  if (collections.length === 0) {
+    return (
+      <div className={cn('bg-white border border-[#E5E5E5] rounded-2xl p-5 sm:p-6', className)}>
+        <span className="inline-block px-[6px] py-[6px] border border-[#EAEAEA] rounded-full text-[14px] text-[#636363] mb-5">
+          Featured Collections
+        </span>
+        <div className="text-sm text-[#BCBCBC]">No collections available.</div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn('bg-white border border-[#E5E5E5] rounded-2xl p-5 sm:p-6', className)}>
@@ -75,4 +113,3 @@ const FeaturedCollections: React.FC<FeaturedCollectionsProps> = ({
 };
 
 export default FeaturedCollections;
-

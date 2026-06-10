@@ -35,19 +35,21 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     return moment(timestamp).format('DD MMM YYYY');
   };
 
-  // Mock function to determine reward status - replace with actual logic
   const getRewardStatus = (order: Order): { status: RewardStatus; daysLeft?: number } => {
-    if (order.paymentStatus === 'refunded' || order.paymentStatus === 'partially_refunded' || order.status === 'cancelled') {
+    if (order.earningStatus === 'void' || order.paymentStatus === 'refunded' || order.paymentStatus === 'partially_refunded' || order.status === 'cancelled') {
       return { status: 'cancelled' };
     }
-    if (order.paymentStatus === 'paid') {
-      // Randomly assign for demo - replace with actual logic
-      const statuses: RewardStatus[] = ['issued', 'payout_processed', 'days_left'];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      if (randomStatus === 'days_left') {
-        return { status: 'days_left', daysLeft: 7 };
-      }
-      return { status: randomStatus };
+    if (order.earningStatus === 'paid') {
+      return { status: 'payout_processed' };
+    }
+    if (order.earningStatus === 'approved') {
+      return { status: 'issued' };
+    }
+    if (order.earningStatus === 'upcoming_payment') {
+      return { status: 'days_left', daysLeft: 15 };
+    }
+    if (order.earningStatus === 'pending_payment') {
+      return { status: 'pending' };
     }
     return { status: 'pending' };
   };
