@@ -48,6 +48,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
     if (order.earningStatus === 'upcoming_payment') {
       return { status: 'days_left', daysLeft: 15 };
     }
+    if (order.earningStatus === 'held') {
+      return { status: 'on_hold' };
+    }
     if (order.earningStatus === 'pending_payment') {
       return { status: 'pending' };
     }

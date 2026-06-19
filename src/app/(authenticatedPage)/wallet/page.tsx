@@ -97,6 +97,14 @@ const LedgerStatusBadge: React.FC<{ isEligible: boolean; status: string }> = ({ 
       </span>
     );
   }
+  if (status === 'held') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border text-amber-700 bg-amber-50 border-amber-200">
+        <RefreshCw className="w-3 h-3" />
+        Held — Exchange
+      </span>
+    );
+  }
   if (isEligible) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border text-green-700 bg-green-50 border-green-200">
@@ -166,6 +174,12 @@ const BalanceCard: React.FC<{
       amount: parseFloat(payout.pending.inCycle.amount) || 0,
       count: payout.pending.inCycle.count,
       description: 'Money is safe! Waiting for the platform\'s official Payout Day to be available.'
+    },
+    {
+      label: 'On Hold (Exchange)',
+      amount: parseFloat(payout.pending.held.amount) || 0,
+      count: payout.pending.held.count,
+      description: 'Commission paused while an exchange is in progress. Released once the replacement ships and clears the return window.'
     },
   ].filter(b => b.amount > 0 || b.count > 0);
 

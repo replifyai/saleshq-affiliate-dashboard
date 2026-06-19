@@ -349,6 +349,11 @@ export interface AvailablePayoutData {
       amount: string;
       count: number;
     };
+    // Commission paused while an exchange is in progress on the order.
+    held: {
+      amount: string;
+      count: number;
+    };
   };
   canPayout: boolean;
   hasPaymentMethod: boolean;
@@ -366,7 +371,7 @@ export interface LedgerEntry {
   basisAmount: string;
   commissionAmount: string;
   deductedAmount?: string;
-  status: 'pending_payment' | 'paid';
+  status: 'pending_payment' | 'upcoming_payment' | 'approved' | 'void' | 'paid' | 'partially_voided' | 'deduction_pending' | 'held';
   entryType: string;
   createdAt: number;
   orderCreatedAt: number;

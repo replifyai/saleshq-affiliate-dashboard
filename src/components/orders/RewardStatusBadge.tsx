@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export type RewardStatus = 'cancelled' | 'pending' | 'issued' | 'payout_processed' | 'days_left';
+export type RewardStatus = 'cancelled' | 'pending' | 'issued' | 'payout_processed' | 'days_left' | 'on_hold';
 
 interface RewardStatusBadgeProps {
   status: RewardStatus;
@@ -38,6 +38,11 @@ const RewardStatusBadge: React.FC<RewardStatusBadgeProps> = ({ status, daysLeft,
         return {
           label: `${daysLeft || 7} days left`,
           className: 'text-[#D97706] border border-[#FCD34D] bg-[#FEF3C7]',
+        };
+      case 'on_hold':
+        return {
+          label: 'On Hold (Exchange)',
+          className: 'text-[#B45309] border border-[#FCD34D] bg-[#FEF3C7]',
         };
       default:
         return {
