@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, ShieldCheck, Sparkles, User, Mail, Phone, Globe } from 'lucide-react';
+import { Check, Clock, RefreshCw, User, Mail, Phone, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Button from './common/Button';
 import { useProfileOperations } from '@/hooks/useProfileOperations';
@@ -11,227 +11,111 @@ const PendingApproval: React.FC = () => {
   const router = useRouter();
 
   const firstName =
-    (profile?.name || '')
-      .trim()
-      .split(' ')
-      .filter(Boolean)[0] || 'Creator';
+    (profile?.name || '').trim().split(' ').filter(Boolean)[0] || 'Creator';
 
   const handleRefresh = () => {
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
+    if (typeof window !== 'undefined') window.location.reload();
   };
 
-  const handleUpdateProfile = () => {
-    router.push('/profile');
-  };
-
-  const handleCompleteOnboarding = () => {
-    router.push('/onboarding');
-  };
+  // Slim 3-stage timeline: submitted (done) → review (active) → approved (pending)
+  const stages = [
+    { label: 'Details submitted', state: 'done' as const },
+    { label: 'Under review', state: 'active' as const },
+    { label: 'Approved', state: 'pending' as const },
+  ];
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-secondary/20 flex items-center justify-center px-4 py-6 sm:py-10">
-      <div className="max-w-xl w-full">
-        <div className="bg-gradient-to-br from-[#FFFAE6]/80 to-white backdrop-blur-sm border border-[#FFD100]/40 rounded-3xl shadow-xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-3 py-1 text-xs font-medium text-secondary-foreground">
-            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-            <span>Account pending review</span>
+    <div className="min-h-[100dvh] bg-[#F0F0F0] flex items-center justify-center px-4 py-8 sm:py-12">
+      <div className="w-full max-w-lg animate-scale-in">
+        <div className="bg-white border border-[#E5E5E5] rounded-3xl shadow-sm overflow-hidden">
+          {/* Hero */}
+          <div className="bg-gradient-to-br from-[#FFFAE6]/80 to-white border-b border-[#FFD100]/30 p-6 sm:p-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 border border-[#FFD100]/40 px-3 py-1 text-xs font-medium text-foreground">
+              <span className="h-2 w-2 rounded-full bg-[#FFD100] animate-pulse" />
+              Account pending review
+            </div>
+            <h1 className="mt-4 text-xl sm:text-2xl font-semibold tracking-tight text-foreground">
+              Hey {firstName}, you&apos;re almost in.
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Our team is reviewing your profile to keep the program high-quality.
+              Your dashboard unlocks as soon as you&apos;re approved — we&apos;ll notify you over SMS, WhatsApp and email.
+            </p>
           </div>
 
-          <div className="flex items-start gap-3 sm:gap-4">
-            <div className="mt-0.5 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Clock className="h-5 w-5 sm:h-6 sm:w-6" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight leading-snug">
-                Hey {firstName}, your creator profile is under review.
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                Our team is reviewing your details to keep the affiliate program high-quality and spam-free.
-                You&apos;ll get full access to your dashboard as soon as your account is approved.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:gap-5 sm:grid-cols-3">
-            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
-              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <ShieldCheck className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Step 1
-                </p>
-                <p className="mt-1 text-sm sm:text-base font-medium text-foreground">
-                  Profile verification
-                </p>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                  We verify your details and social presence.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
-              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Clock className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Step 2
-                </p>
-                <p className="mt-1 text-sm sm:text-base font-medium text-foreground">
-                  Manual review
-                </p>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                  Reviews usually take a short while during business hours.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 rounded-2xl bg-[#FFFAE6]/50 border border-[#FFD100]/30 p-3 sm:p-4">
-              <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Sparkles className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Step 3
-                </p>
-                <p className="mt-1 text-sm sm:text-base font-medium text-foreground">
-                  You&apos;re in
-                </p>
-                <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-                  We&apos;ll notify you as soon as you&apos;re approved and your dashboard unlocks.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Profile Details Section */}
-          <div className="space-y-3 sm:space-y-4 pt-2 border-t border-[#FFD100]/30">
-            <h2 className="text-sm sm:text-base font-semibold text-foreground">
-              Your Profile Details
-            </h2>
-            <div className="space-y-3">
-              {/* Name */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
-                  <User className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Name</p>
-                  <p className="mt-1 text-sm sm:text-base font-medium text-foreground break-words">
-                    {profile?.name || 'Not provided'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
-                  <Mail className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Email</p>
-                  <p className="mt-1 text-sm sm:text-base font-medium text-foreground break-words">
-                    {profile?.email || 'Not provided'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Phone */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
-                  <Phone className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Phone</p>
-                  <div className="mt-1 flex items-center gap-2">
-                    <p className="text-sm sm:text-base font-medium text-foreground break-words">
-                      {profile?.phoneNumber || 'Not provided'}
-                    </p>
-                    {profile?.phoneNumberVerified && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-                        Verified
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Media Handles */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary flex-shrink-0">
-                  <Globe className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Social Media</p>
-                  {profile?.socialMediaHandles && profile.socialMediaHandles.length > 0 ? (
-                    <div className="mt-2 space-y-2">
-                      {profile.socialMediaHandles.map((handle, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium capitalize">
-                            {handle.platform}
-                          </span>
-                          <span className="text-sm text-foreground break-words">{handle.handle}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-1 text-sm sm:text-base text-muted-foreground">No social media handles added</p>
+          <div className="p-6 sm:p-8 space-y-7">
+            {/* Timeline */}
+            <ol className="flex items-center">
+              {stages.map((stage, i) => (
+                <React.Fragment key={stage.label}>
+                  <li className="flex flex-col items-center gap-2 text-center">
+                    <span
+                      className={[
+                        'flex h-9 w-9 items-center justify-center rounded-full border transition-colors',
+                        stage.state === 'done'
+                          ? 'bg-[#131313] border-[#131313] text-white'
+                          : stage.state === 'active'
+                            ? 'bg-[#FFE887] border-[#FFD100] text-[#131313]'
+                            : 'bg-white border-[#E5E5E5] text-muted-foreground',
+                      ].join(' ')}
+                    >
+                      {stage.state === 'done' ? (
+                        <Check className="h-4 w-4" />
+                      ) : stage.state === 'active' ? (
+                        <Clock className="h-4 w-4" />
+                      ) : (
+                        <span className="text-xs font-semibold">{i + 1}</span>
+                      )}
+                    </span>
+                    <span className={`text-xs font-medium max-w-[5.5rem] ${stage.state === 'pending' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                      {stage.label}
+                    </span>
+                  </li>
+                  {i < stages.length - 1 && (
+                    <span className={`flex-1 h-0.5 mb-6 mx-1 rounded-full ${stages[i + 1].state === 'pending' ? 'bg-[#E5E5E5]' : 'bg-[#FFD100]'}`} />
                   )}
-                </div>
+                </React.Fragment>
+              ))}
+            </ol>
+
+            {/* Compact profile summary */}
+            <div className="rounded-2xl border border-[#E5E5E5] divide-y divide-[#E5E5E5]">
+              <SummaryRow icon={<User className="h-4 w-4" />} label="Name" value={profile?.name} />
+              <SummaryRow icon={<Mail className="h-4 w-4" />} label="Email" value={profile?.email} />
+              <SummaryRow
+                icon={<Phone className="h-4 w-4" />}
+                label="Phone"
+                value={profile?.phoneNumber}
+                badge={profile?.phoneNumberVerified ? 'Verified' : undefined}
+              />
+              <SummaryRow
+                icon={<Globe className="h-4 w-4" />}
+                label="Socials"
+                value={
+                  profile?.socialMediaHandles && profile.socialMediaHandles.length > 0
+                    ? profile.socialMediaHandles.map(h => h.platform).join(', ')
+                    : undefined
+                }
+              />
+            </div>
+
+            {/* CTAs */}
+            <div className="space-y-2.5">
+              <div className="flex flex-col sm:flex-row gap-2.5">
+                <Button onClick={() => router.push('/profile')} size="lg" className="flex-1">
+                  Update profile
+                </Button>
+                <Button onClick={handleRefresh} variant="outline" size="lg" className="flex-1 gap-2">
+                  <RefreshCw className="h-4 w-4" />
+                  Check status
+                </Button>
               </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-xs sm:text-sm font-semibold text-foreground">
-              While you wait
-            </h2>
-            <ul className="space-y-1 text-xs sm:text-sm text-muted-foreground list-disc list-inside">
-              <li>You can update your profile details at any time before approval.</li>
-              <li>Keep an eye on your SMS/WhatsApp and email for the approval update.</li>
-              <li>Have any questions? Reply to our onboarding email and we&apos;ll be happy to help.</li>
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:gap-3 pt-2 sm:pt-4">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Button
-                onClick={handleUpdateProfile}
-                size="lg"
-                className="flex-1 bg-primary-gradient font-semibold text-sm sm:text-base"
-              >
-                Update Profile
-              </Button>
-              <Button
-                onClick={handleCompleteOnboarding}
-                variant="outline"
-                size="lg"
-                className="flex-1 text-sm sm:text-base"
-              >
-                Complete Onboarding
-              </Button>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Button
-                onClick={handleRefresh}
-                variant="outline"
-                size="lg"
-                className="flex-1 text-sm sm:text-base"
-              >
-                Check status again
-              </Button>
-              <Button
+              <button
                 onClick={logout}
-                variant="outline"
-                size="lg"
-                className="flex-1 text-sm sm:text-base"
+                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
               >
                 Log out
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -240,6 +124,29 @@ const PendingApproval: React.FC = () => {
   );
 };
 
+const SummaryRow: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value?: string | null;
+  badge?: string;
+}> = ({ icon, label, value, badge }) => (
+  <div className="flex items-center gap-3 px-4 py-3">
+    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FFFAE6] text-[#131313] shrink-0">
+      {icon}
+    </span>
+    <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground w-16 shrink-0">
+      {label}
+    </span>
+    <span className={`flex-1 min-w-0 text-sm truncate ${value ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+      {value || 'Not provided'}
+    </span>
+    {badge && (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium shrink-0">
+        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
+        {badge}
+      </span>
+    )}
+  </div>
+);
+
 export default PendingApproval;
-
-

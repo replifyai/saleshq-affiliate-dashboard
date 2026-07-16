@@ -8,10 +8,18 @@ import {
   PersonalInformationSection,
   SocialMediaSection,
   AccountStatisticsSection,
-  PaymentMethodSection,
 } from '@/components/profile';
+import { KycSection } from '@/components/kyc';
 import { AffiliateProfile, SocialMediaHandle } from '@/components/profile/types';
-import { SocialMediaHandle as ApiSocialMediaHandle } from '@/types/api';
+import { SocialMediaHandle as ApiSocialMediaHandle, CreatorDashboardSummary } from '@/types/api';
+import apiClient from '@/services/apiClient';
+
+// Format the creator's commission from the active referral link (percentage or flat amount)
+const formatCommission = (summary: CreatorDashboardSummary | null): string => {
+  const link = summary?.referralLink;
+  if (!link?.commissionValue) return '—';
+  return link.commissionType === 'amount' ? `₹${link.commissionValue}` : `${link.commissionValue}%`;
+};
 
 // Helper function to convert API social media to UI format
 const convertApiSocialMediaToUI = (apiHandles?: ApiSocialMediaHandle[] | null): SocialMediaHandle[] => {
@@ -40,8 +48,19 @@ export default function ProfilePage() {
   const { state, updateProfile } = useProfile();
 
   const [profile, setProfile] = useState<AffiliateProfile | null>(null);
+  const [summary, setSummary] = useState<CreatorDashboardSummary | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch real account stats (earnings + commission rate)
+  useEffect(() => {
+    let isMounted = true;
+    apiClient
+      .getCreatorDashboardSummary()
+      .then(res => { if (isMounted) setSummary(res.summary); })
+      .catch(err => console.error('Failed to load account statistics:', err));
+    return () => { isMounted = false; };
+  }, []);
 
   // Load profile data from context
   useEffect(() => {
@@ -249,13 +268,13 @@ export default function ProfilePage() {
 
         {/* Account Statistics */}
         <AccountStatisticsSection
-          totalEarnings={profile.totalEarnings}
-          commissionRate={profile.commissionRate}
+          totalEarnings={summary?.totalEarnings ?? 0}
+          commissionDisplay={formatCommission(summary)}
           joiningDate={profile.joiningDate}
         />
 
-        {/* Payment Methods */}
-        <PaymentMethodSection />
+        {/* KYC & Verification (PAN + payout bank details) */}
+        <KycSection />
       </div>
     </div>
   );

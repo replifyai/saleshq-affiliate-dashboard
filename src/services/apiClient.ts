@@ -27,6 +27,11 @@ import {
   AddBankDetailsRequest,
   AddUpiDetailsRequest,
   PaymentMethodsResponse,
+  VerifyPanRequest,
+  VerifyPanResponse,
+  VerifyBankRequest,
+  VerifyBankResponse,
+  KycStatusResponse,
 } from '@/types/api';
 import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
 import config from '@/lib/config';
@@ -347,6 +352,29 @@ class ApiClient {
 
   async getPaymentMethods(): Promise<PaymentMethodsResponse> {
     return this.request<PaymentMethodsResponse>('/creator/payout/payment-methods', {
+      method: 'GET',
+    }, true);
+  }
+
+  // KYC (Cashfree). Verifying a bank account is also what saves it — there is no
+  // separate add/update call.
+
+  async verifyPan(data: VerifyPanRequest): Promise<VerifyPanResponse> {
+    return this.request<VerifyPanResponse>('/creator/kyc/pan/verify', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  async verifyBank(data: VerifyBankRequest): Promise<VerifyBankResponse> {
+    return this.request<VerifyBankResponse>('/creator/kyc/bank/verify', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true);
+  }
+
+  async getKycStatus(): Promise<KycStatusResponse> {
+    return this.request<KycStatusResponse>('/creator/kyc/status', {
       method: 'GET',
     }, true);
   }

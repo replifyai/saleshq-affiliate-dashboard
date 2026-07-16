@@ -4,13 +4,13 @@ import React from 'react';
 
 interface AccountStatisticsSectionProps {
   totalEarnings: number;
-  commissionRate: number;
+  commissionDisplay: string;
   joiningDate: string;
 }
 
 const AccountStatisticsSection: React.FC<AccountStatisticsSectionProps> = ({
   totalEarnings,
-  commissionRate,
+  commissionDisplay,
   joiningDate,
 }) => {
   // Calculate days since joining
@@ -33,7 +33,7 @@ const AccountStatisticsSection: React.FC<AccountStatisticsSectionProps> = ({
           <div className="text-sm text-[#636363]">Total Earnings (₹)</div>
         </div>
         <div className="bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-[#131313]">{commissionRate}%</div>
+          <div className="text-2xl font-bold text-[#131313]">{commissionDisplay}</div>
           <div className="text-sm text-[#636363]">Commission Rate</div>
         </div>
         <div className="bg-[#F9F9F9] border border-[#E5E5E5] rounded-lg p-4 text-center">

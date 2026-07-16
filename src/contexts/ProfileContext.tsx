@@ -97,6 +97,7 @@ interface ProfileContextType {
   }) => Promise<void>;
   setInitialProfile: (profile: CreatorProfile, tokens: { idToken: string; refreshToken: string }, completionScore: CompletionScore) => void;
   logout: () => void;
+  setError: (message: string) => void;
   clearError: () => void;
 }
 
@@ -301,6 +302,10 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     }
   };
 
+  const setError = useCallback((message: string) => {
+    dispatch({ type: 'SET_ERROR', payload: message });
+  }, []);
+
   const clearError = () => {
     dispatch({ type: 'SET_ERROR', payload: null });
   };
@@ -322,6 +327,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     updateProfile,
     setInitialProfile,
     logout,
+    setError,
     clearError,
   };
 
