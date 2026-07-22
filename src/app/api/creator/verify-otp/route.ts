@@ -7,7 +7,7 @@ import {
 } from '@/types/api';
 
 // This would be your actual Firebase Function URL
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://your-firebase-function-url.com';
+const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
 
 async function callFirebaseFunction(endpoint: string, data: any) {
   const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, {

@@ -11,7 +11,7 @@ import {
 } from '@/types/api';
 
 // This would be your actual Firebase Function URL
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi';
+const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
 
 async function callFirebaseFunction(endpoint: string, data: any, method: 'GET' | 'POST' = 'POST') {
   const options: RequestInit = {

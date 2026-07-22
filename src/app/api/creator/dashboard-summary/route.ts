@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorResponse, GetCreatorDashboardSummaryResponse } from '@/types/api';
 
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://asia-south1-touch-17fa9.cloudfunctions.net/dashboardApi';
+const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
 
 export async function POST(request: NextRequest) {
   try {
