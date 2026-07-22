@@ -166,7 +166,7 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
 
     try {
       // Convert otp to number if it's a string, or keep it as is if it's already a number
-      const otpValue = typeof otp === 'string' ? parseInt(otp) : otp;
+      const otpValue = String(otp).trim();
       const response = await apiClient.verifyOtp({ phoneNumber, otp: otpValue });
       const verifiedData = response.verified;
       const { idToken, refreshToken, completionScore, ...profileData } = verifiedData;

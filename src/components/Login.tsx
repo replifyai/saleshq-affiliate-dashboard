@@ -108,7 +108,7 @@ const Login: React.FC<LoginProps> = ({ className }) => {
     setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      await verifyOtp(phoneNumber, parseInt(otp));
+      await verifyOtp(phoneNumber, otp);
       showSnackbar('Login successful!', 'success');
       window.location.href = '/dashboard';
     } catch (error) {

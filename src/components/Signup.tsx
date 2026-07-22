@@ -116,7 +116,7 @@ const Signup: React.FC<SignupProps> = ({ className }) => {
     setIsVerifying(true);
     try {
       const phoneNumber = `+91${mobileNumber}`;
-      await verifyOtp(phoneNumber, parseInt(otp));
+      await verifyOtp(phoneNumber, otp);
       showSnackbar('Signup successful!', 'success');
       window.location.href = '/onboarding';
     } catch (error) {
