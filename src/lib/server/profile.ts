@@ -8,6 +8,28 @@ interface TokenRefreshResponse {
   refreshToken: string;
 }
 
+export type ProfileFetchErrorType = 'auth' | 'server' | null;
+
+export interface ProfileFetchResult {
+  profile: GetCreatorProfileResponse | null;
+  tokens: { idToken: string; refreshToken: string } | null;
+  error: string | null;
+  errorType: ProfileFetchErrorType;
+}
+
+/**
+ * Safely extract an error message from a response.
+ * Backend may return non-JSON bodies (e.g. HTML error pages), so guard the parse.
+ */
+async function parseErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const data = await response.json();
+    return data.message || data.error || `${fallback} (status ${response.status})`;
+  } catch {
+    return `${fallback} (status ${response.status})`;
+  }
+}
+
 /**
  * Server-side function to refresh ID token using refresh token
  */
@@ -29,6 +51,10 @@ async function refreshIdToken(refreshToken: string): Promise<TokenRefreshRespons
     }
 
     const data = await response.json();
+    if (!data?.idToken) {
+      console.error('Token refresh returned no idToken');
+      return null;
+    }
     return data;
   } catch (error) {
     console.error('Error refreshing token:', error);
@@ -39,20 +65,20 @@ async function refreshIdToken(refreshToken: string): Promise<TokenRefreshRespons
 /**
  * Server-side function to fetch creator profile with automatic token refresh
  * This runs on the server before rendering, ensuring profile data is available
+ *
+ * errorType semantics:
+ * - 'auth':   tokens are invalid/expired and could not be refreshed — client should log out
+ * - 'server': backend/network failure — client should show retryable error UI
  */
-export async function fetchCreatorProfileServer(): Promise<{
-  profile: GetCreatorProfileResponse | null;
-  tokens: { idToken: string; refreshToken: string } | null;
-  error: string | null;
-}> {
+export async function fetchCreatorProfileServer(): Promise<ProfileFetchResult> {
   try {
     const cookieStore = await cookies();
     let idToken = cookieStore.get('idToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    // No tokens available
+    // No tokens available — middleware should have redirected; treat as auth error
     if (!idToken && !refreshToken) {
-      return { profile: null, tokens: null, error: null };
+      return { profile: null, tokens: null, error: 'Not authenticated', errorType: 'auth' };
     }
 
     // If only refresh token available, try to refresh
@@ -63,12 +89,12 @@ export async function fetchCreatorProfileServer(): Promise<{
         idToken = refreshResult.idToken;
         // Note: Cookies will be set on client side via the returned tokens
       } else {
-        return { profile: null, tokens: null, error: 'Token refresh failed' };
+        return { profile: null, tokens: null, error: 'Token refresh failed', errorType: 'auth' };
       }
     }
 
     if (!idToken) {
-      return { profile: null, tokens: null, error: 'No valid token' };
+      return { profile: null, tokens: null, error: 'No valid token', errorType: 'auth' };
     }
 
     // Fetch profile with ID token
@@ -104,8 +130,15 @@ export async function fetchCreatorProfileServer(): Promise<{
           });
 
           if (!retryResponse.ok) {
-            const errorData = await retryResponse.json();
-            return { profile: null, tokens: null, error: errorData.message || 'Failed to fetch profile after refresh' };
+            // Refreshed token still rejected → auth problem; anything else → server problem
+            const isAuthFailure = retryResponse.status === 401 || retryResponse.status === 403;
+            const message = await parseErrorMessage(retryResponse, 'Failed to fetch profile after refresh');
+            return {
+              profile: null,
+              tokens: null,
+              error: message,
+              errorType: isAuthFailure ? 'auth' : 'server',
+            };
           }
 
           const profileData = await retryResponse.json();
@@ -113,22 +146,30 @@ export async function fetchCreatorProfileServer(): Promise<{
             profile: profileData,
             tokens: { idToken, refreshToken: refreshResult.refreshToken },
             error: null,
+            errorType: null,
           };
         }
       }
-      return { profile: null, tokens: null, error: 'Authentication failed' };
+      return { profile: null, tokens: null, error: 'Authentication failed', errorType: 'auth' };
     }
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return { profile: null, tokens: null, error: errorData.message || 'Failed to fetch profile' };
+      const message = await parseErrorMessage(response, 'Failed to fetch profile');
+      console.error(`Server: getCreatorProfile failed with status ${response.status}: ${message}`);
+      return { profile: null, tokens: null, error: message, errorType: 'server' };
     }
 
     const profileData = await response.json();
+    if (!profileData?.creator) {
+      console.error('Server: getCreatorProfile returned unexpected payload', profileData);
+      return { profile: null, tokens: null, error: 'Profile data is invalid', errorType: 'server' };
+    }
+
     return {
       profile: profileData,
       tokens: { idToken, refreshToken: refreshToken || '' },
       error: null,
+      errorType: null,
     };
   } catch (error) {
     console.error('Server: Error fetching profile:', error);
@@ -136,7 +177,7 @@ export async function fetchCreatorProfileServer(): Promise<{
       profile: null,
       tokens: null,
       error: error instanceof Error ? error.message : 'Unknown error',
+      errorType: 'server',
     };
   }
 }
-

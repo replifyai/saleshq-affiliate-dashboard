@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Check, Plus, X } from 'lucide-react';
 import Button from './common/Button';
 import TextField from './common/TextField';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -18,6 +18,9 @@ interface OnboardingData {
   }[];
 }
 
+const STEP_TITLES = ['Tell us about you', 'Add your email', 'Connect your socials'] as const;
+const TOTAL_STEPS = STEP_TITLES.length;
+
 const OnboardingFlow: React.FC = () => {
   const router = useRouter();
   const { state, updateProfile } = useProfile();
@@ -28,11 +31,6 @@ const OnboardingFlow: React.FC = () => {
     email: '',
     socialHandles: []
   });
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  const totalSteps = 3;
 
   // Pre-populate data from existing profile
   useEffect(() => {
@@ -48,68 +46,28 @@ const OnboardingFlow: React.FC = () => {
     }
   }, [state.profile]);
 
-  useEffect(() => {
-    // Animate container entrance
-    if (containerRef.current) {
-      gsap.fromTo(containerRef.current,
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }
-      );
-    }
-  }, []);
+  const nextStep = () => setCurrentStep(s => Math.min(s + 1, TOTAL_STEPS));
+  const prevStep = () => setCurrentStep(s => Math.max(s - 1, 1));
 
-  useEffect(() => {
-    // Animate step transitions
-    const currentStepElement = stepRefs.current[currentStep - 1];
-    const previousStepElement = stepRefs.current[currentStep - 2];
-
-    if (currentStepElement) {
-      gsap.fromTo(currentStepElement,
-        { opacity: 0, x: 100, scale: 0.95 },
-        { opacity: 1, x: 0, scale: 1, duration: 0.6, ease: "power2.out" }
-      );
-    }
-
-    if (previousStepElement && currentStep > 1) {
-      gsap.to(previousStepElement, {
-        opacity: 0.3,
-        x: -50,
-        scale: 0.95,
-        duration: 0.4,
-        ease: "power2.inOut"
-      });
-    }
-  }, [currentStep]);
-
-  const nextStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+  // Header back: step back if mid-flow, otherwise leave onboarding
+  const handleBack = () => {
+    if (currentStep > 1) prevStep();
+    else router.back();
   };
 
   const skipStep = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleComplete();
-    }
+    if (currentStep < TOTAL_STEPS) nextStep();
+    else handleComplete();
   };
 
   const handleComplete = async () => {
     if (isSubmitting) return;
 
     setIsSubmitting(true);
-    // Store approval status before update (approval status won't change from profile update)
+    // Approval status won't change from a profile update, so capture it up front
     const isPending = state.profile?.approved === 'pending';
 
     try {
-      // Convert social handles to API format
       const socialMediaHandles: SocialMediaHandle[] = data.socialHandles
         .filter(handle => handle.platform && handle.handle)
         .map(handle => ({
@@ -117,21 +75,16 @@ const OnboardingFlow: React.FC = () => {
           handle: handle.handle
         }));
 
-      // Update profile with onboarding data
       await updateProfile({
         name: data.creatorName || state.profile?.name,
         email: data.email || null,
         socialMediaHandles: socialMediaHandles.length > 0 ? socialMediaHandles : undefined
       });
 
-      // Redirect based on approval status
-      // If pending, redirect to profile so they can see their details and update if needed
-      // If approved, redirect to dashboard
       router.push(isPending ? '/profile' : '/dashboard');
     } catch (error) {
       console.error('Error completing onboarding:', error);
       // Still redirect on error to avoid blocking the user
-      // Redirect to profile if pending, otherwise dashboard
       router.push(isPending ? '/profile' : '/dashboard');
     } finally {
       setIsSubmitting(false);
@@ -141,17 +94,15 @@ const OnboardingFlow: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <CreatorNameStep data={data} setData={setData} onNext={nextStep} onSkip={skipStep} />;
+        return <CreatorNameStep data={data} setData={setData} onNext={nextStep} />;
       case 2:
-        return <EmailStep data={data} setData={setData} onNext={nextStep} onPrev={prevStep} onSkip={skipStep} />;
+        return <EmailStep data={data} setData={setData} onNext={nextStep} />;
       case 3:
         return (
           <SocialHandlesStep
             data={data}
             setData={setData}
             onComplete={handleComplete}
-            onPrev={prevStep}
-            onSkip={skipStep}
             isSubmitting={isSubmitting}
           />
         );
@@ -161,15 +112,14 @@ const OnboardingFlow: React.FC = () => {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-[100dvh] bg-[#F0F0F0] flex flex-col">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#FFFAE6]/60 to-white border-b border-[#FFD100]/30">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          {/* Top navigation (back + skip) */}
+      <div className="bg-gradient-to-br from-[#FFFAE6]/70 to-white border-b border-[#FFD100]/40">
+        <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-5">
           <div className="flex items-center justify-between">
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={handleBack}
               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               <span className="text-lg leading-none">←</span>
@@ -178,37 +128,28 @@ const OnboardingFlow: React.FC = () => {
             <button
               type="button"
               onClick={skipStep}
-              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              className="text-sm font-medium text-foreground/70 hover:text-foreground transition-colors"
             >
               Skip
             </button>
           </div>
 
-          {/* Title + step info + segmented progress */}
-          <div className="mt-4">
-            <p className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-              Profile Setup
+          <div className="mt-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#131313]/50">
+              Profile Setup · Step {currentStep} of {TOTAL_STEPS}
             </p>
-            <div className="mt-1 flex items-baseline justify-between gap-2">
-              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
-                {currentStep === 1
-                  ? 'Tell us about you'
-                  : currentStep === 2
-                    ? 'Add your email'
-                    : 'Connect your socials'}
-              </h1>
-              <span className="text-xs text-muted-foreground">
-                Step {currentStep} of {totalSteps}
-              </span>
-            </div>
+            <h1 className="mt-1.5 text-2xl sm:text-3xl font-semibold text-foreground">
+              {STEP_TITLES[currentStep - 1]}
+            </h1>
 
-            {/* Segmented progress bar */}
-            <div className="mt-4 flex gap-1">
-              {Array.from({ length: totalSteps }).map((_, index) => (
+            {/* Segmented progress */}
+            <div className="mt-4 flex gap-1.5">
+              {Array.from({ length: TOTAL_STEPS }).map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1 flex-1 rounded-full transition-colors ${index < currentStep ? 'bg-primary' : 'bg-muted'
-                    }`}
+                  className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                    index < currentStep ? 'bg-[#FFD100]' : 'bg-[#FFD100]/20'
+                  }`}
                 />
               ))}
             </div>
@@ -216,10 +157,13 @@ const OnboardingFlow: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="flex-1 flex items-start justify-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="w-full max-w-2xl bg-card border border-border rounded-xl p-4 sm:p-6 shadow-sm">
-          {renderStep()}
+        <div className="w-full max-w-2xl">
+          {/* key forces the snappy fade on each step change */}
+          <div key={currentStep} className="animate-fade-in bg-white border border-[#E5E5E5] rounded-2xl p-5 sm:p-8 shadow-sm">
+            {renderStep()}
+          </div>
         </div>
       </div>
     </div>
@@ -231,62 +175,36 @@ const CreatorNameStep: React.FC<{
   data: OnboardingData;
   setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
   onNext: () => void;
-  onSkip: () => void;
-}> = ({ data, setData, onNext, onSkip }) => {
-  const stepRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (stepRef.current) {
-      gsap.fromTo(stepRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-      );
-    }
-  }, []);
-
+}> = ({ data, setData, onNext }) => {
   const handleNext = () => {
-    if (data.creatorName.trim()) {
-      onNext();
-    }
+    if (data.creatorName.trim()) onNext();
   };
 
   return (
-    <div ref={stepRef} className="space-y-6 sm:space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">What&apos;s your creator name?</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
+    <div className="space-y-7">
+      <div className="space-y-1.5">
+        <h2 className="text-xl font-semibold text-foreground">What&apos;s your creator name?</h2>
+        <p className="text-sm text-muted-foreground">
           This is how you&apos;ll be known in our affiliate program.
         </p>
       </div>
 
-      <div className="space-y-6">
-        <TextField
-          label="Creator Name"
-          placeholder="Enter your creator name"
-          value={data.creatorName}
-          onChange={(value) => setData(prev => ({ ...prev, creatorName: value }))}
-          className="w-full text-lg"
-        />
+      <TextField
+        label="Creator Name"
+        placeholder="Enter your creator name"
+        value={data.creatorName}
+        onChange={(value) => setData(prev => ({ ...prev, creatorName: value }))}
+        className="w-full"
+      />
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <Button
-            onClick={onSkip}
-            variant="outline"
-            size="lg"
-            className="flex-1"
-          >
-            Skip for now
-          </Button>
-          <Button
-            onClick={handleNext}
-            size="lg"
-            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-            disabled={!data.creatorName.trim()}
-          >
-            Continue
-          </Button>
-        </div>
-      </div>
+      <Button
+        onClick={handleNext}
+        size="lg"
+        className="w-full"
+        disabled={!data.creatorName.trim()}
+      >
+        Continue
+      </Button>
     </div>
   );
 };
@@ -296,152 +214,93 @@ const EmailStep: React.FC<{
   data: OnboardingData;
   setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
   onNext: () => void;
-  onPrev: () => void;
-  onSkip: () => void;
-}> = ({ data, setData, onNext, onPrev, onSkip }) => {
-  const stepRef = useRef<HTMLDivElement>(null);
+}> = ({ data, setData, onNext }) => {
   const [emailError, setEmailError] = useState<string>('');
   const [isChecking, setIsChecking] = useState(false);
 
-  useEffect(() => {
-    if (stepRef.current) {
-      gsap.fromTo(stepRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-      );
-    }
-  }, []);
-
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailChange = (value: string) => {
     setData(prev => ({ ...prev, email: value }));
-    // Clear error when user starts typing again
-    if (emailError) {
-      setEmailError('');
-    }
+    if (emailError) setEmailError('');
   };
 
   const handleNext = async () => {
-    // Step 1: Validate email is provided
     if (!data.email.trim()) {
       setEmailError('Please enter your email address.');
       return;
     }
-
-    // Step 2: Validate email syntax
     if (!isValidEmail(data.email)) {
       setEmailError('Please enter a valid email address (e.g., name@example.com).');
       return;
     }
 
-    // Step 3: Check if email already exists via API
     setIsChecking(true);
     setEmailError('');
 
     try {
       const result = await apiClient.checkCreatorEmail(data.email.trim());
-
       if (result.exists) {
         setEmailError('This email is already registered with another creator account. Please use a different email.');
-        setIsChecking(false);
         return;
       }
-
-      // Email is valid and not taken — proceed
-      setIsChecking(false);
       onNext();
     } catch (error) {
       console.error('Error checking email:', error);
       // On API error, still allow proceeding to avoid blocking the user
-      setIsChecking(false);
       onNext();
+    } finally {
+      setIsChecking(false);
     }
   };
 
   return (
-    <div ref={stepRef} className="space-y-6 sm:space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">What&apos;s your email address?</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
+    <div className="space-y-7">
+      <div className="space-y-1.5">
+        <h2 className="text-xl font-semibold text-foreground">What&apos;s your email address?</h2>
+        <p className="text-sm text-muted-foreground">
           We&apos;ll use this to send you important updates and earnings reports.
         </p>
       </div>
 
-      <div className="space-y-6">
-        <TextField
-          label="Email Address"
-          placeholder="your.email@example.com"
-          value={data.email}
-          onChange={handleEmailChange}
-          className="w-full text-lg"
-          type="email"
-          error={emailError}
-        />
+      <TextField
+        label="Email Address"
+        placeholder="your.email@example.com"
+        value={data.email}
+        onChange={handleEmailChange}
+        className="w-full"
+        type="email"
+        error={emailError}
+      />
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <Button
-            onClick={onPrev}
-            variant="outline"
-            size="lg"
-            className="flex-1"
-            disabled={isChecking}
-          >
-            Back
-          </Button>
-          <Button
-            onClick={onSkip}
-            variant="outline"
-            size="lg"
-            className="flex-1"
-            disabled={isChecking}
-          >
-            Skip for now
-          </Button>
-          <Button
-            onClick={handleNext}
-            size="lg"
-            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-            disabled={!data.email || !isValidEmail(data.email) || isChecking}
-          >
-            {isChecking ? 'Checking...' : 'Continue'}
-          </Button>
-        </div>
-      </div>
+      <Button
+        onClick={handleNext}
+        size="lg"
+        className="w-full"
+        disabled={!data.email || !isValidEmail(data.email) || isChecking}
+      >
+        {isChecking ? 'Checking…' : 'Continue'}
+      </Button>
     </div>
   );
 };
 
 // Step 3: Social Media Handles
+const PLATFORMS = ['Instagram', 'YouTube', 'TikTok', 'Twitter', 'Facebook', 'LinkedIn'];
+
 const SocialHandlesStep: React.FC<{
   data: OnboardingData;
   setData: React.Dispatch<React.SetStateAction<OnboardingData>>;
   onComplete: () => void;
-  onPrev: () => void;
-  onSkip: () => void;
   isSubmitting: boolean;
-}> = ({ data, setData, onComplete, onPrev, onSkip, isSubmitting }) => {
-  const stepRef = useRef<HTMLDivElement>(null);
+}> = ({ data, setData, onComplete, isSubmitting }) => {
   const [newHandle, setNewHandle] = useState({ platform: '', handle: '' });
 
-  useEffect(() => {
-    if (stepRef.current) {
-      gsap.fromTo(stepRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-      );
-    }
-  }, []);
-
-  const platforms = ['Instagram', 'YouTube', 'TikTok', 'Twitter', 'Facebook', 'LinkedIn'];
-
   const addHandle = () => {
-    if (newHandle.platform && newHandle.handle) {
+    if (newHandle.platform && newHandle.handle.trim()) {
       setData(prev => ({
         ...prev,
-        socialHandles: [...prev.socialHandles, { ...newHandle }]
+        socialHandles: [...prev.socialHandles, { platform: newHandle.platform, handle: newHandle.handle.trim() }]
       }));
       setNewHandle({ platform: '', handle: '' });
     }
@@ -454,111 +313,81 @@ const SocialHandlesStep: React.FC<{
     }));
   };
 
+  const inputClasses =
+    'w-full px-3.5 py-2.5 rounded-xl border border-[#E5E5E5] bg-white text-foreground text-sm focus:outline-none focus:border-[#FFD100] focus:ring-2 focus:ring-[#FFD100]/30 transition-colors';
+
   return (
-    <div ref={stepRef} className="space-y-6 sm:space-y-8">
-      <div className="space-y-2">
-        <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Add your social media handles</h2>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Share your social media presence to help us connect with you.
+    <div className="space-y-7">
+      <div className="space-y-1.5">
+        <h2 className="text-xl font-semibold text-foreground">Add your social handles</h2>
+        <p className="text-sm text-muted-foreground">
+          Optional, but it helps us verify your creator presence faster.
         </p>
       </div>
 
-      <div className="space-y-6">
-        {/* Add New Handle Form */}
-        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Add Social Media Handle</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Platform</label>
-              <select
-                value={newHandle.platform}
-                onChange={(e) => setNewHandle(prev => ({ ...prev, platform: e.target.value }))}
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">Select Platform</option>
-                {platforms.map(platform => (
-                  <option key={platform} value={platform}>{platform}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Handle/Username</label>
-              <input
-                type="text"
-                placeholder="@username or profile link"
-                value={newHandle.handle}
-                onChange={(e) => setNewHandle(prev => ({ ...prev, handle: e.target.value }))}
-                className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <Button
-            onClick={addHandle}
-            variant="outline"
-            className="w-full"
-            disabled={!newHandle.platform || !newHandle.handle}
-          >
-            Add Handle
-          </Button>
-        </div>
-
-        {/* Existing Handles */}
-        {data.socialHandles.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-foreground">Your Social Media Handles</h3>
-            {data.socialHandles.map((handle, index) => (
-              <div key={index} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-primary-gradient rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-[#231F20]">{handle.platform[0]}</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-foreground">{handle.platform}</div>
-                    <div className="text-sm text-muted-foreground">{handle.handle}</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => removeHandle(index)}
-                  className="text-destructive hover:text-destructive/80 transition-colors"
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Navigation */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <Button
-            onClick={onPrev}
-            variant="outline"
-            size="lg"
-            className="flex-1"
-          >
-            Back
-          </Button>
-          <Button
-            onClick={onSkip}
-            variant="outline"
-            size="lg"
-            className="flex-1"
-          >
-            Skip for now
-          </Button>
-          <Button
-            onClick={onComplete}
-            size="lg"
-            className="flex-1 bg-primary-gradient font-bold text-lg py-4"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Complete Setup'}
-          </Button>
-        </div>
+      {/* Add row */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
+        <select
+          value={newHandle.platform}
+          onChange={(e) => setNewHandle(prev => ({ ...prev, platform: e.target.value }))}
+          className={`${inputClasses} sm:w-40 shrink-0`}
+        >
+          <option value="">Platform</option>
+          {PLATFORMS.map(platform => (
+            <option key={platform} value={platform}>{platform}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          placeholder="@username or link"
+          value={newHandle.handle}
+          onChange={(e) => setNewHandle(prev => ({ ...prev, handle: e.target.value }))}
+          onKeyDown={(e) => { if (e.key === 'Enter') addHandle(); }}
+          className={`${inputClasses} flex-1`}
+        />
+        <button
+          type="button"
+          onClick={addHandle}
+          disabled={!newHandle.platform || !newHandle.handle.trim()}
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#FFE887] text-[#131313] text-sm font-semibold hover:bg-[#FFD54F] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+        >
+          <Plus className="h-4 w-4" />
+          Add
+        </button>
       </div>
+
+      {/* Chips */}
+      {data.socialHandles.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {data.socialHandles.map((handle, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full bg-[#FFFAE6] border border-[#FFD100]/40 text-sm text-foreground"
+            >
+              <span className="font-medium capitalize">{handle.platform}</span>
+              <span className="text-muted-foreground max-w-[160px] truncate">{handle.handle}</span>
+              <button
+                type="button"
+                onClick={() => removeHandle(index)}
+                className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-[#FFD100]/30 hover:text-foreground transition-colors"
+                aria-label={`Remove ${handle.platform}`}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <Button
+        onClick={onComplete}
+        size="lg"
+        className="w-full gap-2"
+        disabled={isSubmitting}
+      >
+        {!isSubmitting && <Check className="h-5 w-5" />}
+        {isSubmitting ? 'Saving…' : 'Complete Setup'}
+      </Button>
     </div>
   );
 };

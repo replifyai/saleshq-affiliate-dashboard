@@ -9,6 +9,7 @@ import {
   FeaturedProducts,
 } from '@/components/dashboard';
 import { useSnackbar } from '@/components/snackbar';
+import { KycNudge } from '@/components/kyc';
 import apiClient from '@/services/apiClient';
 import { CreatorDashboardSummary } from '@/types/api';
 
@@ -210,6 +211,8 @@ export default function DashboardPage() {
           isLoading={isProductsLoading}
         />
       </div>
+
+      <KycNudge />
     </div>
   );
 }

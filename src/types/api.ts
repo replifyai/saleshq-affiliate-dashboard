@@ -435,3 +435,47 @@ export interface PaymentMethodsResponse {
     preference: 'bank' | 'upi';
   };
 }
+
+// KYC (PAN + bank account verification, via Cashfree)
+// All verification calls are synchronous — the verdict comes back in the response.
+// There is no job id and nothing to poll.
+
+export type KycStatus = 'not_verified' | 'pending' | 'verified' | 'failed';
+
+export interface VerifyPanRequest {
+  pan: string;
+  dob: string; // yyyy-mm-dd
+}
+
+/**
+ * The identity the PAN resolves to, shown back for the user to confirm.
+ * Cashfree returns no gender, and father's name only from a heavier API — hence
+ * name and DOB only.
+ */
+export interface VerifyPanResponse {
+  pan: {
+    name: string;
+    dateOfBirth: string; // yyyy-mm-dd
+    status: string;
+  };
+}
+
+export interface VerifyBankRequest {
+  accountNumber: string;
+  ifscCode: string;
+  accountName: string;
+}
+
+export interface VerifyBankResponse {
+  success: boolean;
+  nameAtBank?: string | null;
+}
+
+export interface KycStatusResponse {
+  kyc: {
+    status: KycStatus;
+    panVerified: boolean;
+    bankVerified: boolean;
+    maskedPan?: string | null;
+  };
+}
