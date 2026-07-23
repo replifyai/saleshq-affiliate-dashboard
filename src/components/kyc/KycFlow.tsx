@@ -131,9 +131,23 @@ export interface KycFlowProps {
     open: boolean;
     onClose: () => void;
     onVerified?: () => void;
+    /** Current server-side KYC state, so a reopened flow resumes at the right step instead
+     *  of making an already-verified creator re-do PAN. */
+    panVerified?: boolean;
+    bankVerified?: boolean;
 }
 
-const KycFlow: React.FC<KycFlowProps> = ({ open, onClose, onVerified }) => {
+/** Where a freshly-opened flow should land given what's already verified. */
+const firstStep = (panVerified: boolean, bankVerified: boolean): Step =>
+    !panVerified ? 'pan' : !bankVerified ? 'bank' : 'done';
+
+const KycFlow: React.FC<KycFlowProps> = ({
+    open,
+    onClose,
+    onVerified,
+    panVerified = false,
+    bankVerified = false,
+}) => {
     const [step, setStep] = useState<Step>('pan');
 
     const [pan, setPan] = useState('');
@@ -153,9 +167,10 @@ const KycFlow: React.FC<KycFlowProps> = ({ open, onClose, onVerified }) => {
     const busy = isFetchingPan || bank.isVerifying;
 
     // Reset everything when the flow is reopened, so a cancelled attempt doesn't leak in.
+    // Resume at the first unverified step rather than always restarting at PAN.
     useEffect(() => {
         if (!open) return;
-        setStep('pan');
+        setStep(firstStep(panVerified, bankVerified));
         setPan('');
         setDob('');
         setPanDetails(null);
@@ -165,7 +180,7 @@ const KycFlow: React.FC<KycFlowProps> = ({ open, onClose, onVerified }) => {
         setErrors({});
         setFormError(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
+    }, [open, panVerified, bankVerified]);
 
     const handleVerifyPan = async () => {
         const nextErrors = {

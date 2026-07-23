@@ -136,7 +136,9 @@ const KycSection: React.FC = () => {
     }
 
     const status = kyc?.status ?? 'not_verified';
-    const badge = STATUS_BADGE[status];
+    // The badge next to "PAN Card Details" is about the PAN specifically, not the overall
+    // KYC — otherwise a verified PAN reads "In Progress" while the bank is still pending.
+    const panBadge = kyc?.panVerified ? STATUS_BADGE.verified : STATUS_BADGE[status];
 
     return (
         <div className="rounded-2xl border border-[#E5E5E5] bg-white p-6 shadow-sm">
@@ -158,8 +160,8 @@ const KycSection: React.FC = () => {
             {/* PAN */}
             <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-[#131313]">PAN Card Details</span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.className}`}>
-                    {badge.label}
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${panBadge.className}`}>
+                    {panBadge.label}
                 </span>
             </div>
 
@@ -171,7 +173,7 @@ const KycSection: React.FC = () => {
                     aria-label="PAN card number"
                     className="min-w-0 flex-1 px-4 py-3 text-sm text-[#131313] placeholder:text-[#BCBCBC] focus:outline-none"
                 />
-                {status !== 'verified' && (
+                {!kyc?.panVerified && (
                     <button
                         onClick={() => setIsFlowOpen(true)}
                         className="flex-shrink-0 border-l border-[#E5E5E5] px-6 text-sm font-medium text-[#2563EB] hover:bg-[#F9F9F9]"
@@ -228,7 +230,13 @@ const KycSection: React.FC = () => {
 
             {bank.isVerifying && <BankVerifyingOverlay />}
 
-            <KycFlow open={isFlowOpen} onClose={() => setIsFlowOpen(false)} onVerified={fetchStatus} />
+            <KycFlow
+                open={isFlowOpen}
+                panVerified={!!kyc?.panVerified}
+                bankVerified={!!kyc?.bankVerified}
+                onClose={() => { setIsFlowOpen(false); fetchStatus(); }}
+                onVerified={fetchStatus}
+            />
         </div>
     );
 };
