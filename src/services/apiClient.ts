@@ -33,12 +33,13 @@ import {
   VerifyBankResponse,
   KycStatusResponse,
 } from '@/types/api';
-import { getIdToken, getRefreshToken, setTokens, clearTokens } from '@/lib/cookies';
-import config from '@/lib/config';
 
+// Auth is cookie-based: the creator's tokens live in httpOnly cookies that the
+// browser sends automatically to same-origin BFF routes (/api/*). This client
+// never reads or attaches tokens — an XSS bug can't steal them. On a genuine 401
+// (the server-side refresh also failed) we redirect to /login.
 class ApiClient {
   private baseUrl: string;
-  private refreshingPromise: Promise<string | null> | null = null;
 
   // Custom Cache implementation for 30-minutes retention
   private cache: Record<string, { data: any, timestamp: number }> = {};
@@ -57,82 +58,7 @@ class ApiClient {
   }
 
   private setCachedData(key: string, data: any) {
-    this.cache[key] = {
-      data,
-      timestamp: Date.now()
-    };
-  }
-
-  private decodeJwt(token: string): { exp?: number } | null {
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(typeof atob !== 'undefined' ? atob(payload) : Buffer.from(payload, 'base64').toString('utf8'));
-      return decoded || null;
-    } catch {
-      return null;
-    }
-  }
-
-  private isTokenExpiringSoon(token: string, bufferSeconds: number = 60): boolean {
-    const payload = this.decodeJwt(token);
-    if (!payload?.exp) return false;
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    return payload.exp - nowSeconds <= bufferSeconds;
-  }
-
-  private async refreshIdToken(): Promise<string | null> {
-    if (this.refreshingPromise) return this.refreshingPromise;
-
-    this.refreshingPromise = (async () => {
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        clearTokens();
-        return null;
-      }
-
-      try {
-        const response = await fetch(`${config.api.firebaseFunctionUrl}/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${refreshToken}`,
-            ...(process.env.NEXT_PUBLIC_API_KEY ? { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY } : {}),
-          },
-          body: JSON.stringify({}),
-        });
-
-        if (!response.ok) {
-          clearTokens();
-          return null;
-        }
-
-        const data = await response.json() as { idToken?: string; refreshToken?: string };
-        if (data.idToken && data.refreshToken) {
-          setTokens(data.idToken, data.refreshToken);
-          return data.idToken;
-        }
-
-        clearTokens();
-        return null;
-      } catch {
-        clearTokens();
-        return null;
-      } finally {
-        this.refreshingPromise = null;
-      }
-    })();
-
-    return this.refreshingPromise;
-  }
-
-  private async ensureValidIdToken(): Promise<string | null> {
-    const current = getIdToken();
-    if (!current) return await this.refreshIdToken();
-    if (this.isTokenExpiringSoon(current)) {
-      const refreshed = await this.refreshIdToken();
-      return refreshed || current;
-    }
-    return current;
+    this.cache[key] = { data, timestamp: Date.now() };
   }
 
   private async request<T>(
@@ -142,42 +68,26 @@ class ApiClient {
   ): Promise<T> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
 
-    const defaultHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-
-    // Add Authorization header if authentication is required
-    if (requireAuth) {
-      const idToken = await this.ensureValidIdToken();
-      if (idToken) {
-        defaultHeaders['Authorization'] = `Bearer ${idToken}`;
-      }
-    }
-
     const config: RequestInit = {
       ...options,
+      // Send the httpOnly auth cookies to our same-origin BFF routes.
+      credentials: 'same-origin',
       headers: {
-        ...defaultHeaders,
+        'Content-Type': 'application/json',
         ...options.headers,
       },
     };
 
     try {
-      let response = await fetch(url, config);
+      const response = await fetch(url, config);
 
-      // If unauthorized, attempt single refresh and retry once
+      // A 401/403 on an authed call means the server-side session (and refresh)
+      // is gone — send the user to log in again.
       if (requireAuth && (response.status === 401 || response.status === 403)) {
-        const newIdToken = await this.refreshIdToken();
-        if (newIdToken) {
-          const retryConfig: RequestInit = {
-            ...config,
-            headers: {
-              ...(config.headers as Record<string, string>),
-              'Authorization': `Bearer ${newIdToken}`,
-            },
-          };
-          response = await fetch(url, retryConfig);
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
         }
+        throw new Error('Session expired. Please log in again.');
       }
 
       if (!response.ok) {

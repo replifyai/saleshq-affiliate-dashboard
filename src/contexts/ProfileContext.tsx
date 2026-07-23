@@ -4,7 +4,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { CreatorProfile, CompletionScore, SocialMediaHandle } from '@/types/api';
 import apiClient from '@/services/apiClient';
-import { setTokens, clearTokens } from '@/lib/cookies';
 
 // Context state interface
 interface ProfileState {
@@ -25,7 +24,7 @@ type ProfileAction =
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'SET_PROFILE'; payload: CreatorProfile }
   | { type: 'UPDATE_PROFILE'; payload: Partial<CreatorProfile> }
-  | { type: 'SET_AUTHENTICATION'; payload: { profile: CreatorProfile; tokens: { idToken: string; refreshToken: string }; completionScore: CompletionScore } }
+  | { type: 'SET_AUTHENTICATION'; payload: { profile: CreatorProfile; completionScore: CompletionScore } }
   | { type: 'CLEAR_PROFILE' }
   | { type: 'SET_COMPLETION_SCORE'; payload: CompletionScore };
 
@@ -62,7 +61,7 @@ function profileReducer(state: ProfileState, action: ProfileAction): ProfileStat
       return {
         ...state,
         profile: action.payload.profile,
-        tokens: action.payload.tokens,
+        tokens: { idToken: null, refreshToken: null },
         completionScore: action.payload.completionScore,
         isAuthenticated: true,
         isLoading: false,
@@ -95,7 +94,7 @@ interface ProfileContextType {
     phoneNumberVerified?: boolean;
     [key: string]: any;
   }) => Promise<void>;
-  setInitialProfile: (profile: CreatorProfile, tokens: { idToken: string; refreshToken: string }, completionScore: CompletionScore) => void;
+  setInitialProfile: (profile: CreatorProfile, completionScore: CompletionScore) => void;
   logout: () => void;
   setError: (message: string) => void;
   clearError: () => void;
@@ -112,22 +111,10 @@ interface ProfileProviderProps {
 export function ProfileProvider({ children }: ProfileProviderProps) {
   const [state, dispatch] = useReducer(profileReducer, initialState);
   const fetchingProfileRef = useRef(false); // Ref to prevent multiple simultaneous fetch calls
-  const isLoggingOutRef = useRef(false); // Ref to prevent useEffect from resetting cookies during logout
 
-  // NOTE: We no longer load tokens from cookies on mount
-  // Profile data is now fetched server-side and passed to setInitialProfile
-  // This prevents duplicate fetching and improves performance
-
-  // Store tokens in cookies when they change
-  useEffect(() => {
-    // Skip setting cookies if we're in the process of logging out
-    if (isLoggingOutRef.current) {
-      return;
-    }
-    if (state.tokens.idToken) {
-      setTokens(state.tokens.idToken, state.tokens.refreshToken || '');
-    }
-  }, [state.tokens]);
+  // Auth tokens live in httpOnly cookies managed entirely server-side (login sets
+  // them, logout clears them, BFF routes read/refresh them). Client code never
+  // touches tokens, so there is nothing to sync into cookies here.
 
   const createProfile = async (phoneNumber: string, name: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
@@ -168,18 +155,16 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
       // Convert otp to number if it's a string, or keep it as is if it's already a number
       const otpValue = String(otp).trim();
       const response = await apiClient.verifyOtp({ phoneNumber, otp: otpValue });
+      // The auth tokens were set as httpOnly cookies by the verify-otp BFF route
+      // (never returned to page JS). Only non-sensitive profile data comes back.
       const verifiedData = response.verified;
-      const { idToken, refreshToken, completionScore, ...profileData } = verifiedData;
-
-      // Store tokens in cookies
-      setTokens(idToken, refreshToken);
+      const { completionScore, ...profileData } = verifiedData;
 
       // Set authentication state with profile data from verification
       dispatch({
         type: 'SET_AUTHENTICATION',
         payload: {
           profile: profileData as CreatorProfile,
-          tokens: { idToken, refreshToken },
           completionScore,
         },
       });
@@ -272,31 +257,17 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     }
   };
 
-  const logout = () => {
-    // Set flag to prevent useEffect from resetting cookies during logout
-    isLoggingOutRef.current = true;
-    
-    // Clear all tokens from cookies first
-    clearTokens();
-    
-    // Force a synchronous cookie clear by also directly clearing document.cookie
-    // This ensures cookies are deleted before the redirect happens
-    if (typeof document !== 'undefined') {
-      document.cookie = 'idToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict';
-      document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict';
-      
-      // Also clear with Secure flag in case in production
-      if (process.env.NODE_ENV === 'production') {
-        document.cookie = 'idToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure';
-        document.cookie = 'refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict; Secure';
-      }
+  const logout = async () => {
+    // Token cookies are httpOnly — only the server can clear them.
+    try {
+      await fetch('/api/creator/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch {
+      // Best-effort: still clear client state and redirect even if the call fails.
     }
-    
-    // Clear all state and user data after cookies are cleared
+
     dispatch({ type: 'CLEAR_PROFILE' });
-    
-    // Redirect to login page using full page reload to ensure clean state
-    // The redirect will reset the ref when the component unmounts
+
+    // Full page load to /login for a clean state (middleware sees no idToken cookie).
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
@@ -310,11 +281,11 @@ export function ProfileProvider({ children }: ProfileProviderProps) {
     dispatch({ type: 'SET_ERROR', payload: null });
   };
 
-  const setInitialProfile = (profile: CreatorProfile, tokens: { idToken: string; refreshToken: string }, completionScore: CompletionScore) => {
+  const setInitialProfile = (profile: CreatorProfile, completionScore: CompletionScore) => {
     console.log('ProfileContext - Setting initial profile from server');
     dispatch({
       type: 'SET_AUTHENTICATION',
-      payload: { profile, tokens, completionScore },
+      payload: { profile, completionScore },
     });
   };
 

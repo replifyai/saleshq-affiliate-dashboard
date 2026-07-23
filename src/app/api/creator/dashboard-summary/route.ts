@@ -1,58 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ErrorResponse, GetCreatorDashboardSummaryResponse } from '@/types/api';
+import { authedBackendFetch } from '@/lib/server/backend';
 
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
-
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    const authHeader = request.headers.get('Authorization');
+    const response = await authedBackendFetch('/getCreatorDashboardSummary', { method: 'POST', body: '' });
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!response.ok) {
+      let message = 'Failed to fetch dashboard summary';
+      try { const e = await response.json(); message = e.message || e.error || message; } catch { }
+      // Forward the backend status (esp. 401) so the client can redirect to login.
       return NextResponse.json(
-        {
-          error: 'Authentication Error',
-          message: 'Authorization token is required',
-          success: false,
-        } as ErrorResponse,
-        { status: 401 }
+        { error: response.status === 401 ? 'Authentication Error' : 'Backend Error', message, success: false } as ErrorResponse,
+        { status: response.status }
       );
     }
 
-    const token = authHeader.substring(7);
-
-    const response = await fetch(`${FIREBASE_FUNCTION_URL}/getCreatorDashboardSummary`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: '',
-    });
-
-    if (!response.ok) {
-      let errorMessage = 'Failed to fetch dashboard summary';
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || errorData.error || errorMessage;
-      } catch {
-        // Ignore JSON parsing errors and fall back to default message
-      }
-      throw new Error(errorMessage);
-    }
-
     const result = await response.json();
-
     return NextResponse.json(result as GetCreatorDashboardSummaryResponse);
   } catch (error) {
     console.error('Error fetching dashboard summary:', error);
     return NextResponse.json(
-      {
-        error: 'Internal Server Error',
-        message: error instanceof Error ? error.message : 'Failed to fetch dashboard summary',
-        success: false,
-      } as ErrorResponse,
+      { error: 'Internal Server Error', message: error instanceof Error ? error.message : 'Failed to fetch dashboard summary', success: false } as ErrorResponse,
       { status: 500 }
     );
   }
 }
-

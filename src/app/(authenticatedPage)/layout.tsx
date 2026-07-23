@@ -10,8 +10,9 @@ export default async function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch profile on server-side with automatic token refresh
-  const { profile, tokens, error, errorType } = await fetchCreatorProfileServer();
+  // Fetch profile on server-side (reads httpOnly token cookies, refreshes as needed).
+  // Tokens are intentionally NOT forwarded to the client — they stay httpOnly.
+  const { profile, error, errorType } = await fetchCreatorProfileServer();
 
   if (error) {
     console.error('Server: Profile fetch error:', error, `(type: ${errorType})`);
@@ -21,7 +22,6 @@ export default async function AuthenticatedLayout({
   return (
     <AuthenticatedClientLayout
       initialProfile={profile}
-      initialTokens={tokens}
       initialError={error}
       initialErrorType={errorType}
     >

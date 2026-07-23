@@ -1,25 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
+import { authedBackendFetch } from '@/lib/server/backend';
 
 export async function POST(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ success: false, error: 'Authorization token required' }, { status: 401 });
-  }
-
   try {
     const body = await request.json().catch(() => ({}));
-    const response = await fetch(`${FIREBASE_FUNCTION_URL}/getShopifyProductsByIds`, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await response.json();
+    const response = await authedBackendFetch('/getShopifyProductsByIds', { method: 'POST', body: JSON.stringify(body) });
+    const data = await response.json().catch(() => ({}));
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error('Error fetching shopify products by ids:', error);

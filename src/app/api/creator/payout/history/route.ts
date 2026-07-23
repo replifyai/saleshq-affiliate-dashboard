@@ -1,45 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ErrorResponse } from '@/types/api';
+import { authedBackendFetch } from '@/lib/server/backend';
 
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
-
-async function callFirebaseFunctionWithAuth(endpoint: string, authToken: string, data?: any, method: 'GET' | 'POST' = 'POST') {
-    const options: RequestInit = {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`,
-        },
-    };
-    if (method === 'POST' && data) {
-        options.body = JSON.stringify(data);
-    }
-
-    const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, options);
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Firebase function call failed');
-    }
-
-    return response.json();
-}
-
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const response = await authedBackendFetch('/payout/history', { method: 'GET' });
+        if (!response.ok) {
+            let message = 'Failed to fetch payout history';
+            try { const e = await response.json(); message = e.message || e.error || message; } catch { }
             return NextResponse.json(
-                { error: 'Authentication Error', message: 'Authorization token is required', success: false } as ErrorResponse,
-                { status: 401 }
+                { error: response.status === 401 ? 'Authentication Error' : 'Backend Error', message, success: false } as ErrorResponse,
+                { status: response.status }
             );
         }
-
-        const token = authHeader.substring(7);
-        const result = await callFirebaseFunctionWithAuth('/payout/history', token, undefined, 'GET');
-
-        return NextResponse.json(result);
+        return NextResponse.json(await response.json());
     } catch (error) {
         console.error('Error fetching payout history:', error);
         return NextResponse.json(

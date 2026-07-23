@@ -1,14 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { ErrorResponse } from '@/types/api';
-
-const FIREBASE_FUNCTION_URL = process.env.FIREBASE_FUNCTION_URL || 'https://14cgqud3x9.execute-api.ap-south-1.amazonaws.com/api';
+import { authedBackendFetch } from '@/lib/server/backend';
 
 /**
- * Shared proxy for the KYC endpoints. Same shape as the payout routes, factored out
- * because there are four of them and the only thing that varies is the path and body.
- * The creator is identified by the Bearer token on the backend — never by anything the
- * client sends in the body.
+ * Shared proxy for the KYC endpoints. The creator is identified by the httpOnly
+ * auth cookie on the backend — never by anything the client sends in the body.
  */
 export async function proxyKyc(
     request: NextRequest,
@@ -17,34 +13,23 @@ export async function proxyKyc(
     label: string,
 ): Promise<NextResponse> {
     try {
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return NextResponse.json(
-                { error: 'Authentication Error', message: 'Authorization token is required', success: false } as ErrorResponse,
-                { status: 401 }
-            );
-        }
-
-        const options: RequestInit = {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authHeader,
-            },
-        };
-
+        const init: RequestInit = { method };
         if (method === 'POST') {
-            options.body = JSON.stringify(await request.json());
+            init.body = JSON.stringify(await request.json().catch(() => ({})));
         }
 
-        const response = await fetch(`${FIREBASE_FUNCTION_URL}${endpoint}`, options);
-        const data = await response.json();
+        const response = await authedBackendFetch(endpoint, init);
+        const data = await response.json().catch(() => ({} as any));
 
         if (!response.ok) {
             // Pass the backend's status and message through — these are user-facing reasons
             // ("The name on this PAN does not match your profile name"), not internal detail.
             return NextResponse.json(
-                { error: 'Verification Error', message: data.error || `Failed to ${label}`, success: false } as ErrorResponse,
+                {
+                    error: response.status === 401 ? 'Authentication Error' : 'Verification Error',
+                    message: (data as any).error || (data as any).message || `Failed to ${label}`,
+                    success: false,
+                } as ErrorResponse,
                 { status: response.status }
             );
         }

@@ -12,7 +12,6 @@ import type { ProfileFetchErrorType } from '@/lib/server/profile';
 interface AuthenticatedClientLayoutProps {
   children: React.ReactNode;
   initialProfile: GetCreatorProfileResponse | null;
-  initialTokens: { idToken: string; refreshToken: string } | null;
   initialError: string | null;
   initialErrorType: ProfileFetchErrorType;
 }
@@ -20,7 +19,6 @@ interface AuthenticatedClientLayoutProps {
 export default function AuthenticatedClientLayout({
   children,
   initialProfile,
-  initialTokens,
   initialError,
   initialErrorType,
 }: AuthenticatedClientLayoutProps) {
@@ -32,10 +30,10 @@ export default function AuthenticatedClientLayout({
   useEffect(() => {
     if (handledServerResultRef.current) return;
 
-    if (initialProfile && initialTokens && !state.profile) {
+    if (initialProfile && !state.profile) {
       handledServerResultRef.current = true;
       console.log('Client: Setting initial profile from server');
-      setInitialProfile(initialProfile.creator, initialTokens, initialProfile.creator.completionScore);
+      setInitialProfile(initialProfile.creator, initialProfile.creator.completionScore);
       return;
     }
 
@@ -53,7 +51,7 @@ export default function AuthenticatedClientLayout({
         setError(initialError);
       }
     }
-  }, [initialProfile, initialTokens, initialError, initialErrorType, state.profile, setInitialProfile, setError, logout]);
+  }, [initialProfile, initialError, initialErrorType, state.profile, setInitialProfile, setError, logout]);
 
   // Shared error fallback: profile failed to load and we have no data to render.
   // Covers all authenticated pages so none of them spin forever.
