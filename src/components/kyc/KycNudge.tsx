@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { X, ContactRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import apiClient from '@/services/apiClient';
+import { KycStatusResponse } from '@/types/api';
 import KycFlow from './KycFlow';
 
 /** ID card with the red error badge, per the Figma. */
@@ -20,30 +21,52 @@ const PanAlertIcon: React.FC = () => (
  *  Dismissed for the session only — it comes back on reload until KYC is done. */
 const KycNudge: React.FC = () => {
     const ref = useRef<HTMLDialogElement>(null);
-    const [isOpen, setIsOpen] = useState(false);
+    const [kyc, setKyc] = useState<KycStatusResponse['kyc'] | null>(null);
+    const [dismissed, setDismissed] = useState(false);
     const [isFlowOpen, setIsFlowOpen] = useState(false);
 
+    const refresh = useCallback(
+        () =>
+            apiClient
+                .getKycStatus()
+                .then((response) => setKyc(response.kyc))
+                .catch((error) => console.error('Failed to fetch KYC status:', error)),
+        [],
+    );
+
     useEffect(() => {
-        apiClient
-            .getKycStatus()
-            .then((response) => setIsOpen(response.kyc.status !== 'verified'))
-            .catch((error) => console.error('Failed to fetch KYC status:', error));
-    }, []);
+        refresh();
+    }, [refresh]);
+
+    const panVerified = !!kyc?.panVerified;
+    const bankVerified = !!kyc?.bankVerified;
+    // Only unverified creators see the nudge; it returns on reload until KYC is done.
+    const needsKyc = !!kyc && kyc.status !== 'verified';
 
     useEffect(() => {
         const dialog = ref.current;
         if (!dialog) return;
-        // Hide the nudge while the flow itself is on screen.
-        const shouldShow = isOpen && !isFlowOpen;
+        // Hide the nudge while the flow itself is on screen, or once dismissed for the session.
+        const shouldShow = needsKyc && !dismissed && !isFlowOpen;
         if (shouldShow && !dialog.open) dialog.showModal();
         if (!shouldShow && dialog.open) dialog.close();
-    }, [isOpen, isFlowOpen]);
+    }, [needsKyc, dismissed, isFlowOpen]);
+
+    // Reflect what's actually left to verify — not a blanket "nothing is done".
+    const title = panVerified && !bankVerified
+        ? 'Bank details not verified'
+        : !panVerified && bankVerified
+            ? 'PAN details not verified'
+            : 'PAN & Bank details not verified';
+    const subtitle = panVerified && !bankVerified
+        ? 'Verify your bank account details for smooth and easy Razorpay payouts.'
+        : 'Verify your PAN and bank account details for smooth and easy Razorpay payouts.';
 
     return (
         <>
             <dialog
                 ref={ref}
-                onCancel={(e) => { e.preventDefault(); setIsOpen(false); }}
+                onCancel={(e) => { e.preventDefault(); setDismissed(true); }}
                 className={cn(
                     'bg-transparent p-0 backdrop:bg-black/40',
                     // Mobile: pinned to the bottom as a sheet. Desktop: centred 600px card.
@@ -61,16 +84,16 @@ const KycNudge: React.FC = () => {
                         <div className="flex flex-col gap-4">
                             <PanAlertIcon />
                             <h2 className="text-2xl font-medium leading-[1.15] text-black">
-                                PAN &amp; Bank details not verified
+                                {title}
                             </h2>
                         </div>
-                        <button onClick={() => setIsOpen(false)} aria-label="Dismiss" className="text-black">
+                        <button onClick={() => setDismissed(true)} aria-label="Dismiss" className="text-black">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     <p className="text-sm leading-[1.2] text-[#7E7E7E] md:text-lg">
-                        Verify your PAN and bank account details for a smooth and easy Razorpay payouts.
+                        {subtitle}
                     </p>
 
                     <button
@@ -84,8 +107,12 @@ const KycNudge: React.FC = () => {
 
             <KycFlow
                 open={isFlowOpen}
-                onClose={() => setIsFlowOpen(false)}
-                onVerified={() => setIsOpen(false)}
+                panVerified={panVerified}
+                bankVerified={bankVerified}
+                // Refetch on close so a partial completion (PAN done, bank not) updates the
+                // nudge instead of showing stale copy until the next reload.
+                onClose={() => { setIsFlowOpen(false); refresh(); }}
+                onVerified={() => { setDismissed(true); refresh(); }}
             />
         </>
     );
