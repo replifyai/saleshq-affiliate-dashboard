@@ -458,6 +458,9 @@ export interface VerifyPanResponse {
 export interface VerifyBankRequest {
   accountNumber: string;
   ifscCode: string;
+  /** The account-holder name is no longer typed by the user — it's the verified
+   *  creator/PAN name, sent from the client so the backend contract is unchanged. */
+  accountName: string;
 }
 
 export interface VerifyBankResponse {

@@ -5,6 +5,7 @@ import { ArrowLeft, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import apiClient from '@/services/apiClient';
 import { VerifyPanResponse } from '@/types/api';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useBankVerification, BankVerifyingOverlay } from './bankVerification';
 import {
     validatePan,
@@ -158,6 +159,7 @@ const KycFlow: React.FC<KycFlowProps> = ({
     const [ifsc, setIfsc] = useState('');
 
     const bank = useBankVerification();
+    const { state: profileState } = useProfile();
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [formError, setFormError] = useState<string | null>(null);
@@ -223,9 +225,15 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setErrors({});
         setFormError(null);
 
+        // The holder name is not typed — it's the verified identity we already hold
+        // (the PAN name read back this session, else the creator's profile name). The
+        // backend still matches the bank name against the PAN name server-side.
+        const holderName = panDetails?.name || profileState.profile?.name || '';
+
         const verified = await bank.verify({
             accountNumber,
             ifscCode: ifsc.toUpperCase(),
+            accountName: holderName,
         });
         if (verified) {
             setStep('done');

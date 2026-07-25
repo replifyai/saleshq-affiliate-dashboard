@@ -5,6 +5,7 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { KycStatusResponse } from '@/types/api';
 import apiClient from '@/services/apiClient';
+import { useProfile } from '@/contexts/ProfileContext';
 import KycFlow from './KycFlow';
 import { useBankVerification, BankVerifyingOverlay } from './bankVerification';
 import { validateAccountNumber, validateIfsc } from './validators';
@@ -54,6 +55,7 @@ const KycSection: React.FC = () => {
     const [ifsc, setIfsc] = useState('');
 
     const bank = useBankVerification();
+    const { state: profileState } = useProfile();
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -108,10 +110,12 @@ const KycSection: React.FC = () => {
         setError(null);
         setSuccessMessage(null);
 
-        // Saving *is* verifying — there is no separate add/update call.
+        // Saving *is* verifying — there is no separate add/update call. The holder name
+        // is the verified creator name, sent from context rather than typed.
         const verified = await bank.verify({
             accountNumber,
             ifscCode: ifsc.toUpperCase(),
+            accountName: profileState.profile?.name || '',
         });
         if (verified) {
             setSuccessMessage('Bank account verified and saved!');
