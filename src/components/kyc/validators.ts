@@ -40,11 +40,6 @@ export const validateIfsc = (value: string): string | null => {
     return IFSC_RE.test(value.toUpperCase()) ? null : 'Enter a valid IFSC code (e.g. SBIN0001234)';
 };
 
-export const validateAccountName = (value: string): string | null => {
-    if (!value.trim()) return 'Account holder name is required';
-    return value.trim().length >= 2 ? null : 'Enter the full account holder name';
-};
-
 // dd/mm/yyyy -> yyyy-mm-dd, the format the API expects.
 export const dobToIso = (dob: string): string => {
     const match = DOB_RE.exec(dob);

@@ -5,7 +5,6 @@ import {
     validateDob,
     validateAccountNumber,
     validateIfsc,
-    validateAccountName,
     dobToIso,
     maskDob,
 } from './validators.ts';
@@ -36,9 +35,6 @@ assert.equal(validateIfsc('SBIN0001234'), null);
 assert.equal(validateIfsc('sbin0001234'), null, 'lowercase is upcased before matching');
 assert.ok(validateIfsc('SBIN1001234'), '5th char must be 0');
 assert.ok(validateIfsc('SBI0001234'), 'too short rejected');
-
-assert.equal(validateAccountName('Hemant Raj'), null);
-assert.ok(validateAccountName('   '), 'whitespace-only rejected');
 
 // Format helpers.
 assert.equal(dobToIso('01/01/1999'), '1999-01-01');
