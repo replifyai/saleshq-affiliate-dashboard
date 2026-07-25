@@ -458,7 +458,6 @@ export interface VerifyPanResponse {
 export interface VerifyBankRequest {
   accountNumber: string;
   ifscCode: string;
-  accountName: string;
 }
 
 export interface VerifyBankResponse {

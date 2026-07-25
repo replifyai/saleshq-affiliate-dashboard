@@ -7,7 +7,7 @@ import { KycStatusResponse } from '@/types/api';
 import apiClient from '@/services/apiClient';
 import KycFlow from './KycFlow';
 import { useBankVerification, BankVerifyingOverlay } from './bankVerification';
-import { validateAccountName, validateAccountNumber, validateIfsc } from './validators';
+import { validateAccountNumber, validateIfsc } from './validators';
 
 const STATUS_BADGE: Record<KycStatusResponse['kyc']['status'], { label: string; className: string }> = {
     not_verified: { label: 'Not Verified', className: 'bg-red-50 text-red-600' },
@@ -50,7 +50,6 @@ const KycSection: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isFlowOpen, setIsFlowOpen] = useState(false);
 
-    const [accountName, setAccountName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
     const [ifsc, setIfsc] = useState('');
 
@@ -70,7 +69,6 @@ const KycSection: React.FC = () => {
             // Prefill from whatever is already saved. The account number comes back masked,
             // so it is only a hint — re-verifying requires typing it in full again.
             if (methodsResponse.methods.bankDetails) {
-                setAccountName(methodsResponse.methods.bankDetails.accountName);
                 setIfsc(methodsResponse.methods.bankDetails.ifscCode);
             }
         } catch (err) {
@@ -98,7 +96,6 @@ const KycSection: React.FC = () => {
         e.preventDefault();
 
         const nextErrors: Record<string, string> = {
-            accountName: validateAccountName(accountName) ?? '',
             accountNumber: validateAccountNumber(accountNumber) ?? '',
             ifsc: validateIfsc(ifsc) ?? '',
         };
@@ -113,7 +110,6 @@ const KycSection: React.FC = () => {
 
         // Saving *is* verifying — there is no separate add/update call.
         const verified = await bank.verify({
-            accountName,
             accountNumber,
             ifscCode: ifsc.toUpperCase(),
         });
@@ -187,13 +183,6 @@ const KycSection: React.FC = () => {
             <h3 className="mb-3 mt-6 text-sm font-medium text-[#131313]">Bank Details</h3>
 
             <form onSubmit={handleSaveBank} className="space-y-4">
-                <Field
-                    label="Account Holder Name"
-                    value={accountName}
-                    onChange={setAccountName}
-                    placeholder="Enter account holder name"
-                    error={errors.accountName}
-                />
                 <Field
                     label="Account Number"
                     value={accountNumber}

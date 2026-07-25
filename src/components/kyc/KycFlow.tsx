@@ -9,7 +9,6 @@ import { useBankVerification, BankVerifyingOverlay } from './bankVerification';
 import {
     validatePan,
     validateDob,
-    validateAccountName,
     validateAccountNumber,
     validateIfsc,
     dobToIso,
@@ -155,7 +154,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
     const [panDetails, setPanDetails] = useState<VerifyPanResponse['pan'] | null>(null);
     const [isFetchingPan, setIsFetchingPan] = useState(false);
 
-    const [accountName, setAccountName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
     const [ifsc, setIfsc] = useState('');
 
@@ -174,7 +172,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setPan('');
         setDob('');
         setPanDetails(null);
-        setAccountName('');
         setAccountNumber('');
         setIfsc('');
         setErrors({});
@@ -215,7 +212,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
 
     const handleVerifyBank = async () => {
         const nextErrors: Record<string, string> = {
-            accountName: validateAccountName(accountName) ?? '',
             accountNumber: validateAccountNumber(accountNumber) ?? '',
             ifsc: validateIfsc(ifsc) ?? '',
         };
@@ -228,7 +224,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setFormError(null);
 
         const verified = await bank.verify({
-            accountName,
             accountNumber,
             ifscCode: ifsc.toUpperCase(),
         });
@@ -239,7 +234,7 @@ const KycFlow: React.FC<KycFlowProps> = ({
     };
 
     const canSubmitPan = pan.length > 0 && dob.length > 0;
-    const canSubmitBank = accountName.length > 0 && accountNumber.length > 0 && ifsc.length > 0;
+    const canSubmitBank = accountNumber.length > 0 && ifsc.length > 0;
 
     return (
         <Shell open={open} onClose={onClose}>
@@ -334,20 +329,13 @@ const KycFlow: React.FC<KycFlowProps> = ({
 
                             <div className="mt-5 space-y-5">
                                 <Field
-                                    label="Account Holder Name"
-                                    value={accountName}
-                                    onChange={setAccountName}
-                                    placeholder="Enter account holder name"
-                                    error={errors.accountName}
-                                    autoFocus
-                                />
-                                <Field
                                     label="Account Number"
                                     value={accountNumber}
                                     onChange={(v) => setAccountNumber(v.replace(/\D/g, '').slice(0, 18))}
                                     placeholder="Enter bank account number"
                                     error={errors.accountNumber}
                                     inputMode="numeric"
+                                    autoFocus
                                 />
                                 <Field
                                     label="IFSC Code"
@@ -359,7 +347,8 @@ const KycFlow: React.FC<KycFlowProps> = ({
                             </div>
 
                             <p className="mt-5 text-sm text-[#636363]">
-                                Note: INR 1 will be sent to your Bank Account to validate &amp; verify the details
+                                Use an account in your own name — it must match your PAN. INR 1 will be sent to it to
+                                validate &amp; verify the details.
                             </p>
                         </>
                     )}
@@ -379,9 +368,9 @@ const KycFlow: React.FC<KycFlowProps> = ({
                         </div>
                     )}
 
-                    {formError && (
+                    {(formError || bank.error) && (
                         <p className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-                            {formError}
+                            {formError || bank.error}
                         </p>
                     )}
                 </div>
