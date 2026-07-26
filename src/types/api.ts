@@ -448,14 +448,14 @@ export interface VerifyPanRequest {
 }
 
 /**
- * The identity the PAN resolves to, shown back for the user to confirm.
- * Cashfree returns no gender, and father's name only from a heavier API — hence
- * name and DOB only.
+ * Verdict only. The name and DOB registered against the PAN are deliberately NOT
+ * typed here even though the backend still sends them: rendering them turns the
+ * endpoint into a PAN -> identity lookup that any logged-in creator can run against
+ * numbers that are not theirs. The backend owns the PAN-vs-profile name match.
+ * TODO(backend): stop returning name/dateOfBirth from /creator/kyc/pan/verify.
  */
 export interface VerifyPanResponse {
   pan: {
-    name: string;
-    dateOfBirth: string; // yyyy-mm-dd
     status: string;
   };
 }

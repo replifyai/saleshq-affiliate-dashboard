@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import apiClient from '@/services/apiClient';
-import { VerifyPanResponse } from '@/types/api';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useBankVerification, BankVerifyingOverlay } from './bankVerification';
 import {
@@ -16,16 +15,10 @@ import {
     maskDob,
 } from './validators';
 
-type Step = 'pan' | 'confirm' | 'bank' | 'done';
+type Step = 'pan' | 'bank' | 'done';
 
-const STEP_INDEX: Record<Step, number> = { pan: 1, confirm: 1, bank: 2, done: 3 };
+const STEP_INDEX: Record<Step, number> = { pan: 1, bank: 2, done: 3 };
 const TOTAL_STEPS = 3;
-
-const formatDobForDisplay = (iso: string): string => {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) return iso;
-    return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-};
 
 /** Full-screen on mobile, centered card on desktop. <dialog> gives us the backdrop,
  *  Esc handling and focus trap for free. */
@@ -152,7 +145,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
 
     const [pan, setPan] = useState('');
     const [dob, setDob] = useState('');
-    const [panDetails, setPanDetails] = useState<VerifyPanResponse['pan'] | null>(null);
     const [isFetchingPan, setIsFetchingPan] = useState(false);
 
     const [accountNumber, setAccountNumber] = useState('');
@@ -173,7 +165,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setStep(firstStep(panVerified, bankVerified));
         setPan('');
         setDob('');
-        setPanDetails(null);
         setAccountNumber('');
         setIfsc('');
         setErrors({});
@@ -195,21 +186,16 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setFormError(null);
         setIsFetchingPan(true);
         try {
-            const response = await apiClient.verifyPan({ pan: pan.toUpperCase(), dob: dobToIso(dob) });
-            setPanDetails(response.pan);
-            setStep('confirm');
+            // The identity behind the PAN is deliberately never read back to the user: any
+            // logged-in creator could otherwise type a stranger's PAN and harvest the name
+            // and DOB registered against it. The backend owns the name match.
+            await apiClient.verifyPan({ pan: pan.toUpperCase(), dob: dobToIso(dob) });
+            setStep('bank');
         } catch (error) {
             setFormError(error instanceof Error ? error.message : 'Could not verify your PAN. Try again.');
         } finally {
             setIsFetchingPan(false);
         }
-    };
-
-    // The PAN is already verified and stored by the time this screen shows — the confirm
-    // step is the user acknowledging the identity we read back, not a second API call.
-    const handleConfirmPan = () => {
-        setFormError(null);
-        setStep('bank');
     };
 
     const handleVerifyBank = async () => {
@@ -225,15 +211,13 @@ const KycFlow: React.FC<KycFlowProps> = ({
         setErrors({});
         setFormError(null);
 
-        // The holder name is not typed — it's the verified identity we already hold
-        // (the PAN name read back this session, else the creator's profile name). The
-        // backend still matches the bank name against the PAN name server-side.
-        const holderName = panDetails?.name || profileState.profile?.name || '';
-
+        // The holder name is not typed — it's the creator's profile name, same as the
+        // profile page's Save Bank Details path. The backend matches the name at the bank
+        // against the PAN name server-side; the client never sees either.
         const verified = await bank.verify({
             accountNumber,
             ifscCode: ifsc.toUpperCase(),
-            accountName: holderName,
+            accountName: profileState.profile?.name || '',
         });
         if (verified) {
             setStep('done');
@@ -308,26 +292,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
                         </>
                     )}
 
-                    {step === 'confirm' && panDetails && (
-                        <>
-                            <h2 className="text-2xl font-semibold text-[#131313]">Hi, {panDetails.name}</h2>
-                            {/* Only name and DOB: Cashfree returns no gender, and father's name
-                                only from a separate heavier API. */}
-                            <dl className="mt-6 space-y-4">
-                                <div className="flex justify-between gap-4">
-                                    <dt className="text-sm text-[#636363]">Date of birth</dt>
-                                    <dd className="text-sm font-medium text-[#131313]">
-                                        {formatDobForDisplay(panDetails.dateOfBirth)}
-                                    </dd>
-                                </div>
-                                <div className="flex justify-between gap-4">
-                                    <dt className="text-sm text-[#636363]">PAN status</dt>
-                                    <dd className="text-sm font-medium text-green-600">Verified</dd>
-                                </div>
-                            </dl>
-                        </>
-                    )}
-
                     {step === 'bank' && (
                         <>
                             <p className="text-sm text-[#636363]">Bank details verification</p>
@@ -389,17 +353,6 @@ const KycFlow: React.FC<KycFlowProps> = ({
                         <PrimaryButton onClick={handleVerifyPan} disabled={!canSubmitPan || busy}>
                             Verify
                         </PrimaryButton>
-                    )}
-                    {step === 'confirm' && (
-                        <>
-                            <PrimaryButton onClick={handleConfirmPan}>Yes, that&apos;s me. Proceed</PrimaryButton>
-                            <button
-                                onClick={() => { setStep('pan'); setPanDetails(null); }}
-                                className="mt-4 w-full text-sm font-medium text-[#2563EB] hover:underline"
-                            >
-                                Not you? Change PAN number
-                            </button>
-                        </>
                     )}
                     {step === 'bank' && (
                         <PrimaryButton onClick={handleVerifyBank} disabled={!canSubmitBank || busy}>
